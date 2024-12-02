@@ -1,0 +1,19 @@
+number_truck	2
+number_drone	2
+truck_speed	0.5
+drone_speed	1
+M_d	4
+L_d	90
+Sigma	5
+XCOORD	YCOORD	DEMAND	RELEASE_DATE
+40	50	0	0
+52	75	2	0
+45	70	1	29
+62	69	3	38
+60	66	5	37
+42	65	3	28
+16	42	3	96
+58	70	5	72
+34	60	1	96
+28	70	4	111
+35	66	2	49

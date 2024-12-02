@@ -1,0 +1,9 @@
+{
+    "drone_speed (distanceUnit/TimeUnit)": 1,
+    "truck_speed(distanceUnit/TimeUnit)": 0.5,
+    "number_truck": 3,
+    "number_drone": 3,
+    "sigma (TimeUnit)":5
+    "M_d": 4,
+    "L_d (TimeUnit)": 90
+}

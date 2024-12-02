@@ -1,0 +1,9 @@
+{
+    "drone_speed": 1,
+    "truck_speed": 0.5,
+    "number_truck": 1,
+    "number_drone": 1,
+    "sigma":5,
+    "M_d": 4,
+    "L_d": 90
+}

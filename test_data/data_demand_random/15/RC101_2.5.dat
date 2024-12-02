@@ -1,0 +1,24 @@
+number_truck	2
+number_drone	2
+truck_speed	0.5
+drone_speed	1
+M_d	4
+L_d	90
+Sigma	5
+XCOORD	YCOORD	DEMAND	RELEASE_DATE
+40	50	0	0
+25	85	4	0
+22	75	4	84
+22	85	2	109
+20	80	3	106
+20	85	4	82
+18	75	1	277
+15	75	4	207
+15	80	3	276
+10	35	3	319
+10	40	2	142
+8	40	3	63
+8	45	1	331
+5	35	5	23
+5	45	2	201
+2	40	1	253
