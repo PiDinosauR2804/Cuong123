@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [100]
+        number_of_cities: [10]
         delta: [0.3, 0.6]
         alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
         theta: [0.5, 1, 2]
-        # data_set: ["C101_0.5.dat", "R101_3.dat"]
-        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        data_set: ["C101_0.5.dat", "R101_3.dat"]
+        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,18 +43,18 @@ jobs:
           name: json-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.theta }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
           path: Random_*_CL2.json
 
-  continue:
+  continue1:
     name: Run test with multiple configurations
     needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [100]
+        number_of_cities: [10]
         delta: [0.3, 0.6]
         alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
         theta: [0.5, 1, 2]
-        # data_set: ["C101_0.5.dat", "R101_3.dat"]
-        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        data_set: ["C101_0.5.dat", "R101_3.dat"]
+        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,6 +63,50 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: json-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.theta }}-${{ matrix.data_set }} 
+          path: .
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+        
+      - name: Run main.py ITE-9
+        run: python load_cl2.py
+        env:
+          NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
+          DELTA: ${{ matrix.delta }}
+          ALPHA: ${{ matrix.alpha }}
+          THETA: ${{ matrix.theta }}
+          DATA_SET: ${{ matrix.data_set }}
+      - name: Upload result Excel file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: json1-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.theta }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
+          path: Random_*_CL2.json
+
+  continue:
+    name: Run test with multiple configurations
+    needs: continue1
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        number_of_cities: [10]
+        delta: [0.3, 0.6]
+        alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
+        theta: [0.5, 1, 2]
+        data_set: ["C101_0.5.dat", "R101_3.dat"]
+        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: json1-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.theta }}-${{ matrix.data_set }} 
           path: .
       
       - name: Setup Python
@@ -93,12 +137,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [100]
+        number_of_cities: [10]
         delta: [0.3, 0.6]
         alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
         theta: [0.5, 1, 2]
-        # data_set: ["C101_0.5.dat", "R101_3.dat"]
-        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        data_set: ["C101_0.5.dat", "R101_3.dat"]
+        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
