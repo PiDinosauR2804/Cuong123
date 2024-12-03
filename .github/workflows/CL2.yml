@@ -15,8 +15,8 @@ jobs:
         delta: [0.3, 0.6]
         alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
         theta: [0.5, 1, 2]
-        data_set: ["C101_0.5.dat", "R101_3.dat"]
-        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        # data_set: ["C101_0.5.dat", "R101_3.dat"]
+        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,12 +49,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [10]
+        number_of_cities: [100]
         delta: [0.3, 0.6]
         alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
         theta: [0.5, 1, 2]
-        data_set: ["C101_0.5.dat", "R101_3.dat"]
-        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        # data_set: ["C101_0.5.dat", "R101_3.dat"]
+        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -93,12 +93,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [10]
+        number_of_cities: [100]
         delta: [0.3, 0.6]
         alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
         theta: [0.5, 1, 2]
-        data_set: ["C101_0.5.dat", "R101_3.dat"]
-        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        # data_set: ["C101_0.5.dat", "R101_3.dat"]
+        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -137,12 +137,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [10]
+        number_of_cities: [100]
         delta: [0.3, 0.6]
         alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
         theta: [0.5, 1, 2]
-        data_set: ["C101_0.5.dat", "R101_3.dat"]
-        # data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        # data_set: ["C101_0.5.dat", "R101_3.dat"]
+        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
