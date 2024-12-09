@@ -102,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: excel-results-summary
-          path: Random_*_div.xlsx
+          path: Random_*_10_*_div.xlsx
   
   test1:
     name: Run test with multiple configurations
@@ -200,4 +200,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: excel1-results-summary
-          path: Random_*_div.xlsx
+          path: Random_*_15_*_div.xlsx
