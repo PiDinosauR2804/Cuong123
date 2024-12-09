@@ -370,7 +370,7 @@ def Tabu_search_for_CVRP(CC):
                     best_sol = best_sol1
                     best_fitness = best_fitness1
 
-        return best_fitness, best_sol, runtime
+        return best_sol, best_fitness, runtime
 
 # Thư mục chứa các file .txt
 folder_path = "test_data/data_demand_random/"+str(number_of_cities)
@@ -400,7 +400,7 @@ for txt_file in txt_files:
             BEST = []
             print("------------------------",i,"------------------------")
             start_time = time.time()
-            best_fitness, best_sol, runtime = Tabu_search_for_CVRP(1)
+            best_sol, best_fitness, runtime = Tabu_search_for_CVRP(1)
             print("---------- RESULT ----------")
             print(best_sol)
             print(best_fitness)
