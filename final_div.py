@@ -370,7 +370,7 @@ def Tabu_search_for_CVRP(CC):
                     best_sol = best_sol1
                     best_fitness = best_fitness1
 
-    return best_fitness, best_sol, runtime
+        return best_fitness, best_sol, runtime
 
 # Thư mục chứa các file .txt
 folder_path = "test_data/data_demand_random/"+str(number_of_cities)
