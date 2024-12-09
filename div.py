@@ -369,6 +369,7 @@ def Tabu_search_for_CVRP(CC):
     # print(best_fitness)
     # print(Function.Check_if_feasible(best_sol))
     data_to_write = {}
+    done = True
     best_sol, best_fitness, result_print, solution_pack = Tabu_search(init_solution=current_sol, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=True, Data1=Data1, index_consider_elite_set=0, solution_pack=solution_pack)
     for pi in range(solution_pack_len):
         # print("+++++++++++++++++++++++++",len(solution_pack),"+++++++++++++++++++++++++",)
@@ -378,12 +379,7 @@ def Tabu_search_for_CVRP(CC):
         #     print("$$$$$$$$$$$$$$")
         end_time = time.time()
         if end_time - start_time > TIME_LIMIT:
-            data_to_write = {
-                "best_sol": best_sol,
-                "best_fitness": best_fitness,
-                "solution_pack": solution_pack,
-                "Done": False
-            }
+            done = False
             break
         else:
             if pi < len(solution_pack):
@@ -405,10 +401,19 @@ def Tabu_search_for_CVRP(CC):
                 if best_fitness1 - best_fitness < epsilon:
                     best_sol = best_sol1
                     best_fitness = best_fitness1
-
-        data_to_write["best_sol"] = best_sol
-        data_to_write["best_fitness"] = best_fitness
-        data_to_write["Done"] = True
+    if done:
+        data_to_write = {
+            "best_sol": best_sol,
+            "best_fitness": best_fitness,
+            "Done": True
+        }
+    else:
+        data_to_write = {
+            "best_sol": best_sol,
+            "best_fitness": best_fitness,
+            "solution_pack": solution_pack,
+            "Done": False
+        }
 
     return best_fitness, best_sol, data_to_write
 
