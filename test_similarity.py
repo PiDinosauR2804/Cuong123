@@ -34,20 +34,21 @@ LOOP_IMPROVED = 0
 SET_LAST_10 = [] 
 BEST = []
 number_of_cities = int(os.getenv('NUMBER_OF_CITIES', '30')) 
-delta = 0.6
+delta = 0.3
 alpha = [0.5, 0.3, 0.1]
 data_set = str(os.getenv('DATA_SET', 'C101_0.5.dat'))
 SEGMENT = 10
 solution_pack_len = int(os.getenv('SOLUTION_PACK_LEN', '0'))
 similarity = float(os.getenv('SIMILARITY', '0.6'))
-
+theta = 2
 def roulette_wheel_selection(population, fitness_scores):
     total_fitness = sum(fitness_scores)
     probabilities = [score / total_fitness for score in fitness_scores]
     selected_index = np.random.choice(len(population), p=probabilities)
     return population[selected_index]
 
-def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_consider_elite_set):
+def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_consider_elite_set, start_time):
+    solution_pack_len = 0
     solution_pack = []
 
     current_fitness, current_truck_time, current_sum_fitness = Function.fitness(init_solution)
@@ -69,18 +70,32 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
     global use_optimize_truck_route
     use_optimize_truck_route = False
     
-    Data1 = [['act', 'fitness', 'change1', 'change2', 'solution', 'tabu structue', 'tabu structure1']]
-    LOOP = int(Data.number_of_cities/math.log10(Data.number_of_cities))
+    Data1 = [['act', 'fitness', 'change1', 'change2', 'solution', 'tabu structure', 'tabu structure1']]
+    # LOOP = min(int(Data.number_of_cities*math.log10(Data.number_of_cities)), 100)
 
     # BREAKLOOP = Data.number_of_cities
-
+    SEGMENT = 10
+    END_SEGMENT =  int(Data.number_of_cities/math.log10(Data.number_of_cities)) * theta
     
     T = 0
-    nei_set = [0, 1, 2, 3, 4]
+    nei_set = [0, 1, 2, 3]
     weight = [1/len(nei_set)]*len(nei_set)
     current_sol = init_solution
-    
+    data_to_write = {}
     while T < SEGMENT:
+        end_time = time.time()
+        if end_time - start_time > TIME_LIMIT:
+            # Prepare the data as a dictionary
+            data_to_write = {
+                "best_sol": best_sol,
+                "best_fitness": best_fitness,
+                "T": T,
+                "weight": weight,
+                "Done": False
+            }
+            # Write data as a JSON string
+            # file.write(json.dumps(data_to_write) + "\n")
+            break
         tabu_tenure = tabu_tenure1 = tabu_tenure3 = tabu_tenure2 = random.uniform(2*math.log(Data.number_of_cities), Data.number_of_cities)
         Tabu_Structure = [(tabu_tenure +1) * (-1)] * Data.number_of_cities
         Tabu_Structure1 = [(tabu_tenure +1) * (-1)] * Data.number_of_cities
@@ -96,15 +111,12 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
         lennn = [0] * 6
         lenght_i = [0] * 6
         i = 0
-        while i < LOOP:
+        while i < END_SEGMENT:
             current_neighborhood = []
             choose = roulette_wheel_selection(nei_set, weight)
             if choose == 0:
-                current_neighborhood1, solution_pack = Neighborhood.Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_package(name_of_truck_neiborhood=Neighborhood10.Neighborhood_one_otp, solution=current_sol, number_of_potial_solution=CC, number_of_loop_drone=2, tabu_list=Tabu_Structure, tabu_tenure=tabu_tenure,  index_of_loop=lenght_i[1], best_fitness=best_fitness, kind_of_tabu_structure=1, need_truck_time=True, solution_pack=solution_pack, solution_pack_len=solution_pack_len, use_solution_pack=first_time, index_consider_elite_set=index_consider_elite_set)
+                current_neighborhood1, solution_pack = Neighborhood.Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_package(name_of_truck_neiborhood=Neighborhood10.Neighborhood_one_opt_standard, solution=current_sol, number_of_potial_solution=CC, number_of_loop_drone=2, tabu_list=Tabu_Structure, tabu_tenure=tabu_tenure,  index_of_loop=lenght_i[1], best_fitness=best_fitness, kind_of_tabu_structure=1, need_truck_time=False, solution_pack=solution_pack, solution_pack_len=solution_pack_len, use_solution_pack=first_time, index_consider_elite_set=index_consider_elite_set)
                 current_neighborhood.append([1, current_neighborhood1])
-            elif choose == 1:
-                current_neighborhood2, solution_pack = Neighborhood.Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_package(name_of_truck_neiborhood=Neighborhood10.Neighborhood_one_otp_plus, solution=current_sol, number_of_potial_solution=CC, number_of_loop_drone=2, tabu_list=Tabu_Structure, tabu_tenure=tabu_tenure,  index_of_loop=lenght_i[1], best_fitness=best_fitness, kind_of_tabu_structure=2, need_truck_time=True, solution_pack=solution_pack, solution_pack_len=solution_pack_len, use_solution_pack=first_time, index_consider_elite_set=index_consider_elite_set)
-                current_neighborhood.append([2, current_neighborhood2])
             elif choose == 2:
                 current_neighborhood5, solution_pack = Neighborhood.Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_package(name_of_truck_neiborhood=Neighborhood11.Neighborhood_two_opt_tue, solution=current_sol, number_of_potial_solution=CC, number_of_loop_drone=2, tabu_list=Tabu_Structure3, tabu_tenure=tabu_tenure3,  index_of_loop=lenght_i[5], best_fitness=best_fitness, kind_of_tabu_structure=5, need_truck_time=False, solution_pack=solution_pack, solution_pack_len=solution_pack_len, use_solution_pack=first_time, index_consider_elite_set=index_consider_elite_set)
                 current_neighborhood.append([5, current_neighborhood5])
@@ -268,7 +280,7 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
             current_fitness = current_neighborhood[index_best_nei][1][index[index_best_nei]][1][0]
             current_truck_time = current_neighborhood[index_best_nei][1][index[index_best_nei]][1][1]
             current_sum_fitness = current_neighborhood[index_best_nei][1][index[index_best_nei]][1][2]
-            # print(current_fitness, current_sol)
+            print(current_fitness, current_sol)
             Data1.append(current_fitness)
             Data1.append(current_sol)
             # SET_LAST_10.append([current_sol, [current_fitness, current_truck_time]])
@@ -327,23 +339,29 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
                 i = 0
             else:
                 i += 1
-        # print("-------",T,"--------")
-        # print(best_fitness)
-        # print(T, best_sol, "\n", best_fitness)
-        # print(used, score, sum(used))
+        print("-------",T,"--------")
+        print(best_fitness)
+        print(T, best_sol, "\n", best_fitness)
+        print(used, score, sum(used))
 
         if best_fitness - prev_f < epsilon:
             T = 0
         else: 
             T += 1
+    if data_to_write == {}:
+        data_to_write = {
+            "Done": True,
+            "best_fitness": best_fitness,
+            "best_sol": best_sol,
+        }
         
-    return best_sol, best_fitness, Result_print, solution_pack, Data1
+    return best_sol, best_fitness, Result_print, solution_pack, data_to_write
     
 def Tabu_search_for_CVRP(CC):
     Data1 = []
     list_init = []
-    
-    current_sol5 = Function.initial_solution7()
+    start_time = time.time()
+    current_sol5 = Function.initial_solution3()
     list_init.append(current_sol5)
 
     
@@ -370,7 +388,7 @@ def Tabu_search_for_CVRP(CC):
     # print(best_sol) 
     # print(best_fitness)
     # print(Function.Check_if_feasible(best_sol))
-    best_sol, best_fitness, result_print, solution_pack, Data1 = Tabu_search(init_solution=current_sol, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=True, Data1=Data1, index_consider_elite_set=0)
+    best_sol, best_fitness, result_print, solution_pack, data_to_write = Tabu_search(init_solution=current_sol, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=True, Data1=Data1, index_consider_elite_set=0, start_time=start_time)
     for pi in range(solution_pack_len):
         # print("+++++++++++++++++++++++++",len(solution_pack),"+++++++++++++++++++++++++",)
         # for iiii in range(len(solution_pack)):
@@ -388,7 +406,7 @@ def Tabu_search_for_CVRP(CC):
             #         best_fitness_in_brnei = cfnode
             temp = ["break", "break", "break", "break", "break", "break", "break"]
             Data1.append(temp)
-            best_sol1, best_fitness1, result_print1, solution_pack1, Data1 = Tabu_search(init_solution=best_sol, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=False, Data1=Data1, index_consider_elite_set=pi+1)
+            best_sol1, best_fitness1, result_print1, solution_pack1, data_to_write = Tabu_search(init_solution=best_sol, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=False, Data1=Data1, index_consider_elite_set=pi+1)
             # print("-----------------", pi, "------------------------")
             # print(best_sol1)
             # print(best_fitness1)
@@ -400,7 +418,7 @@ def Tabu_search_for_CVRP(CC):
         # if end_time - start_time > 3000:
         #     break
 
-    return best_fitness, best_sol
+    return best_fitness, best_sol, data_to_write
 
 # Thư mục chứa các file .txt
 folder_path = "test_data/data_demand_random/"+str(number_of_cities)
@@ -448,30 +466,12 @@ for txt_file in txt_files:
             BEST = []
             print("------------------------",i,"------------------------")
             start_time = time.time()
-            best_fitness, best_sol = Tabu_search_for_CVRP(1)
+            best_fitness, best_sol, data_to_write = Tabu_search_for_CVRP(1)
+            end_time = time.time()
+            data_to_write["runtime"] = end_time - start_time
+            with open('Random_{data_set}_{number_of_cities}_{solution_pack_len}_{similarity}_withoutdiv.json', 'w') as file:  # Open a file in write mode
+                file.write(json.dumps(data_to_write) + "\n")
             print("---------- RESULT ----------")
             print(best_sol)
             print(best_fitness)
-            avg += best_fitness/ITE
-            result.append(best_fitness)
-            # print(Function.Check_if_feasible(best_sol))
-            end_time = time.time()
-            run = end_time - start_time
-            run_time.append(run)
-            avg_run_time += run/ITE
-            sheet.cell(row=row, column=column, value=best_fitness)
-
-            column += 1
-            if best_csv_fitness > best_fitness:
-                best_csv_sol = best_sol
-                best_csv_fitness = best_fitness
-            if i == ITE - 1:
-                sheet.cell(row=row, column=column, value=avg_run_time)
-                sheet.cell(row=row, column=column+1, value=str(best_csv_sol))    
-        # Tăng dòng cho lần chạy tiếp theo
-        row += 1
-    workbook.save(f"Random_{data_set}_{number_of_cities}_{solution_pack_len}_{similarity}_withoutdiv.xlsx")
-        # log_file.close()
-
-workbook.close()
 
