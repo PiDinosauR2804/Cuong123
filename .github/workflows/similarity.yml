@@ -85,7 +85,7 @@ jobs:
 
   summary-div:
     name: Summary results
-    needs: test
+    needs: continue
     runs-on: ubuntu-latest
 
     steps:
