@@ -41,7 +41,7 @@ SEGMENT = 3
 solution_pack_len = int(os.getenv('SOLUTION_PACK_LEN'))
 similarity = float(os.getenv('SIMILARITY'))
 theta = 2
-TIME_LIMIT = 10
+TIME_LIMIT = 17000
 def roulette_wheel_selection(population, fitness_scores):
     total_fitness = sum(fitness_scores)
     probabilities = [score / total_fitness for score in fitness_scores]
