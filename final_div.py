@@ -340,16 +340,17 @@ def Tabu_search_for_CVRP(CC):
         lines = file.readlines()
         last_line = lines[-1]
         data = json.loads(last_line)  # Parse the last line as JSON
-
+        done = data["Done"]
+    if done == True:
+        return data["best_sol"], data["best_fitness"], data["runtime"]
+    else:
         best_sol = data["best_sol"]
         best_fitness = float(data["best_fitness"])
         solution_pack = data["solution_pack"]
-        done = data["Done"]
+        
         runtime = data["runtime"]
-    Data1 = []
-    if done == True:
-        return best_sol, best_fitness, runtime
-    else:
+        Data1 = []
+
         for pi in range(solution_pack_len):
             if pi < len(solution_pack):
                 current_neighborhood5 = Neighborhood.swap_two_array(solution_pack[pi][0])
