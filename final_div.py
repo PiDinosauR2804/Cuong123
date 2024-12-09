@@ -404,7 +404,6 @@ for txt_file in txt_files:
             print("---------- RESULT ----------")
             print(best_sol)
             print(best_fitness)
-            avg += best_fitness/ITE
             result.append(best_fitness)
             # print(Function.Check_if_feasible(best_sol))
             end_time = time.time()
