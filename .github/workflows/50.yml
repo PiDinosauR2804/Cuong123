@@ -28,7 +28,7 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
         
-      - name: Run main.py ITE-3
+      - name: Run main.py ITE-4
         run: python div.py
         env:
             NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
