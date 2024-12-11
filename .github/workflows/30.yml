@@ -70,7 +70,7 @@ jobs:
           name: json-results-${{ matrix.number_of_cities }}-${{ matrix.similarity }}-${{ matrix.solution_pack_len }}-${{ matrix.data_set }}
           path: .
           
-      - name: Run main.py ITE-3
+      - name: Run main.py ITE-7
         run: python final_div.py
         env:
             NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
