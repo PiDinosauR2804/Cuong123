@@ -35,12 +35,14 @@ SET_LAST_10 = []
 BEST = []
 # 
 number_of_cities = int(os.getenv('NUMBER_OF_CITIES')) 
-delta = float(os.getenv('DELTA'))
-alpha = json.loads(os.getenv('ALPHA'))
-theta = float(os.getenv('THETA'))
+delta = 0.3
+alpha = [0.5, 0.3, 0.1]
+theta = 2
 data_set = str(os.getenv('DATA_SET'))
 solution_pack_len = 0
-TIME_LIMIT = 18000
+TIME_LIMIT = 14000
+SEGMENT = int(os.getenv('SEGMENT'))
+ite = int(os.getenv('ITERATION'))
 def roulette_wheel_selection(population, fitness_scores):
     total_fitness = sum(fitness_scores)
     probabilities = [score / total_fitness for score in fitness_scores]
@@ -68,10 +70,10 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
     # LOOP = min(int(Data.number_of_cities*math.log10(Data.number_of_cities)), 100)
 
     # BREAKLOOP = Data.number_of_cities
-    SEGMENT = 10
+
     END_SEGMENT =  int(Data.number_of_cities/math.log10(Data.number_of_cities)) * theta
     data_to_write = {}
-    with open('Random_'+str(data_set)+'_'+str(number_of_cities)+'_'+str(delta)+'_'+str(alpha)+'_'+str(theta)+'_CL2.json', 'r') as file:
+    with open('Random_'+str(data_set)+'_'+str(number_of_cities)+'_'+str(SEGMENT)+'_iter-'+str(ite)+'_CL2.json', 'r') as file:
         lines = file.readlines()
         last_line = lines[-1]
         data = json.loads(last_line)  # Parse the last line as JSON
@@ -80,12 +82,17 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
         best_fitness = float(data["best_fitness"])
         done = data["Done"]
         runtime = data["runtime"]
+        Best_T = data["Best_T"]
+        END = data["END"]
+
 
     if done:
         data_to_write = {
             "Done": True,
             "best_sol": best_sol,
             "best_fitness": best_fitness,
+            "Best_T": Best_T,
+            "END": END
         }
         return best_sol, best_fitness, Result_print, solution_pack, data_to_write, runtime
 
@@ -102,7 +109,9 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
                 "best_fitness": best_fitness,
                 "T": T,
                 "weight": weight,
-                "Done": False
+                "Done": False,
+                "Best_T": Best_T,
+                "END": END
             }
             break
         tabu_tenure = tabu_tenure1 = tabu_tenure3 = tabu_tenure2 = random.uniform(2*math.log(Data.number_of_cities), Data.number_of_cities)
@@ -115,12 +124,13 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
         used = [0]*len(nei_set)
         prev_f = best_fitness
         current_sol = best_sol
-        current_fitness = best_fitness
+        
         LOOP_IMPROVED = 0
         lennn = [0] * 6
         lenght_i = [0] * 6
         i = 0
         while i < END_SEGMENT:
+            current_fitness = best_fitness
             prev_fitness = current_fitness
             current_neighborhood = []
             choose = roulette_wheel_selection(nei_set, weight)
@@ -367,6 +377,8 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
             "Done": True,
             "best_sol": best_sol,
             "best_fitness": best_fitness,
+            "Best_T": Best_T,
+            "END": END
         }
 
     return best_sol, best_fitness, Result_print, solution_pack, data_to_write, runtime
@@ -462,6 +474,8 @@ for txt_file in txt_files:
             if i == ITE - 1:
                 sheet.cell(row=row, column=column, value=avg_run_time)
                 sheet.cell(row=row, column=column+1, value=str(best_csv_sol))
-            workbook.save(f"Random_{number_of_cities}_{data_set}_{delta}_{alpha}_{theta}_CL2.xlsx")
+            sheet.cell(row=row, column=column+2, value=data_to_write["Best_T"])
+            sheet.cell(row=row, column=column+3, value=data_to_write["END"])
+            workbook.save(f"Random_{number_of_cities}_{data_set}_{SEGMENT}_iter-_{ite}_CL2.xlsx")
             workbook.close()
             

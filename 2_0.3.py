@@ -35,12 +35,14 @@ SET_LAST_10 = []
 BEST = []
 # 
 number_of_cities = int(os.getenv('NUMBER_OF_CITIES')) 
-delta = float(os.getenv('DELTA'))
-alpha = json.loads(os.getenv('ALPHA'))
-theta = float(os.getenv('THETA'))
+delta = 0.3
+alpha = [0.5, 0.3, 0.1]
+theta = 2
 data_set = str(os.getenv('DATA_SET'))
 solution_pack_len = 0
-TIME_LIMIT = 17000
+TIME_LIMIT = 14000
+SEGMENT = int(os.getenv('SEGMENT'))
+ite = int(os.getenv('ITERATION'))
 def roulette_wheel_selection(population, fitness_scores):
     total_fitness = sum(fitness_scores)
     probabilities = [score / total_fitness for score in fitness_scores]
@@ -74,10 +76,11 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
     # LOOP = min(int(Data.number_of_cities*math.log10(Data.number_of_cities)), 100)
 
     # BREAKLOOP = Data.number_of_cities
-    SEGMENT = 10
+
     END_SEGMENT =  int(Data.number_of_cities/math.log10(Data.number_of_cities)) * theta
-    
+    END = 0
     T = 0
+    Best_T = 0
     nei_set = [0, 1, 2, 3]
     weight = [1/len(nei_set)]*len(nei_set)
     current_sol = init_solution
@@ -91,7 +94,9 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
                 "best_fitness": best_fitness,
                 "T": T,
                 "weight": weight,
-                "Done": False
+                "Done": False,
+                "Best_T": Best_T,
+                "END": END
             }
             # Write data as a JSON string
             # file.write(json.dumps(data_to_write) + "\n")
@@ -105,7 +110,7 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
         score = [0]*len(nei_set)
         used = [0]*len(nei_set)
         prev_f = best_fitness
-        prev_fitness = current_fitness
+        
         
         LOOP_IMPROVED = 0
         lennn = [0] * 6
@@ -113,6 +118,7 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
         i = 0
         while i < END_SEGMENT:
             current_neighborhood = []
+            prev_fitness = current_fitness
             choose = roulette_wheel_selection(nei_set, weight)
             if choose == 0:
                 current_neighborhood1, solution_pack = Neighborhood.Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_package(name_of_truck_neiborhood=Neighborhood10.Neighborhood_one_opt_standard, solution=current_sol, number_of_potial_solution=CC, number_of_loop_drone=2, tabu_list=Tabu_Structure, tabu_tenure=tabu_tenure,  index_of_loop=lenght_i[1], best_fitness=best_fitness, kind_of_tabu_structure=1, need_truck_time=False, solution_pack=solution_pack, solution_pack_len=solution_pack_len, use_solution_pack=first_time, index_consider_elite_set=index_consider_elite_set)
@@ -346,13 +352,17 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
 
         if best_fitness - prev_f < epsilon:
             T = 0
+            Best_T = END
         else: 
             T += 1
+        END += 1
     if data_to_write == {}:
         data_to_write = {
             "Done": True,
             "best_fitness": best_fitness,
             "best_sol": best_sol,
+            "Best_T": Best_T,
+            "END": END
         }
         
     return best_sol, best_fitness, Result_print, solution_pack, data_to_write
@@ -467,7 +477,7 @@ for txt_file in txt_files:
             best_fitness, best_sol, data_to_write = Tabu_search_for_CVRP(1)
             end_time = time.time()
             data_to_write["runtime"] = end_time - start_time
-            with open('Random_'+str(data_set)+'_'+str(number_of_cities)+'_'+str(delta)+'_'+str(alpha)+'_'+str(theta)+'_CL2.json', 'w') as file:  # Open a file in write mode
+            with open('Random_'+str(data_set)+'_'+str(number_of_cities)+'_'+str(SEGMENT)+'_iter-'+str(i)+'_CL2.json', 'w') as file:  # Open a file in write mode
                 file.write(json.dumps(data_to_write) + "\n")
             print("---------- RESULT ----------")
             print(best_sol)

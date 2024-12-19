@@ -527,10 +527,7 @@ def initial_solution7():
         for j in range(len(init_solution[0][i])):
             init_solution[0][i][j][1] = []
 
-    tabu_tenure1 = Data.number_of_cities
-    tabu_tenure2 = Data.number_of_cities
-    tabu_tenure3 = Data.number_of_cities
-    tabu_tenure4 = Data.number_of_cities
+    tabu_tenure4 = tabu_tenure1 = tabu_tenure3 = tabu_tenure2 = random.uniform(2*math.log(Data.number_of_cities), Data.number_of_cities)
     tabu_structure1 = [-tabu_tenure1] * Data.number_of_cities
     tabu_structure2 = [-tabu_tenure1] * Data.number_of_cities
     tabu_structure3 = [-tabu_tenure1] * Data.number_of_cities
@@ -540,7 +537,7 @@ def initial_solution7():
     current_fitness = fitness(current_sol)[0]
     best_sol = current_sol
     best_fitness = current_fitness
-    for i in range(tabu_tenure1*4):
+    for i in range(Data.number_of_cities):
         neighborhood = []
         
         a = random.random()

@@ -37,7 +37,7 @@ number_of_cities = int(os.getenv('NUMBER_OF_CITIES'))
 delta = 0.3
 alpha = [0.5, 0.3, 0.1]
 data_set = str(os.getenv('DATA_SET'))
-SEGMENT = 3
+SEGMENT = 5
 solution_pack_len = int(os.getenv('SOLUTION_PACK_LEN'))
 similarity = float(os.getenv('SIMILARITY'))
 theta = 2
@@ -337,7 +337,7 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time,Data1, index_consider
     return best_sol, best_fitness, Result_print, solution_pack
     
 def Tabu_search_for_CVRP(CC):
-    with open('Random_'+str(data_set)+'_'+str(number_of_cities)+'_'+str(solution_pack_len)+'_'+str(similarity)+'_div.json', 'r') as file:
+    with open('Random_'+str(data_set)+'_'+str(number_of_cities)+'_'+str(solution_pack_len)+'_'+str(similarity)+'_withoutdiv.json', 'r') as file:
         lines = file.readlines()
         last_line = lines[-1]
         data = json.loads(last_line)  # Parse the last line as JSON
@@ -422,7 +422,7 @@ for txt_file in txt_files:
                 sheet.cell(row=row, column=column+1, value=str(best_csv_sol))    
         # Tăng dòng cho lần chạy tiếp theo
         row += 1
-    workbook.save(f"Random_{data_set}_{number_of_cities}_{solution_pack_len}_{similarity}_div.xlsx")
+    workbook.save(f"Random_{data_set}_{number_of_cities}_{solution_pack_len}_{similarity}_withoutdiv.xlsx")
         # log_file.close()
 
 workbook.close()
