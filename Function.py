@@ -537,7 +537,10 @@ def initial_solution7():
     current_fitness = fitness(current_sol)[0]
     best_sol = current_sol
     best_fitness = current_fitness
-    for i in range(Data.number_of_cities):
+    END_SEGMENT =  int(Data.number_of_cities/math.log10(Data.number_of_cities)) * 2
+    i = 0
+    if_improved = False
+    while i < END_SEGMENT:
         neighborhood = []
         
         a = random.random()
@@ -567,7 +570,7 @@ def initial_solution7():
                         index[j] = k
                         best_fitness = cfnode
                         best_sol = neighborhood[j][1][k][0]
-                        # if_improved = True
+                        if_improved = True
 
                     elif cfnode - min_nei[j] < epsilon and tabu_structure1[neighborhood[j][1][k][2]] + tabu_tenure1 <= i:
                         min_nei[j] = cfnode
@@ -580,7 +583,7 @@ def initial_solution7():
                         index[j] = k
                         best_fitness = cfnode
                         best_sol = neighborhood[j][1][k][0]
-                        # if_improved = True
+                        if_improved = True
 
                     elif cfnode - min_nei[j] < epsilon and ( tabu_structure2[neighborhood[j][1][k][2][0]] + tabu_tenure2 <= i or tabu_structure2[neighborhood[j][1][k][2][1]] + tabu_tenure2 <= i ) :
                         min_nei[j] = cfnode
@@ -593,7 +596,7 @@ def initial_solution7():
                         index[j] = k
                         best_fitness = cfnode
                         best_sol = neighborhood[j][1][k][0]
-                        # if_improved = True
+                        if_improved = True
                                                 
                     elif cfnode - min_nei[j] < epsilon and tabu_structure3[neighborhood[j][1][k][2][1]] + tabu_tenure3 <= i and tabu_structure3[neighborhood[j][1][k][2][0]] + tabu_tenure3 <= i:
                         min_nei[j] = cfnode
@@ -606,7 +609,7 @@ def initial_solution7():
                         index[j] = k
                         best_fitness = cfnode
                         best_sol = neighborhood[j][1][k][0]
-                        # if_improved = True
+                        if_improved = True
                                                 
                     elif cfnode - min_nei[j] < epsilon and ( tabu_structure4[neighborhood[j][1][k][2][1]] + tabu_tenure4 <= i or tabu_structure4[neighborhood[j][1][k][2][0]] + tabu_tenure4 <= i or tabu_structure4[neighborhood[j][1][k][2][2]] + tabu_tenure4 <= i):
                         min_nei[j] = cfnode
@@ -639,7 +642,10 @@ def initial_solution7():
             tabu_structure4[neighborhood[index_best_nei][1][index[index_best_nei]][2][0]] = i
             tabu_structure4[neighborhood[index_best_nei][1][index[index_best_nei]][2][2]] = i
     
-
+        if if_improved == False:
+            i += 1
+        else:
+            i = 0
             # print(best_sol)
             # print("------------", j, "------------")
     
@@ -660,44 +666,44 @@ def initial_solution7():
     # print(fitness(current_sol))
     abc = 0
     
-    while if_improved < 2:
-        neighborhood = []
-        if_improved += 1
-        neighborhood1 = Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus(current_sol)
-        neighborhood2 = Neighborhood_drone.Neighborhood_group_trip(current_sol)
-        neighborhood3 = Neighborhood_drone.Neighborhood_change_index_trip(current_sol)
-        
-        neighborhood.append([1, neighborhood1])
-        neighborhood.append([2, neighborhood2])
-        neighborhood.append([3, neighborhood3])
-        
-        index = [-1] * len(neighborhood)
-        min_nei = [100000] * len(neighborhood)
-        
-        for j in range(len(neighborhood)):
-            for k in range(len(neighborhood[j][1])):
-                cfnode = neighborhood[j][1][k][1][0]
-                if cfnode - best_fitness < epsilon:
-                    min_nei[j] = cfnode
-                    index[j] = k
-                    best_fitness = cfnode
-                    best_sol = neighborhood[j][1][k][0]
-                    if_improved = 0
-                    # if_improved = True
-                                            
-                elif cfnode - min_nei[j] < epsilon:
-                    min_nei[j] = cfnode
-                    index[j] = k
-        index_best_nei = 0
-        best_fit_in_cur_loop = min_nei[0]
-        for j in range(1, len(min_nei)):
-            if min_nei[j] < best_fit_in_cur_loop:
-                index_best_nei = j
-                best_fit_in_cur_loop = min_nei[j]
-        if len(neighborhood[index_best_nei][1]) == 0:
-            continue
-        current_sol = neighborhood[index_best_nei][1][index[index_best_nei]][0]
-        current_fitness = neighborhood[index_best_nei][1][index[index_best_nei]][1][0]
+    # while if_improved < 2:
+    neighborhood = []
+    # if_improved += 1
+    neighborhood1 = Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus(current_sol)
+    neighborhood2 = Neighborhood_drone.Neighborhood_group_trip(current_sol)
+    neighborhood3 = Neighborhood_drone.Neighborhood_change_index_trip(current_sol)
+    
+    neighborhood.append([1, neighborhood1])
+    neighborhood.append([2, neighborhood2])
+    neighborhood.append([3, neighborhood3])
+    
+    index = [-1] * len(neighborhood)
+    min_nei = [100000] * len(neighborhood)
+    
+    for j in range(len(neighborhood)):
+        for k in range(len(neighborhood[j][1])):
+            cfnode = neighborhood[j][1][k][1][0]
+            if cfnode - best_fitness < epsilon:
+                min_nei[j] = cfnode
+                index[j] = k
+                best_fitness = cfnode
+                best_sol = neighborhood[j][1][k][0]
+                if_improved = 0
+                # if_improved = True
+                                        
+            elif cfnode - min_nei[j] < epsilon:
+                min_nei[j] = cfnode
+                index[j] = k
+    index_best_nei = 0
+    best_fit_in_cur_loop = min_nei[0]
+    for j in range(1, len(min_nei)):
+        if min_nei[j] < best_fit_in_cur_loop:
+            index_best_nei = j
+            best_fit_in_cur_loop = min_nei[j]
+    # if len(neighborhood[index_best_nei][1]) == 0:
+    #     continue
+    current_sol = neighborhood[index_best_nei][1][index[index_best_nei]][0]
+    current_fitness = neighborhood[index_best_nei][1][index[index_best_nei]][1][0]
         
         
     

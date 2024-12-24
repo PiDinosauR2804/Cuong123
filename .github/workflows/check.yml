@@ -12,8 +12,8 @@ jobs:
     strategy:
       matrix:
         number_of_cities: [100]
-        segment: [10]
-        iteration: [4, 5, 6]
+        segment: [8, 10, 12]
+        iteration: [1, 2, 3]
         data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
@@ -47,8 +47,8 @@ jobs:
     strategy:
       matrix:
         number_of_cities: [100]
-        segment: [10]
-        iteration: [4, 5, 6]
+        segment: [8, 10, 12]
+        iteration: [1, 2, 3]
         data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
@@ -88,8 +88,8 @@ jobs:
     strategy:
       matrix:
         number_of_cities: [100]
-        segment: [10]
-        iteration: [4, 5, 6]
+        segment: [8, 10, 12]
+        iteration: [1, 2, 3]
         data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
@@ -129,8 +129,8 @@ jobs:
     strategy:
       matrix:
         number_of_cities: [100]
-        segment: [10]
-        iteration: [4, 5, 6]
+        segment: [8, 10, 12]
+        iteration: [1, 2, 3]
         data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
@@ -170,8 +170,8 @@ jobs:
     strategy:
       matrix:
         number_of_cities: [100]
-        segment: [10]
-        iteration: [4, 5, 6]
+        segment: [8, 10, 12]
+        iteration: [1, 2, 3]
         data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository

@@ -365,7 +365,7 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
 
         if best_fitness - prev_f < epsilon:
             T = 0
-            Best_T = T
+            Best_T = END
         else: 
             T += 1
 

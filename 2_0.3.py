@@ -372,7 +372,7 @@ def Tabu_search_for_CVRP(CC):
     list_init = []
     
     start_time = time.time()
-    current_sol5 = Function.initial_solution3()
+    current_sol5 = Function.initial_solution7()
     list_init.append(current_sol5)
 
     
