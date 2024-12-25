@@ -107,7 +107,9 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
                 "best_fitness": best_fitness,
                 "T": T,
                 "weight": weight,
-                "Done": False
+                "Done": False,
+                "Best_T": Best_T,
+                "END": END
             }
             break
         tabu_tenure = tabu_tenure1 = tabu_tenure3 = tabu_tenure2 = random.uniform(2*math.log(Data.number_of_cities), Data.number_of_cities)
