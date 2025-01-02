@@ -36,7 +36,7 @@ BEST = []
 # 
 number_of_cities = int(os.getenv('NUMBER_OF_CITIES')) 
 delta = 0.3
-alpha = [0.5, 0.3, 0.1]
+alpha = [0.3, 0.2, 0.1]
 theta = 2
 data_set = str(os.getenv('DATA_SET'))
 solution_pack_len = 0
@@ -372,7 +372,7 @@ def Tabu_search_for_CVRP(CC):
     list_init = []
     
     start_time = time.time()
-    current_sol5 = Function.initial_solution7()
+    current_sol5 = Function.initial_solution3()
     list_init.append(current_sol5)
 
     
