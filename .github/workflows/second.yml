@@ -1,0 +1,158 @@
+name: Workflow name
+
+on: push
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run test with multiple configurations
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        number_of_cities: [100]
+        delta: [0.3, 0.6]
+        alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
+        end_segment: [60, 80, 100]
+        # data_set: ["C101_0.5.dat", "R101_3.dat"]
+        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+        
+      - name: Run main.py ITE-9
+        run: python 1_0.3.py
+        env:
+          NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
+          DELTA: ${{ matrix.delta }}
+          ALPHA: ${{ matrix.alpha }}
+          END_SEGMENT: ${{ matrix.end_segment }}
+          DATA_SET: ${{ matrix.data_set }}
+
+      - name: Upload test file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.end_segment }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
+          path: Random_*_CL1.json
+
+  continue:
+    name: Run test with multiple configurations
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        number_of_cities: [100]
+        delta: [0.3, 0.6]
+        alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
+        end_segment: [60, 80, 100]
+        # data_set: ["C101_0.5.dat", "R101_3.dat"]
+        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.end_segment }}-${{ matrix.data_set }}
+          path: .
+      - name: Check if the file exists
+        run: ls
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+        
+      - name: Run main.py ITE-9
+        run: python load_cl1.py
+        env:
+          NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
+          DELTA: ${{ matrix.delta }}
+          ALPHA: ${{ matrix.alpha }}
+          END_SEGMENT: ${{ matrix.end_segment }}
+          DATA_SET: ${{ matrix.data_set }}
+      - name: Upload result Excel file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: json-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.end_segment }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
+          path: Random_*_CL1.json
+  
+  final:
+    name: Run test with multiple configurations
+    needs: continue
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        number_of_cities: [100]
+        delta: [0.3, 0.6]
+        alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
+        end_segment: [60, 80, 100]
+        # data_set: ["C101_0.5.dat", "R101_3.dat"]
+        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: json-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.end_segment }}-${{ matrix.data_set }}
+          path: .
+      - name: Check if the file exists
+        run: ls
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+        
+      - name: Run main.py ITE-9
+        run: python final_CL1.py
+        env:
+          NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
+          DELTA: ${{ matrix.delta }}
+          ALPHA: ${{ matrix.alpha }}
+          END_SEGMENT: ${{ matrix.end_segment }}
+          DATA_SET: ${{ matrix.data_set }}
+      - name: Upload result Excel file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.end_segment }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
+          path: Random_*_CL1.xlsx
+
+  summary:
+    name: Summary results
+    needs: final
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+          merge-multiple: true
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-results-summary
+          path: Random_*_CL1.xlsx

@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [30]
-        similarity: [0.6, 0.7, 0.5]
-        solution_pack_len: [0, 2, 5, 10]
-        # data_set: ["C101_0.5.dat", "RC101_3.dat"]
+        number_of_cities: [50]
+        delta: [0.3, 0.6]
+        alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
+        theta: [0.5, 1, 2]
         data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
@@ -28,18 +28,19 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
         
-      - name: Run main.py ITE-3
-        run: python div.py
+      - name: Run main.py ITE-7
+        run: python 2_0.3.py
         env:
-            NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
-            SIMILARITY: ${{ matrix.similarity }}  # Added correct matrix variable
-            SOLUTION_PACK_LEN: ${{ matrix.solution_pack_len }}  # Added correct matrix variable
-            DATA_SET: ${{ matrix.data_set }}
+          NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
+          DELTA: ${{ matrix.delta }}
+          ALPHA: ${{ matrix.alpha }}
+          THETA: ${{ matrix.theta }}
+          DATA_SET: ${{ matrix.data_set }}
       - name: Upload result Excel file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: json-results-${{ matrix.number_of_cities }}-${{ matrix.similarity }}-${{ matrix.solution_pack_len }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
-          path: Random_*_div.json
+          name: json-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.theta }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
+          path: Random_*_CL2.txt
 
   continue:
     name: Run test with multiple configurations
@@ -47,15 +48,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [30]
-        similarity: [0.6, 0.7, 0.5]
-        solution_pack_len: [0, 2, 5, 10]
-        # data_set: ["C101_0.5.dat", "RC101_3.dat"]
+        number_of_cities: [10]
+        delta: [0.3, 0.6]
+        alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
+        theta: [0.5, 1, 2]
         data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: json-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.theta }}-${{ matrix.data_set }}
+          path: .
+      
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -63,27 +70,22 @@ jobs:
 
       - name: Install requirements
         run: pip install -r requirements.txt
-      
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: json-results-${{ matrix.number_of_cities }}-${{ matrix.similarity }}-${{ matrix.solution_pack_len }}-${{ matrix.data_set }}
-          path: .
-          
-      - name: Run main.py ITE-3
-        run: python final_div.py
+        
+      - name: Run main.py ITE-9
+        run: python load_cl2.py
         env:
-            NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
-            SIMILARITY: ${{ matrix.similarity }}  # Added correct matrix variable
-            SOLUTION_PACK_LEN: ${{ matrix.solution_pack_len }}  # Added correct matrix variable
-            DATA_SET: ${{ matrix.data_set }}
+          NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
+          DELTA: ${{ matrix.delta }}
+          ALPHA: ${{ matrix.alpha }}
+          THETA: ${{ matrix.theta }}
+          DATA_SET: ${{ matrix.data_set }}
       - name: Upload result Excel file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: excel-results-${{ matrix.number_of_cities }}-${{ matrix.similarity }}-${{ matrix.solution_pack_len }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
-          path: Random_*_div.xlsx
+          name: excel-results-${{ matrix.number_of_cities }}-${{ matrix.delta }}-${{ matrix.alpha }}-${{ matrix.theta }}-${{ matrix.data_set }}  # Thêm iteration vào tên file
+          path: Random_*_CL2.xlsx
 
-  summary-div:
+  summary:
     name: Summary results
     needs: continue
     runs-on: ubuntu-latest
@@ -102,4 +104,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: excel-results-summary
-          path: Random_*_div.xlsx
+          path: Random_*_CL2.xlsx
