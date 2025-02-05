@@ -527,10 +527,7 @@ def initial_solution7():
         for j in range(len(init_solution[0][i])):
             init_solution[0][i][j][1] = []
 
-    tabu_tenure1 = Data.number_of_cities
-    tabu_tenure2 = Data.number_of_cities
-    tabu_tenure3 = Data.number_of_cities
-    tabu_tenure4 = Data.number_of_cities
+    tabu_tenure4 = tabu_tenure1 = tabu_tenure3 = tabu_tenure2 = random.uniform(2*math.log(Data.number_of_cities), Data.number_of_cities)
     tabu_structure1 = [-tabu_tenure1] * Data.number_of_cities
     tabu_structure2 = [-tabu_tenure1] * Data.number_of_cities
     tabu_structure3 = [-tabu_tenure1] * Data.number_of_cities
@@ -540,7 +537,10 @@ def initial_solution7():
     current_fitness = fitness(current_sol)[0]
     best_sol = current_sol
     best_fitness = current_fitness
-    for i in range(tabu_tenure1*4):
+    END_SEGMENT = Data.number_of_cities
+    i = 0
+
+    while i < END_SEGMENT:
         neighborhood = []
         
         a = random.random()
@@ -642,7 +642,7 @@ def initial_solution7():
             tabu_structure4[neighborhood[index_best_nei][1][index[index_best_nei]][2][0]] = i
             tabu_structure4[neighborhood[index_best_nei][1][index[index_best_nei]][2][2]] = i
     
-
+        i += 1
             # print(best_sol)
             # print("------------", j, "------------")
     
@@ -663,7 +663,7 @@ def initial_solution7():
     # print(fitness(current_sol))
     abc = 0
     
-    while if_improved < 2:
+    while if_improved < 1:
         neighborhood = []
         if_improved += 1
         neighborhood1 = Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus(current_sol)
@@ -697,14 +697,14 @@ def initial_solution7():
             if min_nei[j] < best_fit_in_cur_loop:
                 index_best_nei = j
                 best_fit_in_cur_loop = min_nei[j]
-        if len(neighborhood[index_best_nei][1]) == 0:
-            continue
+        # if len(neighborhood[index_best_nei][1]) == 0:
+        #     continue
         current_sol = neighborhood[index_best_nei][1][index[index_best_nei]][0]
         current_fitness = neighborhood[index_best_nei][1][index[index_best_nei]][1][0]
+            
+            
         
-        
-    
-    return best_sol        
+        return best_sol       
     
 def convert(solution):
     sol = []
