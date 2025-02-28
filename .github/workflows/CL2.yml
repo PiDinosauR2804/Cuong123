@@ -1,0 +1,62 @@
+name: Workflow name
+
+on: push
+
+permissions:
+  contents: read
+
+jobs:
+  continue1:
+    name: Run test with multiple configurations
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        number_of_cities: [10]
+        segment: [12]
+        iteration: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        data_set: ["C101_0.5.dat","C101_1.dat","C101_1.5.dat", "C101_2.dat", "C101_2.5.dat", "C101_3.dat", "C201_0.5.dat", "C201_1.dat", "C201_1.5.dat", "C201_2.dat", "C201_2.5.dat", "C201_3.dat", "R101_0.5.dat", "R101_1.dat", "R101_1.5.dat", "R101_2.dat", "R101_2.5.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_1.dat", "RC101_1.5.dat", "RC101_2.dat", "RC101_2.5.dat", "RC101_3.dat"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+        
+      - name: Run main.py ITE-3 for each iteration
+        run: python test_similarity.py
+        env:
+          NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
+          DATA_SET: ${{ matrix.data_set }}
+          SEGMENT: ${{ matrix.segment }}
+          ITERATION: ${{ matrix.iteration }}
+      - name: Upload result Excel file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: json1-results-${{ matrix.number_of_cities }}-${{ matrix.data_set }}-${{ matrix.segment }}-iter-${{ matrix.iteration }}
+          path: Random_*_CL2.xlsx
+  
+  summary:
+    name: Summary results
+    needs: continue1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+          merge-multiple: true
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-results-summary
+          path: Random_*_CL2.xlsx
