@@ -27,7 +27,7 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
         
-      - name: Run main.py ITE-2 for each iteration
+      - name: Run main.py ITE-3 for each iteration
         run: python test_similarity.py
         env:
           NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
