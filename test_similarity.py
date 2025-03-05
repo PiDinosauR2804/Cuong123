@@ -80,7 +80,7 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
     END = 0
     T = 0
     Best_T = 0
-    nei_set = [0, 1, 2, 3, 4]
+    nei_set = [0, 1, 2, 3]
     weight = [1/len(nei_set)]*len(nei_set)
     current_sol = init_solution
     data_to_write = {}
@@ -128,9 +128,9 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
             elif choose == 3: 
                 current_neighborhood4, solution_pack = Neighborhood.Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_package(name_of_truck_neiborhood=Neighborhood11.Neighborhood_move_2_1, solution=current_sol, number_of_potial_solution=CC, number_of_loop_drone=2, tabu_list=Tabu_Structure2, tabu_tenure=tabu_tenure2,  index_of_loop=lenght_i[4], best_fitness=best_fitness, kind_of_tabu_structure=4, need_truck_time=False, solution_pack=solution_pack, solution_pack_len=solution_pack_len, use_solution_pack=first_time, index_consider_elite_set=index_consider_elite_set)
                 current_neighborhood.append([4, current_neighborhood4])
-            elif choose == 1:
-                current_neighborhood6, solution_pack = Neighborhood.swap_two_array(current_sol)
-                current_neighborhood.append([6, current_neighborhood6]) 
+            # elif choose == 1:
+            #     current_neighborhood6, solution_pack = Neighborhood.swap_two_array(current_sol)
+            #     current_neighborhood.append([6, current_neighborhood6]) 
             else:
                 current_neighborhood3, solution_pack = Neighborhood.Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_package(name_of_truck_neiborhood=Neighborhood11.Neighborhood_move_1_1_ver2, solution=current_sol, number_of_potial_solution=CC, number_of_loop_drone=2, tabu_list=Tabu_Structure1, tabu_tenure=tabu_tenure1,  index_of_loop=lenght_i[3], best_fitness=best_fitness, kind_of_tabu_structure=3, need_truck_time=False, solution_pack=solution_pack, solution_pack_len=solution_pack_len, use_solution_pack=first_time, index_consider_elite_set=index_consider_elite_set)
                 current_neighborhood.append([3, current_neighborhood3])
