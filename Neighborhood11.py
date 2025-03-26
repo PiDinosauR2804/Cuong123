@@ -417,12 +417,11 @@ def Neighborhood_move_1_1_ver2(solution):
                         if new_solution[1][ii] == []:
                             new_solution[1].pop(ii)
                     
-                    new_solution1 = copy.deepcopy(new_solution)
                     for ii in range(len(drop_package1)):
-                        new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package1[ii])
+                        new_solution = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package1[ii])
                     if i != k:
                         for ii in range(len(drop_package2)):
-                            new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, k, drop_package2[ii])
+                            new_solution = Neighborhood.findLocationForDropPackage(new_solution, k, drop_package2[ii])
                     
                     # print(new_solution)
                     # print(Function.fitness(new_solution)[0])
@@ -438,16 +437,6 @@ def Neighborhood_move_1_1_ver2(solution):
                     pack_child.append(i)
                     pack_child.append(k)
                     neighborhood.append(pack_child)
-
-                    if new_solution1 != new_solution:
-                        pack_child1 = []
-                        pack_child1.append(new_solution1)
-                        a1, b1, c1 = Function.fitness(new_solution1)
-                        pack_child1.append([a1, b1, c1])
-                        pack_child1.append([city1, city2])
-                        pack_child1.append(i)
-                        pack_child1.append(k)
-                        neighborhood.append(pack_child1)
                     
     return neighborhood
 
@@ -617,12 +606,12 @@ def Neighborhood_move_2_1(solution):
                                 pack = new_solution[0][k][ii][1][jj]
                                 if pack in pre_drop_package:
                                     new_solution[0][k][ii][1].pop(jj)
-                    new_solution1 = copy.deepcopy(new_solution)
+                    
                     for ii in range(len(drop_package1)):
-                        new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package1[ii])
+                        new_solution = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package1[ii])
                     if i != k:
                         for ii in range(len(drop_package2)):
-                            new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, k, drop_package2[ii])
+                            new_solution = Neighborhood.findLocationForDropPackage(new_solution, k, drop_package2[ii])
                     
                     # print(new_solution)
                     # print(Function.fitness(new_solution)[0])
@@ -638,16 +627,6 @@ def Neighborhood_move_2_1(solution):
                     pack_child.append(i)
                     pack_child.append(k)
                     neighborhood.append(pack_child)
-
-                    if new_solution1 != new_solution:
-                        pack_child1 = []
-                        pack_child1.append(new_solution1)
-                        a1, b1, c1 = Function.fitness(new_solution1)
-                        pack_child1.append([a1, b1, c1])
-                        pack_child1.append([city_change1, city_change2, city_change3])
-                        pack_child1.append(i)
-                        pack_child1.append(k)
-                        neighborhood.append(pack_child1)
                     
     return neighborhood
 
@@ -722,11 +701,10 @@ def Neighborhood_two_opt_tue(solution):
                         if city in pre_drop_package:
                             drop_package2.append(city)
                     
-                    new_solution1 = copy.deepcopy(new_solution)
                     for ii in range(len(drop_package1)):
-                        new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package1[ii])
+                        new_solution = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package1[ii])
                     for ii in range(len(drop_package2)):
-                        new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, k, drop_package2[ii])
+                        new_solution = Neighborhood.findLocationForDropPackage(new_solution, k, drop_package2[ii])
                         
                     # print(new_solution[0][0])
                     # print(new_solution[0][1])
@@ -738,20 +716,10 @@ def Neighborhood_two_opt_tue(solution):
                     
                     pack_child = []
                     pack_child.append(new_solution)
-                    a, b, c = Function.fitness(new_solution)         
+                    a, b, c = Function.fitness(new_solution)                
                     pack_child.append([a, b, c])
                     pack_child.append([solution[0][i][j][0], solution[0][k][l][0]])
                     pack_child.append(i)
                     pack_child.append(k)
                     neighborhood.append(pack_child)
-
-                    if new_solution1 != new_solution:
-                        pack_child1 = []
-                        pack_child1.append(new_solution1)
-                        a1, b1, c1 = Function.fitness(new_solution1)
-                        pack_child1.append([a1, b1, c1])
-                        pack_child1.append([solution[0][i][j][0], solution[0][k][l][0]])
-                        pack_child1.append(i)
-                        pack_child1.append(k)
-                        neighborhood.append(pack_child1)
     return neighborhood

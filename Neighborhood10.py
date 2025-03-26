@@ -275,12 +275,11 @@ def Neighborhood_one_opt_standard(solution):
                         
                         # Tìm nơi nhận hàng mới cho từng drop_package
                         # Xét từng góp hàng trong drop package
-                        new_solution1 = copy.deepcopy(new_solution)
                         for m in range(len(drop_package)):
-                            new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package[m])
+                            new_solution = Neighborhood.findLocationForDropPackage(new_solution, i, drop_package[m])
                             
                         # Xử lý gói hàng của city change được giao ở đâu tại trip drone nào ?
-                        new_solution, new_solution1 = Neighborhood.findLocationForDropPackage(new_solution, k, city_change)
+                        new_solution = Neighborhood.findLocationForDropPackage(new_solution, k, city_change)
                         # print(new_solution)
                         # print(Function.Check_if_feasible(new_solution))
                         pack_child = []
@@ -291,16 +290,6 @@ def Neighborhood_one_opt_standard(solution):
                         pack_child.append(i)
                         pack_child.append(k)
                         neighborhood.append(pack_child)
-
-                        if new_solution1 != new_solution:
-                            pack_child1 = []
-                            pack_child1.append(new_solution1)
-                            a1, b1, c1 = Function.fitness(new_solution1)
-                            pack_child1.append([a1, b1, c1])
-                            pack_child1.append(city_change)
-                            pack_child1.append(i)
-                            pack_child1.append(k)
-                            neighborhood.append(pack_child1)
     return neighborhood
 
 def Neighborhood_one_otp_plus(solution, truck_time):

@@ -112,7 +112,7 @@ def findIndexOfDropPackage(new_solution, solution, city_change, truck_time, i, j
     elif Function.max_release_date(new_solution[0][i][0][1]) * DIFFERENTIAL_RATE_RELEASE_TIME + Data.standard_deviation > \
             Data.release_date[drop_package] and Function.min_release_date(new_solution[0][i][0][1]) * \
             DIFFERENTIAL_RATE_RELEASE_TIME + C_ratio * Data.standard_deviation > Data.release_date[drop_package]:
-        new_solution[0][i][0][1] += [drop_package]
+        new_solution[0][i][0][1] += [drop_package] 
         stop = True
     else:
         for m in range(len(new_solution[0][i])):
@@ -310,7 +310,6 @@ def findIndexOfDropPackage(new_solution, solution, city_change, truck_time, i, j
     return new_solution
 
 def swap_two_array(solution):
-    solution_pack = []
     neighborhood = []
     for aa in range(len(solution[0])):
         length = len(solution[0][aa]) - 1
@@ -400,14 +399,13 @@ def swap_two_array(solution):
                         pack_child.append(aa)
                         pack_child.append(aa)
                         neighborhood.append(pack_child)
-    return neighborhood, solution_pack
+    return neighborhood
 
 def findLocationForDropPackage(new_solution, index_truck, drop_package):
     list_check = []  # Tập hợp điểm nhận hàng trên truck
     check = False
     stop = False
     stop1 = False
-    stop2 = False
     max_index = - 1  # Tìm điểm cuối cùng có thể nhận được new_package hợp lệ trên route_truck
     if Data.release_date[drop_package] == 0 or Data.city_demand[drop_package] > Data.drone_capacity:
         new_solution[0][index_truck][0][1] += [drop_package]
@@ -443,57 +441,35 @@ def findLocationForDropPackage(new_solution, index_truck, drop_package):
                             and Function.max_release_date_update(new_solution[1][m]) * DIFFERENTIAL_RATE_RELEASE_TIME + \
                                 Data.standard_deviation > Data.release_date[drop_package] and Function.min_release_date_update(new_solution[1][m]) * DIFFERENTIAL_RATE_RELEASE_TIME + \
                                 B_ratio * Data.standard_deviation > Data.release_date[drop_package]:
-                        stop2 = True
+                        stop = True
                         stop1 = True
                         number_of_city_change_in_new_truck = -1
                         for c in range(len(new_solution[0][index_truck])):
                             if new_solution[0][index_truck][c][0] == a:
                                 number_of_city_change_in_new_truck = c
                                 break
-                        new_solution[0][index_truck][number_of_city_change_in_new_truck][1] += [drop_package]
+                        new_solution[0][index_truck][number_of_city_change_in_new_truck][
+                            1] += [drop_package]
                         new_solution[1][m][n][1] += [drop_package]
                         break
             if stop1: break
-    if not stop and stop2 == True:
-        new_solution1 = copy.deepcopy(new_solution)
+    if not stop:
         index = -1
         city_received = drop_package
-        for i in reversed(range(len(new_solution1[0][index_truck]))):
-            index_of_city = new_solution1[0][index_truck][i][0]
+        for i in reversed(range(len(new_solution[0][index_truck]))):
+            index_of_city = new_solution[0][index_truck][i][0]
             if index_of_city == drop_package:
                 index = i
                 break
         while Data.euclid_flight_matrix[0][city_received] * 2 + Data.unloading_time > Data.drone_limit_time:
             index -= 1
-            city_received = new_solution1[0][index_truck][index][0]
+            city_received = new_solution[0][index_truck][index][0]
             
-        new_solution1[0][index_truck][index][1] += [drop_package]
+        new_solution[0][index_truck][index][1] += [drop_package]
         if index != 0:
             # new_solution, successed = groupToATrip(new_solution, [drop_package], index_truck, index)
-            new_solution1, number_in_the_drone_queue_of_drop_package, index_in_trip = addNewTripInDroneRoute(new_solution1, [drop_package], index_truck, index)
-        return new_solution, new_solution1
-    
-    if stop == True:
-        return new_solution, new_solution
-    if stop2 == False:
-        new_solution1 = copy.deepcopy(new_solution)
-        index = -1
-        city_received = drop_package
-        for i in reversed(range(len(new_solution1[0][index_truck]))):
-            index_of_city = new_solution1[0][index_truck][i][0]
-            if index_of_city == drop_package:
-                index = i
-                break
-        while Data.euclid_flight_matrix[0][city_received] * 2 + Data.unloading_time > Data.drone_limit_time:
-            index -= 1
-            city_received = new_solution1[0][index_truck][index][0]
-            
-        new_solution1[0][index_truck][index][1] += [drop_package]
-        if index != 0:
-            # new_solution, successed = groupToATrip(new_solution, [drop_package], index_truck, index)
-            new_solution1, number_in_the_drone_queue_of_drop_package, index_in_trip = addNewTripInDroneRoute(new_solution1, [drop_package], index_truck, index)
-            
-        return new_solution1, new_solution1
+            new_solution, number_in_the_drone_queue_of_drop_package, index_in_trip = addNewTripInDroneRoute(new_solution, [drop_package], index_truck, index)
+    return new_solution  
 
 def find_shortest_path_by_greedy_1(start, end, list):
     new_list= []
@@ -1151,7 +1127,6 @@ def Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_packag
         elif kind_of_tabu_structure in [4]:
             if cfsol - best_fitness < epsilon or (index_of_loop - tabu_list[current_neighborhood[i][2][0]] > tabu_tenure or index_of_loop - tabu_list[current_neighborhood[i][2][1]] > tabu_tenure or index_of_loop - tabu_list[current_neighborhood[i][2][2]] > tabu_tenure): 
                 continue2564 = True
-
         consider = False
         if continue2564:
             while num != 0:
