@@ -310,6 +310,7 @@ def findIndexOfDropPackage(new_solution, solution, city_change, truck_time, i, j
     return new_solution
 
 def swap_two_array(solution):
+    solution_pack = []
     neighborhood = []
     for aa in range(len(solution[0])):
         length = len(solution[0][aa]) - 1
@@ -399,7 +400,7 @@ def swap_two_array(solution):
                         pack_child.append(aa)
                         pack_child.append(aa)
                         neighborhood.append(pack_child)
-    return neighborhood
+    return neighborhood, solution_pack
 
 def findLocationForDropPackage(new_solution, index_truck, drop_package):
     list_check = []  # Tập hợp điểm nhận hàng trên truck
@@ -1499,4 +1500,3 @@ def Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_packag
         potential_solution[i][2] = restrict_next_loop[i]
     # print(restrict_next_loop)
     return potential_solution, solution_pack
-
