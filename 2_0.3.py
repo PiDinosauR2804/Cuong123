@@ -85,7 +85,8 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
     weight = [1/len(nei_set)]*len(nei_set)
     current_sol = init_solution
     data_to_write = {}
-    while T < SEGMENT:
+    COUNT = 0
+    while COUNT < 3:
         end_time = time.time()
         if end_time - start_time > TIME_LIMIT:
             # Prepare the data as a dictionary
@@ -96,11 +97,26 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
                 "weight": weight,
                 "Done": False,
                 "Best_T": Best_T,
-                "END": END
+                "END": END,
+                "COUNT": COUNT
             }
             # Write data as a JSON string
             # file.write(json.dumps(data_to_write) + "\n")
             break
+        if T > 3:
+            COUNT += 1
+            T = 0
+            current_neighborhood5, solution_pack1 = Neighborhood.swap_two_array(current_sol)
+            best_sol_in_brnei = current_neighborhood5[0][0]
+            best_fitness_in_brnei = current_neighborhood5[0][1][0]
+            for i in range(1, len(current_neighborhood5)):
+                cfnode = current_neighborhood5[i][1][0]
+                if cfnode - best_fitness_in_brnei < epsilon:
+                    best_sol_in_brnei = current_neighborhood5[i][0]
+                    best_fitness_in_brnei = cfnode
+            
+            current_sol = best_sol_in_brnei
+
         tabu_tenure = tabu_tenure1 = tabu_tenure3 = tabu_tenure2 = random.uniform(2*math.log(Data.number_of_cities), Data.number_of_cities)
         Tabu_Structure = [(tabu_tenure +1) * (-1)] * Data.number_of_cities
         Tabu_Structure1 = [(tabu_tenure +1) * (-1)] * Data.number_of_cities
@@ -362,7 +378,8 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
             "best_fitness": best_fitness,
             "best_sol": best_sol,
             "Best_T": Best_T,
-            "END": END
+            "END": END,
+            "COUNT": COUNT
         }
         
     return best_sol, best_fitness, Result_print, solution_pack, data_to_write

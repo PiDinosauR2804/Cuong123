@@ -84,7 +84,7 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
         runtime = data["runtime"]
         Best_T = data["Best_T"]
         END = data["END"]
-
+        COUNT = data["COUNT"]
 
     if done:
         data_to_write = {
@@ -92,7 +92,8 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
             "best_sol": best_sol,
             "best_fitness": best_fitness,
             "Best_T": Best_T,
-            "END": END
+            "END": END,
+            "COUNT": COUNT
         }
         return best_sol, best_fitness, Result_print, solution_pack, data_to_write, runtime
 
@@ -101,7 +102,7 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
     nei_set = [0, 1, 2, 3]
     sol_chosen_to_break = best_sol
     fit_of_sol_chosen_to_break = best_fitness
-    while T < SEGMENT:
+    while COUNT < 3:
         end_time = time.time()
         if end_time - start_time > TIME_LIMIT:
             data_to_write = {
@@ -114,6 +115,21 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
                 "END": END
             }
             break
+        print("+++++++++++++++", COUNT, "+++++++++++++++")
+        if T > 3:
+            COUNT += 1
+            T = 0
+            current_neighborhood5, solution_pack1 = Neighborhood.swap_two_array(current_sol)
+            best_sol_in_brnei = current_neighborhood5[0][0]
+            best_fitness_in_brnei = current_neighborhood5[0][1][0]
+            for i in range(1, len(current_neighborhood5)):
+                cfnode = current_neighborhood5[i][1][0]
+                if cfnode - best_fitness_in_brnei < epsilon:
+                    best_sol_in_brnei = current_neighborhood5[i][0]
+                    best_fitness_in_brnei = cfnode
+            
+            current_sol = best_sol_in_brnei
+
         tabu_tenure = tabu_tenure1 = tabu_tenure3 = tabu_tenure2 = random.uniform(2*math.log(Data.number_of_cities), Data.number_of_cities)
         Tabu_Structure = [(tabu_tenure +1) * (-1)] * Data.number_of_cities
         Tabu_Structure1 = [(tabu_tenure +1) * (-1)] * Data.number_of_cities
