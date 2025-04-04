@@ -40,7 +40,7 @@ alpha = Data.alpha
 theta = Data.theta
 data_set = str(os.getenv('DATA_SET'))
 solution_pack_len = 0
-TIME_LIMIT = 20
+TIME_LIMIT = 14000
 SEGMENT = int(os.getenv('SEGMENT'))
 ite = int(os.getenv('ITERATION'))
 def roulette_wheel_selection(population, fitness_scores):
