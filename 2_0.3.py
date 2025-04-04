@@ -40,7 +40,7 @@ alpha = Data.alpha
 theta = Data.theta
 data_set = str(os.getenv('DATA_SET'))
 solution_pack_len = 0
-TIME_LIMIT = 14000
+TIME_LIMIT = 20
 SEGMENT = int(os.getenv('SEGMENT'))
 ite = int(os.getenv('ITERATION'))
 def roulette_wheel_selection(population, fitness_scores):
@@ -84,6 +84,8 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
     nei_set = [0, 1, 2, 3]
     weight = [1/len(nei_set)]*len(nei_set)
     current_sol = init_solution
+    best_sol = current_sol
+    best_fitness = current_fitness
     data_to_write = {}
     COUNT = 0
     while COUNT < 3:

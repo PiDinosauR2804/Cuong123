@@ -102,6 +102,8 @@ def Tabu_search(tabu_tenure, CC, first_time, Data1, index_consider_elite_set, st
     nei_set = [0, 1, 2, 3]
     sol_chosen_to_break = best_sol
     fit_of_sol_chosen_to_break = best_fitness
+    current_sol = best_sol
+    current_fitness = best_fitness
     while COUNT < 3:
         end_time = time.time()
         if end_time - start_time > TIME_LIMIT:
