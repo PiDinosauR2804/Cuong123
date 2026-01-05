@@ -43,7 +43,7 @@ def addNewTripInDroneRoute(solution, ChangesPackages, ChangeInTruck, IndexOfNewR
     check_max = False
     time_fly = Function.cal_time_fly_a_trip([[NewReceiveCity, []]])
     total_time = time_fly + Function.max_release_date(ChangesPackages)
-    
+
     if max_point != -1:  # Add trip mới vào thứ tự giao hàng của drone
         for a in range(start_check_point_in_drone_queue, len(solution[1])):
             for b in range(len(solution[1][a])):
@@ -1226,8 +1226,8 @@ def Neighborhood_combine_truck_and_drone_neighborhood_with_tabu_list_with_packag
         sol = copy.deepcopy(potential_solution[i])
         min_to_improve = potential_solution[i][1][0]
         # list_neighborhood = [Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus_for_specific_truck, Neighborhood_drone.Neighborhood_group_trip]
-        # list_neighborhood = [Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus_for_specific_truck, Neighborhood_drone.Neighborhood_change_index_trip, Neighborhood_drone.Neighborhood_group_trip]
-        list_neighborhood = [Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus_for_specific_truck, Neighborhood_drone.Neighborhood_change_index_trip]             
+        list_neighborhood = [Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus_for_specific_truck, Neighborhood_drone.Neighborhood_change_index_trip, Neighborhood_drone.Neighborhood_group_trip]
+        # list_neighborhood = [Neighborhood_drone.Neighborghood_change_drone_route_max_pro_plus_for_specific_truck, Neighborhood_drone.Neighborhood_change_index_trip]             
         while j < number_of_loop_drone:
             j += 1
             # print("i: ",i," j: ", j)

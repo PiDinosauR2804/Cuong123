@@ -9,7 +9,8 @@ import collections
 import os
 number_of_trucks = 3
 number_of_cities = 0
-number_of_drones = 3
+number_of_drones = 1
+
 truck_speed = 0.5
 drone_speed = 1
 drone_capacity = 4
@@ -226,7 +227,64 @@ def read_data_random(path):
     # print(standard_deviation)
     return data
 
-
+def read_data_random_fixeDemandEqual1(path):
+    global data
+    global number_of_cities
+    global euclid_flight_matrix
+    global manhattan_move_matrix
+    global city
+    global release_date
+    global city_demand
+    global standard_deviation
+    global value_tan_of_city
+    global file_name
+    global DIFFERENTIAL_RATE_RELEASE_TIME
+    global B_ratio
+    global C_ratio
+    
+    DIFFERENTIAL_RATE_RELEASE_TIME = 1
+    A_ratio = 1
+    B_ratio = 0.7
+    C_ratio = 0.1
+    
+    f = open(path)
+    data = f.readlines()
+    number_of_cities = len(data) - 8
+    manhattan_move_matrix = [0] * number_of_cities
+    for i in range(number_of_cities):
+        manhattan_move_matrix[i] = [0] * number_of_cities
+    euclid_flight_matrix = [0] * number_of_cities
+    for i in range(number_of_cities):
+        euclid_flight_matrix[i] = [0] * number_of_cities
+    value_tan_of_city = [0] * number_of_cities
+    city = []
+    for i in range(8, 8 + number_of_cities):
+        city.append([])
+        line = data[i].split()
+        for j in range(0, 2):
+            city[i-8].append(float(line[j]))
+    for i in range(number_of_cities):
+        for j in range(number_of_cities):
+            euclid_flight_matrix[i][j] = euclid_distance(city[i], city[j]) / drone_speed
+    euclid_flight_matrix = numpy.array(euclid_flight_matrix)
+    for i in range(number_of_cities):
+        for j in range(number_of_cities):
+            manhattan_move_matrix[i][j] = manhattan_distance(city[i], city[j]) / truck_speed
+    manhattan_move_matrix = numpy.array(manhattan_move_matrix)
+    for i in range(1, number_of_cities):
+        value_tan_of_city[i] = calculate_angle(city[0], city[i])
+    release_date = []
+    city_demand = [0] * number_of_cities
+    for i in range(8, 8 + number_of_cities):
+        release_date.append([])
+        line = data[i].split()
+        release_date[i - 8] = int(line[-1])
+        if i==8:
+            city_demand[i - 8] = 0
+        else: 
+            city_demand[i - 8] = 1
+    print(city_demand)
+    standard_deviation = calculate_standard_deviation(release_date)
+    # print(standard_deviation)
+    return data
 # read_data_random(file_path)
-
-# read_data_random("test_data\\data_demand_random\\Solomon\\50\\C101_0.5.dat")

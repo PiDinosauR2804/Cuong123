@@ -6,21 +6,21 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  continue1:
     name: Run test with multiple configurations
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        number_of_cities: [30]
-        delta: [0.3, 0.6]
-        alpha: ['[0.5, 0.3, 0.1]', '[0.3, 0.2, 0.1]']
-        theta: [0.5, 1, 2]
-        segment: [10]
-        data_set: ["C101_0.5.dat", "C101_2.dat", "C101_3.dat", "C201_0.5.dat", "C201_2.dat", "C201_3.dat", "R101_0.5.dat", "R101_2.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_2.dat", "RC101_3.dat"]
+        number_of_cities: [50]
+        segment: [12]
+        iteration: [1, 2]
+        data_set: ["C101_0.5.dat","C101_1.dat","C101_1.5.dat", "C101_2.dat", "C101_2.5.dat", "C101_3.dat", "C201_0.5.dat", "C201_1.dat", "C201_1.5.dat", "C201_2.dat", "C201_2.5.dat", "C201_3.dat", "R101_0.5.dat", "R101_1.dat", "R101_1.5.dat", "R101_2.dat", "R101_2.5.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_1.dat", "RC101_1.5.dat", "RC101_2.dat", "RC101_2.5.dat", "RC101_3.dat"]
+        #data_set: ["C201_0.5.dat", "C201_1.dat", "C201_1.5.dat", "C201_2.dat", "C201_2.5.dat", "C201_3.dat", "R101_0.5.dat", "R101_1.dat", "R101_1.5.dat", "R101_2.dat", "R101_2.5.dat", "R101_3.dat", "RC101_0.5.dat", "RC101_1.dat", "RC101_1.5.dat", "RC101_2.dat", "RC101_2.5.dat", "RC101_3.dat"]
+        #data_set: ["C101_0.5.dat","C101_1.dat","C101_1.5.dat", "C101_2.dat", "C101_2.5.dat", "C101_3.dat"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -29,24 +29,22 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
         
-      - name: Run main.py ITE-10
-        run: python 1_0.3.py
+      - name: Run main.py ITE-4 for each iteration
+        run: python test_similarity.py
         env:
           NUMBER_OF_CITIES: ${{ matrix.number_of_cities }}
-          DELTA: ${{ matrix.delta }}
-          ALPHA: ${{ matrix.alpha }}
-          THETA: ${{ matrix.theta }}
           DATA_SET: ${{ matrix.data_set }}
           SEGMENT: ${{ matrix.segment }}
+          ITERATION: ${{ matrix.iteration }}
       - name: Upload result Excel file as artifact
         uses: actions/upload-artifact@v4
         with:
           name: json1-results-${{ matrix.number_of_cities }}-${{ matrix.data_set }}-${{ matrix.segment }}-iter-${{ matrix.iteration }}
           path: Random_*_CL2.xlsx
-
+  
   summary:
     name: Summary results
-    needs: test
+    needs: continue1
     runs-on: ubuntu-latest
 
     steps:
@@ -63,4 +61,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: excel-results-summary
-          path: Random_*_CL1.xlsx
+          path: Random_*_CL2.xlsx
