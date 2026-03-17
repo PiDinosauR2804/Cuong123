@@ -1,0 +1,305 @@
+name: Benchmark Similarity A4 L90
+
+on:
+  workflow_dispatch:
+  push:
+
+permissions:
+  contents: read
+
+env:
+  NUMBER_OF_CITIES: "50"
+  A: "4"
+  L: "90"
+  SEGMENT: "12"
+  TIME_LIMIT: "14000"
+
+jobs:
+  run_job:
+    name: ${{ matrix.strategy }} | ${{ matrix.data_set }} | run-${{ matrix.run_index }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 24
+      matrix:
+        strategy: [no_diversification, with_diversification]
+        run_index: [1, 2]
+        data_set:
+          - C101_0.5.dat
+          - C101_1.dat
+          - C101_1.5.dat
+          - C101_2.dat
+          - C101_2.5.dat
+          - C101_3.dat
+          - C201_0.5.dat
+          - C201_1.dat
+          - C201_1.5.dat
+          - C201_2.dat
+          - C201_2.5.dat
+          - C201_3.dat
+          - R101_0.5.dat
+          - R101_1.dat
+          - R101_1.5.dat
+          - R101_2.dat
+          - R101_2.5.dat
+          - R101_3.dat
+          - RC101_0.5.dat
+          - RC101_1.dat
+          - RC101_1.5.dat
+          - RC101_2.dat
+          - RC101_2.5.dat
+          - RC101_3.dat
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run one strategy job
+        env:
+          DATA_SET: ${{ matrix.data_set }}
+          ITERATION: ${{ matrix.run_index }}
+        run: |
+          if [ "${{ matrix.strategy }}" = "no_diversification" ]; then
+            python test_similarity_no_diversification.py
+          else
+            python test_similarity_with_diversification.py
+          fi
+
+      - name: Extract job metrics from xlsx
+        env:
+          DATA_SET: ${{ matrix.data_set }}
+          RUN_INDEX: ${{ matrix.run_index }}
+          STRATEGY: ${{ matrix.strategy }}
+        run: |
+          python - <<'PY'
+          import csv
+          import glob
+          import os
+          from pathlib import Path
+          import openpyxl
+
+          data_set = os.environ["DATA_SET"]
+          run_index = int(os.environ["RUN_INDEX"])
+          strategy = os.environ["STRATEGY"]
+          number_of_cities = os.environ["NUMBER_OF_CITIES"]
+          segment = os.environ["SEGMENT"]
+
+          pattern = f"Random_{number_of_cities}_{data_set}_{segment}_iter-_*_CL2.xlsx"
+          candidates = glob.glob(pattern)
+          if not candidates:
+              raise FileNotFoundError(f"No xlsx generated with pattern: {pattern}")
+          xlsx_path = max(candidates, key=os.path.getmtime)
+
+          wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+          sh = wb.active
+          row = {
+              "dataset": data_set,
+              "run": run_index,
+              "strategy": strategy,
+              "best_fitness": sh.cell(1, 2).value,
+              "runtime_sec": sh.cell(1, 3).value,
+              "best_t_segment": sh.cell(1, 5).value,
+              "segments": sh.cell(1, 6).value,
+              "xlsx_path": xlsx_path,
+          }
+          wb.close()
+
+          safe_dataset = Path(data_set).stem.replace(".", "_")
+          out_csv = f"job_result_{strategy}_{safe_dataset}_run{run_index}.csv"
+          with open(out_csv, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(
+                  f,
+                  fieldnames=[
+                      "dataset",
+                      "run",
+                      "strategy",
+                      "best_fitness",
+                      "runtime_sec",
+                      "best_t_segment",
+                      "segments",
+                      "xlsx_path",
+                  ],
+              )
+              writer.writeheader()
+              writer.writerow(row)
+          print(f"Wrote {out_csv}")
+          PY
+
+      - name: Upload job artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: job-${{ matrix.strategy }}-${{ matrix.data_set }}-run-${{ matrix.run_index }}
+          path: |
+            job_result_*.csv
+            Random_*_CL2.xlsx
+
+  summarize:
+    name: Summarize Benchmark
+    needs: run_job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: collected
+          merge-multiple: true
+
+      - name: Build summary csv files
+        run: |
+          python - <<'PY'
+          import csv
+          import math
+          import statistics
+          from pathlib import Path
+
+          root = Path("collected")
+          result_dir = Path("Result/github_actions_similarity_a4_l90")
+          result_dir.mkdir(parents=True, exist_ok=True)
+
+          rows = []
+          for fp in root.glob("job_result_*.csv"):
+              with open(fp, newline="", encoding="utf-8") as f:
+                  reader = csv.DictReader(f)
+                  rows.extend(reader)
+
+          if not rows:
+              raise RuntimeError("No job_result_*.csv found in collected artifacts.")
+
+          def to_float(v):
+              try:
+                  return float(v)
+              except Exception:
+                  return math.nan
+
+          def to_int(v):
+              try:
+                  return int(float(v))
+              except Exception:
+                  return -1
+
+          normalized = []
+          for r in rows:
+              normalized.append(
+                  {
+                      "dataset": r["dataset"],
+                      "run": to_int(r["run"]),
+                      "strategy": r["strategy"],
+                      "best_fitness": to_float(r["best_fitness"]),
+                      "runtime_sec": to_float(r["runtime_sec"]),
+                      "best_t_segment": to_int(r["best_t_segment"]),
+                      "segments": to_int(r["segments"]),
+                      "xlsx_path": r.get("xlsx_path", ""),
+                  }
+              )
+
+          raw_path = result_dir / "raw_results.csv"
+          with open(raw_path, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(
+                  f,
+                  fieldnames=[
+                      "dataset",
+                      "run",
+                      "strategy",
+                      "best_fitness",
+                      "runtime_sec",
+                      "best_t_segment",
+                      "segments",
+                      "xlsx_path",
+                  ],
+              )
+              writer.writeheader()
+              writer.writerows(sorted(normalized, key=lambda x: (x["dataset"], x["run"], x["strategy"])))
+
+          summary_rows = []
+          for strategy in ["no_diversification", "with_diversification"]:
+              grp = [r for r in normalized if r["strategy"] == strategy]
+              summary_rows.append(
+                  {
+                      "strategy": strategy,
+                      "n_jobs": len(grp),
+                      "avg_best_fitness": statistics.mean([r["best_fitness"] for r in grp]),
+                      "avg_runtime_sec": statistics.mean([r["runtime_sec"] for r in grp]),
+                      "avg_segments": statistics.mean([r["segments"] for r in grp]),
+                  }
+              )
+
+          summary_path = result_dir / "summary_by_strategy.csv"
+          with open(summary_path, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(
+                  f,
+                  fieldnames=[
+                      "strategy",
+                      "n_jobs",
+                      "avg_best_fitness",
+                      "avg_runtime_sec",
+                      "avg_segments",
+                  ],
+              )
+              writer.writeheader()
+              writer.writerows(summary_rows)
+
+          pair_index = {}
+          for r in normalized:
+              pair_index.setdefault((r["dataset"], r["run"]), {})[r["strategy"]] = r
+
+          pair_rows = []
+          for key in sorted(pair_index.keys()):
+              if "no_diversification" not in pair_index[key] or "with_diversification" not in pair_index[key]:
+                  continue
+              no_div = pair_index[key]["no_diversification"]
+              with_div = pair_index[key]["with_diversification"]
+              pair_rows.append(
+                  {
+                      "dataset": key[0],
+                      "run": key[1],
+                      "fitness_no_div": no_div["best_fitness"],
+                      "fitness_with_div": with_div["best_fitness"],
+                      "delta_fitness_with_minus_no": with_div["best_fitness"] - no_div["best_fitness"],
+                      "runtime_no_div_sec": no_div["runtime_sec"],
+                      "runtime_with_div_sec": with_div["runtime_sec"],
+                      "delta_runtime_with_minus_no_sec": with_div["runtime_sec"] - no_div["runtime_sec"],
+                      "segments_no_div": no_div["segments"],
+                      "segments_with_div": with_div["segments"],
+                      "delta_segments_with_minus_no": with_div["segments"] - no_div["segments"],
+                  }
+              )
+
+          pair_path = result_dir / "pairwise_comparison.csv"
+          with open(pair_path, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(
+                  f,
+                  fieldnames=[
+                      "dataset",
+                      "run",
+                      "fitness_no_div",
+                      "fitness_with_div",
+                      "delta_fitness_with_minus_no",
+                      "runtime_no_div_sec",
+                      "runtime_with_div_sec",
+                      "delta_runtime_with_minus_no_sec",
+                      "segments_no_div",
+                      "segments_with_div",
+                      "delta_segments_with_minus_no",
+                  ],
+              )
+              writer.writeheader()
+              writer.writerows(pair_rows)
+
+          print(f"Wrote: {raw_path}")
+          print(f"Wrote: {summary_path}")
+          print(f"Wrote: {pair_path}")
+          PY
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-summary-a4-l90
+          path: Result/github_actions_similarity_a4_l90/*.csv
