@@ -1,0 +1,79 @@
+name: Summarize Repair 50 Batch From Existing Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Existing run ID to summarize (does NOT rerun optimization)"
+        required: true
+        default: "23226499520"
+        type: string
+  workflow_run:
+    workflows:
+      - "Repair + Improve 50 Batch (Matrix)"
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  summarize-existing-run:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Aggregate improved solutions from existing run id
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TARGET_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}
+        run: |
+          python summarize_repair_50_batch_run.py \
+            --run-id "$TARGET_RUN_ID" \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --output-dir "Result/github_run_summaries"
+
+      - name: Write GitHub Summary
+        env:
+          RUN_ID: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}
+          META_PATH: Result/github_run_summaries/run_${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}/summary_meta.json
+        run: |
+          python - <<'PY'
+          import json
+          import os
+
+          run_id = os.environ["RUN_ID"]
+          meta_path = os.environ["META_PATH"]
+          step_summary = os.environ["GITHUB_STEP_SUMMARY"]
+
+          with open(step_summary, "a", encoding="utf-8") as out:
+              out.write(f"# Summary From Existing Run ({run_id})\n\n")
+              if not os.path.exists(meta_path):
+                  out.write("- summary_meta.json not found\n")
+              else:
+                  with open(meta_path, "r", encoding="utf-8") as f:
+                      m = json.load(f)
+                  out.write(f"- mode: `{m.get('mode', '')}`\n")
+                  out.write(f"- rows: {m.get('summary_rows', '')}\n")
+                  out.write(f"- ok_rows: {m.get('ok_rows', '')}\n")
+                  out.write(f"- error_rows: {m.get('error_rows', '')}\n")
+                  out.write(f"- improved_csv: `{m.get('final_csv', '')}`\n")
+                  out.write(f"- compact_summary_csv: `{m.get('compact_summary_csv', '')}`\n")
+          PY
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-50-batch-summary-from-run-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}
+          path: Result/github_run_summaries/run_${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}/*
