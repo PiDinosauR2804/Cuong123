@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       rows_per_job:
-        description: "Number of CSV rows handled by each matrix job"
+        description: "Number of CSV rows handled by each matrix job (set to 2 rows/job)"
         required: true
-        default: "20"
+        default: "2"
       workers_per_job:
         description: "Parallel processes per matrix job (2 as requested)"
         required: true
@@ -47,7 +47,7 @@ on:
       - ".github/workflows/repair-50-batch.yml"
 
 env:
-  ROWS_PER_JOB: ${{ github.event.inputs.rows_per_job || '20' }}
+  ROWS_PER_JOB: ${{ github.event.inputs.rows_per_job || '2' }}
   WORKERS_PER_JOB: ${{ github.event.inputs.workers_per_job || '2' }}
   REPAIR_WORKERS: ${{ github.event.inputs.repair_workers || '2' }}
   ATS_NIMP: ${{ github.event.inputs.nimp || '30' }}
