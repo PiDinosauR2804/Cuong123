@@ -11,12 +11,18 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
 from zipfile import ZipFile
 
 
 API_BASE = "https://api.github.com"
 API_VERSION = "2022-11-28"
+REDIRECT_CODES = {301, 302, 303, 307, 308}
+
+
+class _NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+        return None
 
 
 def _sanitize_name(name: str) -> str:
@@ -71,14 +77,50 @@ def _api_get_json(url: str, token: str) -> Dict[str, Any]:
 def _download_artifact_zip(owner: str, repo: str, artifact_id: int, token: str, out_zip: Path) -> None:
     url = f"{API_BASE}/repos/{owner}/{repo}/actions/artifacts/{artifact_id}/zip"
     req = Request(url=url, headers=_api_headers(token), method="GET")
+    opener = build_opener(_NoRedirect())
     try:
-        with urlopen(req) as resp:
+        with opener.open(req) as resp:
+            # Some environments may return bytes directly without redirect.
+            if int(resp.getcode() or 0) == 200:
+                data = resp.read()
+                out_zip.parent.mkdir(parents=True, exist_ok=True)
+                out_zip.write_bytes(data)
+                return
+            redirect_url = (resp.headers.get("Location") or "").strip()
+            if not redirect_url:
+                raise RuntimeError(
+                    f"Download artifact failed: missing redirect Location header (artifact_id={artifact_id})."
+                )
+    except HTTPError as e:
+        if e.code in REDIRECT_CODES:
+            redirect_url = (e.headers.get("Location") or "").strip()
+            if not redirect_url:
+                detail = e.read().decode("utf-8", errors="ignore")
+                raise RuntimeError(
+                    f"Download artifact redirect missing Location (artifact_id={artifact_id})\n{detail}"
+                ) from e
+        else:
+            detail = e.read().decode("utf-8", errors="ignore")
+            raise RuntimeError(f"Download artifact HTTPError {e.code} (artifact_id={artifact_id})\n{detail}") from e
+    except URLError as e:
+        raise RuntimeError(f"Download artifact URLError (artifact_id={artifact_id}): {e}") from e
+
+    # Follow signed URL WITHOUT Authorization header to avoid blob-storage 401.
+    signed_req = Request(
+        url=redirect_url,
+        headers={"User-Agent": "summarize-repair-50-batch-run"},
+        method="GET",
+    )
+    try:
+        with urlopen(signed_req) as resp:
             data = resp.read()
     except HTTPError as e:
         detail = e.read().decode("utf-8", errors="ignore")
-        raise RuntimeError(f"Download artifact HTTPError {e.code} (artifact_id={artifact_id})\n{detail}") from e
+        raise RuntimeError(
+            f"Download signed artifact URL HTTPError {e.code} (artifact_id={artifact_id})\n{detail}"
+        ) from e
     except URLError as e:
-        raise RuntimeError(f"Download artifact URLError (artifact_id={artifact_id}): {e}") from e
+        raise RuntimeError(f"Download signed artifact URL URLError (artifact_id={artifact_id}): {e}") from e
 
     out_zip.parent.mkdir(parents=True, exist_ok=True)
     out_zip.write_bytes(data)
@@ -260,14 +302,16 @@ def _build_compact_summary(
 
 
 def _select_relevant_artifacts(artifacts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    prefixes = (
-        "repair-improve-50-batch-final-",
-        "stage1-repaired-",
-        "stage2-chunk-",
-    )
-    selected = [a for a in artifacts if (a.get("name") or "").startswith(prefixes)]
-    if selected:
-        return selected
+    final = [a for a in artifacts if (a.get("name") or "").startswith("repair-improve-50-batch-final-")]
+    if final:
+        # One final artifact is enough; avoid downloading hundreds of chunk artifacts.
+        return sorted(final, key=lambda a: int(a.get("id") or 0), reverse=True)[:1]
+
+    stage1 = [a for a in artifacts if (a.get("name") or "").startswith("stage1-repaired-")]
+    stage2 = [a for a in artifacts if (a.get("name") or "").startswith("stage2-chunk-")]
+    if stage1 and stage2:
+        return stage1 + stage2
+
     return artifacts
 
 
