@@ -1,0 +1,3 @@
+row_index,instance,run,old_best_fitness,old_best_multi_visit_fitness,best_sol_initially_feasible,best_sol_repair_mode,best_multi_visit_initially_feasible,best_multi_visit_repair_mode,ats_segments_run,new_best_fitness,new_best_multi_visit_fitness,best_multi_visit_source,status,error,runtime_sec
+1,test_data/data_demand_random_50_batch_all1_equal_cluster/C201_0.5.dat,1,523.8887869,,True,already_feasible,,missing,1,627,,,OK,,48.67
+2,test_data/data_demand_random_50_batch_all1_equal_cluster/C201_0.5.dat,2,585.9800806,623.6619038,False,repair_solution_after_truck_routes,False,repair_solution_after_truck_routes,1,611,,,OK,,59.15

@@ -1,0 +1,884 @@
+{
+  "instance": "test_data/data_demand_random_50_batch_all1_equal_cluster/C201_0.5.dat",
+  "A": 4.0,
+  "Ld": 120.0,
+  "truck_departure_time": {
+    "0": 0.0,
+    "1": 0.0
+  },
+  "truck_return_time": {
+    "0": 756.2531640716645,
+    "1": 644.6619037896905
+  },
+  "drone_rows": [
+    {
+      "trip": 0,
+      "drone_id": 0,
+      "drone_ready_at_depot": 0.0,
+      "release_bound": 28.0,
+      "first_launch_city": 11,
+      "first_truck_arrival": 32.0,
+      "depart_depot": 28.0,
+      "return_depot": 56.323807579381196,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 11,
+          "owner_truck": 0,
+          "drone_arrival": 39.6619037896906,
+          "truck_arrival": 32.0,
+          "drone_wait": 0.0,
+          "truck_wait": 7.661903789690598,
+          "sync_time": 39.6619037896906,
+          "service_end": 44.6619037896906,
+          "customers": [
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 1,
+      "drone_id": 1,
+      "drone_ready_at_depot": 0.0,
+      "release_bound": 42.0,
+      "first_launch_city": 10,
+      "first_truck_arrival": 32.0,
+      "depart_depot": 42.0,
+      "return_depot": 70.3238075793812,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 10,
+          "owner_truck": 1,
+          "drone_arrival": 53.6619037896906,
+          "truck_arrival": 32.0,
+          "drone_wait": 0.0,
+          "truck_wait": 21.661903789690598,
+          "sync_time": 53.6619037896906,
+          "service_end": 58.6619037896906,
+          "customers": [
+            10,
+            12,
+            15,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 2,
+      "drone_id": 0,
+      "drone_ready_at_depot": 56.323807579381196,
+      "release_bound": 70.0,
+      "first_launch_city": 15,
+      "first_truck_arrival": 100.6619037896906,
+      "depart_depot": 80.0463756616023,
+      "return_depot": 126.2774319177789,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 15,
+          "owner_truck": 1,
+          "drone_arrival": 100.6619037896906,
+          "truck_arrival": 100.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 100.6619037896906,
+          "service_end": 105.6619037896906,
+          "customers": [
+            16,
+            17,
+            14,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 3,
+      "drone_id": 1,
+      "drone_ready_at_depot": 70.3238075793812,
+      "release_bound": 56.0,
+      "first_launch_city": 2,
+      "first_truck_arrival": 84.6619037896906,
+      "depart_depot": 72.49637872909416,
+      "return_depot": 101.82742885028703,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 2,
+          "owner_truck": 0,
+          "drone_arrival": 84.6619037896906,
+          "truck_arrival": 84.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 84.6619037896906,
+          "service_end": 89.6619037896906,
+          "customers": [
+            20,
+            2,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 4,
+      "drone_id": 1,
+      "drone_ready_at_depot": 101.82742885028703,
+      "release_bound": 56.0,
+      "first_launch_city": 19,
+      "first_truck_arrival": 127.6619037896906,
+      "depart_depot": 107.0463756616023,
+      "return_depot": 153.2774319177789,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 19,
+          "owner_truck": 0,
+          "drone_arrival": 127.6619037896906,
+          "truck_arrival": 127.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 127.6619037896906,
+          "service_end": 132.6619037896906,
+          "customers": [
+            19,
+            18,
+            22,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 5,
+      "drone_id": 0,
+      "drone_ready_at_depot": 126.2774319177789,
+      "release_bound": 113.0,
+      "first_launch_city": 32,
+      "first_truck_arrival": 161.6619037896906,
+      "depart_depot": 132.59302008219333,
+      "return_depot": 195.73078749718786,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 32,
+          "owner_truck": 1,
+          "drone_arrival": 161.6619037896906,
+          "truck_arrival": 161.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 161.6619037896906,
+          "service_end": 166.6619037896906,
+          "customers": [
+            32,
+            31,
+            28,
+            35
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 6,
+      "drone_id": 1,
+      "drone_ready_at_depot": 153.2774319177789,
+      "release_bound": 141.0,
+      "first_launch_city": 43,
+      "first_truck_arrival": 188.6619037896906,
+      "depart_depot": 156.2736343082873,
+      "return_depot": 226.05017327109388,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 43,
+          "owner_truck": 0,
+          "drone_arrival": 188.6619037896906,
+          "truck_arrival": 188.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 188.6619037896906,
+          "service_end": 193.6619037896906,
+          "customers": [
+            43,
+            36,
+            37,
+            41
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 7,
+      "drone_id": 0,
+      "drone_ready_at_depot": 195.73078749718786,
+      "release_bound": 141.0,
+      "first_launch_city": 42,
+      "first_truck_arrival": 227.6619037896906,
+      "depart_depot": 195.73078749718786,
+      "return_depot": 276.888518555827,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 42,
+          "owner_truck": 0,
+          "drone_arrival": 233.80965302650742,
+          "truck_arrival": 227.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 6.147749236816821,
+          "sync_time": 233.80965302650742,
+          "service_end": 238.80965302650742,
+          "customers": [
+            42,
+            44,
+            45,
+            46
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 8,
+      "drone_id": 1,
+      "drone_ready_at_depot": 226.05017327109388,
+      "release_bound": 113.0,
+      "first_launch_city": 30,
+      "first_truck_arrival": 298.6619037896906,
+      "depart_depot": 265.3602521789972,
+      "return_depot": 336.963555400384,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 30,
+          "owner_truck": 1,
+          "drone_arrival": 298.6619037896906,
+          "truck_arrival": 298.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 298.6619037896906,
+          "service_end": 303.6619037896906,
+          "customers": [
+            30,
+            33,
+            34,
+            38
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 9,
+      "drone_id": 0,
+      "drone_ready_at_depot": 276.888518555827,
+      "release_bound": 155.0,
+      "first_launch_city": 48,
+      "first_truck_arrival": 347.6619037896906,
+      "depart_depot": 307.3506150481978,
+      "return_depot": 392.9731925311834,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 48,
+          "owner_truck": 1,
+          "drone_arrival": 347.66190378969054,
+          "truck_arrival": 347.6619037896906,
+          "drone_wait": 5.684341886080802e-14,
+          "truck_wait": 0.0,
+          "sync_time": 347.6619037896906,
+          "service_end": 352.6619037896906,
+          "customers": [
+            48,
+            47,
+            49,
+            29
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 10,
+      "drone_id": 1,
+      "drone_ready_at_depot": 336.963555400384,
+      "release_bound": 155.0,
+      "first_launch_city": 50,
+      "first_truck_arrival": 374.8096530265074,
+      "depart_depot": 336.963555400384,
+      "return_depot": 420.551086217938,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 50,
+          "owner_truck": 0,
+          "drone_arrival": 376.257320809161,
+          "truck_arrival": 374.8096530265074,
+          "drone_wait": 0.0,
+          "truck_wait": 1.447667782653582,
+          "sync_time": 376.257320809161,
+          "service_end": 381.257320809161,
+          "customers": [
+            50,
+            6,
+            7,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 11,
+      "drone_id": 0,
+      "drone_ready_at_depot": 392.9731925311834,
+      "release_bound": 85.0,
+      "first_launch_city": 27,
+      "first_truck_arrival": 418.6619037896906,
+      "depart_depot": 395.3380962103094,
+      "return_depot": 446.9857113690718,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 27,
+          "owner_truck": 1,
+          "drone_arrival": 418.6619037896906,
+          "truck_arrival": 418.6619037896906,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 418.6619037896906,
+          "service_end": 423.6619037896906,
+          "customers": [
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 12,
+      "drone_id": 1,
+      "drone_ready_at_depot": 420.551086217938,
+      "release_bound": 127.0,
+      "first_launch_city": 39,
+      "first_truck_arrival": 563.6619037896905,
+      "depart_depot": 532.6135543971704,
+      "return_depot": 616.6138438466625,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 39,
+          "owner_truck": 1,
+          "drone_arrival": 563.6619037896905,
+          "truck_arrival": 563.6619037896905,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 563.6619037896905,
+          "service_end": 568.6619037896905,
+          "customers": [
+            39
+          ]
+        },
+        {
+          "leg": 1,
+          "launch_city": 23,
+          "owner_truck": 0,
+          "drone_arrival": 589.2531640716645,
+          "truck_arrival": 469.257320809161,
+          "drone_wait": 0.0,
+          "truck_wait": 119.99584326250351,
+          "sync_time": 589.2531640716645,
+          "service_end": 594.2531640716645,
+          "customers": [
+            23,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 13,
+      "drone_id": 0,
+      "drone_ready_at_depot": 446.9857113690718,
+      "release_bound": 70.0,
+      "first_launch_city": 24,
+      "first_truck_arrival": 626.2531640716645,
+      "depart_depot": 603.4496555696818,
+      "return_depot": 654.0566725736472,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 24,
+          "owner_truck": 0,
+          "drone_arrival": 626.2531640716645,
+          "truck_arrival": 626.2531640716645,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 626.2531640716645,
+          "service_end": 631.2531640716645,
+          "customers": [
+            24,
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "trip": 14,
+      "drone_id": 1,
+      "drone_ready_at_depot": 616.6138438466625,
+      "release_bound": 127.0,
+      "first_launch_city": 40,
+      "first_truck_arrival": 679.2531640716645,
+      "depart_depot": 647.0041330784703,
+      "return_depot": 716.5021950648587,
+      "legs": [
+        {
+          "leg": 0,
+          "launch_city": 40,
+          "owner_truck": 0,
+          "drone_arrival": 679.2531640716645,
+          "truck_arrival": 679.2531640716645,
+          "drone_wait": 0.0,
+          "truck_wait": 0.0,
+          "sync_time": 679.2531640716645,
+          "service_end": 684.2531640716645,
+          "customers": [
+            40
+          ]
+        }
+      ]
+    }
+  ],
+  "truck_rows": [
+    {
+      "truck": 0,
+      "route_index": 0,
+      "city": 0,
+      "arrival": 0.0,
+      "departure": 0.0,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 1,
+      "city": 11,
+      "arrival": 32.0,
+      "departure": 44.6619037896906,
+      "waiting_at_city": 12.661903789690598
+    },
+    {
+      "truck": 0,
+      "route_index": 2,
+      "city": 3,
+      "arrival": 66.6619037896906,
+      "departure": 66.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 3,
+      "city": 4,
+      "arrival": 74.6619037896906,
+      "departure": 74.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 4,
+      "city": 2,
+      "arrival": 84.6619037896906,
+      "departure": 89.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 0,
+      "route_index": 5,
+      "city": 1,
+      "arrival": 97.6619037896906,
+      "departure": 97.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 6,
+      "city": 19,
+      "arrival": 127.6619037896906,
+      "departure": 132.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 0,
+      "route_index": 7,
+      "city": 18,
+      "arrival": 142.6619037896906,
+      "departure": 142.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 8,
+      "city": 20,
+      "arrival": 166.6619037896906,
+      "departure": 166.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 9,
+      "city": 43,
+      "arrival": 188.6619037896906,
+      "departure": 193.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 0,
+      "route_index": 10,
+      "city": 22,
+      "arrival": 203.6619037896906,
+      "departure": 203.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 11,
+      "city": 21,
+      "arrival": 207.6619037896906,
+      "departure": 207.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 12,
+      "city": 42,
+      "arrival": 227.6619037896906,
+      "departure": 238.80965302650742,
+      "waiting_at_city": 11.147749236816821
+    },
+    {
+      "truck": 0,
+      "route_index": 13,
+      "city": 41,
+      "arrival": 248.80965302650742,
+      "departure": 248.80965302650742,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 14,
+      "city": 36,
+      "arrival": 306.8096530265074,
+      "departure": 306.8096530265074,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 15,
+      "city": 37,
+      "arrival": 328.8096530265074,
+      "departure": 328.8096530265074,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 16,
+      "city": 44,
+      "arrival": 350.8096530265074,
+      "departure": 350.8096530265074,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 17,
+      "city": 45,
+      "arrival": 360.8096530265074,
+      "departure": 360.8096530265074,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 18,
+      "city": 46,
+      "arrival": 370.8096530265074,
+      "departure": 370.8096530265074,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 19,
+      "city": 50,
+      "arrival": 374.8096530265074,
+      "departure": 381.257320809161,
+      "waiting_at_city": 6.447667782653582
+    },
+    {
+      "truck": 0,
+      "route_index": 20,
+      "city": 9,
+      "arrival": 447.257320809161,
+      "departure": 447.257320809161,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 21,
+      "city": 6,
+      "arrival": 453.257320809161,
+      "departure": 453.257320809161,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 22,
+      "city": 23,
+      "arrival": 469.257320809161,
+      "departure": 594.2531640716645,
+      "waiting_at_city": 124.99584326250351
+    },
+    {
+      "truck": 0,
+      "route_index": 23,
+      "city": 7,
+      "arrival": 604.2531640716645,
+      "departure": 604.2531640716645,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 24,
+      "city": 8,
+      "arrival": 608.2531640716645,
+      "departure": 608.2531640716645,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 25,
+      "city": 24,
+      "arrival": 626.2531640716645,
+      "departure": 631.2531640716645,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 0,
+      "route_index": 26,
+      "city": 26,
+      "arrival": 667.2531640716645,
+      "departure": 667.2531640716645,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 27,
+      "city": 40,
+      "arrival": 679.2531640716645,
+      "departure": 684.2531640716645,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 0,
+      "route_index": 28,
+      "city": 5,
+      "arrival": 728.2531640716645,
+      "departure": 728.2531640716645,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 0,
+      "route_index": 29,
+      "city": 0,
+      "arrival": 756.2531640716645,
+      "departure": 756.2531640716645,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 0,
+      "city": 0,
+      "arrival": 0.0,
+      "departure": 0.0,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 1,
+      "city": 10,
+      "arrival": 32.0,
+      "departure": 58.6619037896906,
+      "waiting_at_city": 26.661903789690598
+    },
+    {
+      "truck": 1,
+      "route_index": 2,
+      "city": 12,
+      "arrival": 72.6619037896906,
+      "departure": 72.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 3,
+      "city": 13,
+      "arrival": 78.6619037896906,
+      "departure": 78.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 4,
+      "city": 15,
+      "arrival": 100.6619037896906,
+      "departure": 105.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 1,
+      "route_index": 5,
+      "city": 16,
+      "arrival": 129.6619037896906,
+      "departure": 129.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 6,
+      "city": 17,
+      "arrival": 151.6619037896906,
+      "departure": 151.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 7,
+      "city": 32,
+      "arrival": 161.6619037896906,
+      "departure": 166.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 1,
+      "route_index": 8,
+      "city": 31,
+      "arrival": 176.6619037896906,
+      "departure": 176.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 9,
+      "city": 14,
+      "arrival": 214.6619037896906,
+      "departure": 214.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 10,
+      "city": 28,
+      "arrival": 256.6619037896906,
+      "departure": 256.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 11,
+      "city": 35,
+      "arrival": 272.6619037896906,
+      "departure": 272.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 12,
+      "city": 30,
+      "arrival": 298.6619037896906,
+      "departure": 303.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 1,
+      "route_index": 13,
+      "city": 33,
+      "arrival": 337.6619037896906,
+      "departure": 337.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 14,
+      "city": 34,
+      "arrival": 343.6619037896906,
+      "departure": 343.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 15,
+      "city": 48,
+      "arrival": 347.6619037896906,
+      "departure": 352.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 1,
+      "route_index": 16,
+      "city": 47,
+      "arrival": 362.6619037896906,
+      "departure": 362.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 17,
+      "city": 49,
+      "arrival": 372.6619037896906,
+      "departure": 372.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 18,
+      "city": 38,
+      "arrival": 382.6619037896906,
+      "departure": 382.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 19,
+      "city": 29,
+      "arrival": 396.6619037896906,
+      "departure": 396.6619037896906,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 20,
+      "city": 27,
+      "arrival": 418.6619037896906,
+      "departure": 423.6619037896906,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 1,
+      "route_index": 21,
+      "city": 25,
+      "arrival": 525.6619037896905,
+      "departure": 525.6619037896905,
+      "waiting_at_city": 0.0
+    },
+    {
+      "truck": 1,
+      "route_index": 22,
+      "city": 39,
+      "arrival": 563.6619037896905,
+      "departure": 568.6619037896905,
+      "waiting_at_city": 5.0
+    },
+    {
+      "truck": 1,
+      "route_index": 23,
+      "city": 0,
+      "arrival": 644.6619037896905,
+      "departure": 644.6619037896905,
+      "waiting_at_city": 0.0
+    }
+  ]
+}

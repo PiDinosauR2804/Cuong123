@@ -1,0 +1,337 @@
+name: Repair + Improve 50 Batch (Matrix)
+
+on:
+  workflow_dispatch:
+    inputs:
+      rows_per_job:
+        description: "Number of CSV rows handled by each matrix job"
+        required: true
+        default: "20"
+      workers_per_job:
+        description: "Parallel processes per matrix job (2 as requested)"
+        required: true
+        default: "2"
+      repair_workers:
+        description: "Parallel processes for stage-1 repair job"
+        required: true
+        default: "2"
+      nimp:
+        description: "ATS non-improving iteration limit"
+        required: true
+        default: "30"
+      max_segments:
+        description: "ATS max segments in stage-2 (legacy test_similarity mode)"
+        required: true
+        default: "1"
+      max_runtime_minutes:
+        description: "Time limit per row (minutes) in stage-2"
+        required: true
+        default: "20"
+      truck_max_neighbors:
+        description: "Truck neighborhood cap per ATS iteration"
+        required: true
+        default: "300"
+      drone_max_neighbors:
+        description: "Drone neighborhood cap per ATS iteration"
+        required: true
+        default: "120"
+      limit:
+        description: "Only process first N rows in stage-1 (0 = all)"
+        required: true
+        default: "0"
+  push:
+    paths:
+      - "**/*.py"
+      - "50_batch.csv"
+      - "requirements.txt"
+      - ".github/workflows/repair-50-batch.yml"
+
+env:
+  ROWS_PER_JOB: ${{ github.event.inputs.rows_per_job || '20' }}
+  WORKERS_PER_JOB: ${{ github.event.inputs.workers_per_job || '2' }}
+  REPAIR_WORKERS: ${{ github.event.inputs.repair_workers || '2' }}
+  ATS_NIMP: ${{ github.event.inputs.nimp || '30' }}
+  ATS_MAX_SEGMENTS: ${{ github.event.inputs.max_segments || '1' }}
+  ATS_MAX_RUNTIME_MINUTES: ${{ github.event.inputs.max_runtime_minutes || '20' }}
+  TRUCK_MAX_NEIGHBORS: ${{ github.event.inputs.truck_max_neighbors || '300' }}
+  DRONE_MAX_NEIGHBORS: ${{ github.event.inputs.drone_max_neighbors || '120' }}
+  STAGE1_LIMIT: ${{ github.event.inputs.limit || '0' }}
+
+jobs:
+  repair-stage:
+    name: Stage 1 - Repair All Solutions
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Repair invalid solutions and refresh fields (no ATS improve)
+        run: |
+          python repair_update_50_batch.py \
+            --input-csv 50_batch.csv \
+            --output-csv stage1_repaired.csv \
+            --backup-csv stage1_unused_backup.csv \
+            --compare-csv stage1_repair_compare.csv \
+            --workers "$REPAIR_WORKERS" \
+            --nimp "$ATS_NIMP" \
+            --max-segments 0 \
+            --truck-max-neighbors "$TRUCK_MAX_NEIGHBORS" \
+            --drone-max-neighbors "$DRONE_MAX_NEIGHBORS" \
+            --limit "$STAGE1_LIMIT"
+
+      - name: Upload Stage-1 Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-repaired-${{ github.run_id }}
+          path: |
+            stage1_repaired.csv
+            stage1_repair_compare.csv
+
+  build-matrix:
+    name: Build Matrix
+    needs: repair-stage
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total_jobs: ${{ steps.make-matrix.outputs.total_jobs }}
+      total_rows: ${{ steps.make-matrix.outputs.total_rows }}
+    steps:
+      - name: Download Stage-1 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-repaired-${{ github.run_id }}
+          path: stage1
+
+      - name: Build row-range matrix
+        id: make-matrix
+        shell: bash
+        run: |
+          python - <<'PY' > matrix.json
+          import csv
+          import json
+          import math
+          import os
+
+          rows_per_job = max(1, int(os.environ["ROWS_PER_JOB"]))
+          with open("stage1/stage1_repaired.csv", newline="", encoding="utf-8") as f:
+              total_rows = sum(1 for _ in csv.DictReader(f))
+
+          chunks = []
+          if total_rows > 0:
+              total_jobs = math.ceil(total_rows / rows_per_job)
+              for i in range(total_jobs):
+                  start_row = i * rows_per_job + 1
+                  end_row = min(total_rows, (i + 1) * rows_per_job)
+                  chunks.append(
+                      {
+                          "chunk_id": i + 1,
+                          "start_row": start_row,
+                          "end_row": end_row,
+                      }
+                  )
+          print(json.dumps(chunks, separators=(",", ":")))
+          PY
+
+          TOTAL_JOBS=$(python - <<'PY'
+          import json
+          with open("matrix.json", "r", encoding="utf-8") as f:
+              print(len(json.load(f)))
+          PY
+          )
+
+          TOTAL_ROWS=$(python - <<'PY'
+          import csv
+          with open("stage1/stage1_repaired.csv", newline="", encoding="utf-8") as f:
+              print(sum(1 for _ in csv.DictReader(f)))
+          PY
+          )
+
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$TOTAL_JOBS" >> "$GITHUB_OUTPUT"
+          echo "total_rows=$TOTAL_ROWS" >> "$GITHUB_OUTPUT"
+
+  improve-matrix:
+    name: Stage 2 - Improve (Chunk ${{ matrix.chunk.chunk_id }})
+    needs: [repair-stage, build-matrix]
+    if: ${{ needs.build-matrix.outputs.total_jobs != '0' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Download Stage-1 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-repaired-${{ github.run_id }}
+          path: stage1
+
+      - name: Improve chunk with 2-process ATS
+        shell: bash
+        run: |
+          MAX_RUNTIME_SEC=$(python - <<'PY'
+          import os
+          minutes = float(os.environ["ATS_MAX_RUNTIME_MINUTES"])
+          print(minutes * 60.0)
+          PY
+          )
+          python repair_update_50_batch.py \
+            --input-csv stage1/stage1_repaired.csv \
+            --output-csv stage2_chunk_${{ matrix.chunk.chunk_id }}.csv \
+            --backup-csv stage2_unused_backup_${{ matrix.chunk.chunk_id }}.csv \
+            --compare-csv stage2_chunk_${{ matrix.chunk.chunk_id }}_compare.csv \
+            --patch-csv stage2_chunk_${{ matrix.chunk.chunk_id }}_patch.csv \
+            --start-row "${{ matrix.chunk.start_row }}" \
+            --end-row "${{ matrix.chunk.end_row }}" \
+            --workers "$WORKERS_PER_JOB" \
+            --nimp "$ATS_NIMP" \
+            --max-segments "$ATS_MAX_SEGMENTS" \
+            --max-runtime-sec "$MAX_RUNTIME_SEC" \
+            --truck-max-neighbors "$TRUCK_MAX_NEIGHBORS" \
+            --drone-max-neighbors "$DRONE_MAX_NEIGHBORS"
+
+      - name: Upload chunk artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage2-chunk-${{ matrix.chunk.chunk_id }}-${{ github.run_id }}
+          path: |
+            stage2_chunk_${{ matrix.chunk.chunk_id }}.csv
+            stage2_chunk_${{ matrix.chunk.chunk_id }}_compare.csv
+            stage2_chunk_${{ matrix.chunk.chunk_id }}_patch.csv
+
+  merge-results:
+    name: Merge Stage-2 Patches
+    needs: [repair-stage, build-matrix, improve-matrix]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Download Stage-1 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-repaired-${{ github.run_id }}
+          path: stage1
+
+      - name: Download all stage-2 chunk artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: stage2_all
+          merge-multiple: true
+
+      - name: Merge patch rows into final CSV
+        run: |
+          python - <<'PY'
+          import csv
+          import glob
+          from pathlib import Path
+
+          stage1_csv = Path("stage1/stage1_repaired.csv")
+          with stage1_csv.open("r", newline="", encoding="utf-8") as f:
+              reader = csv.DictReader(f)
+              fieldnames = list(reader.fieldnames or [])
+              rows = list(reader)
+
+          patch_files = sorted(glob.glob("stage2_all/**/stage2_chunk_*_patch.csv", recursive=True))
+          if not patch_files:
+              patch_files = sorted(glob.glob("stage2_all/stage2_chunk_*_patch.csv"))
+
+          applied = 0
+          patch_errors = 0
+          for patch_path in patch_files:
+              with open(patch_path, "r", newline="", encoding="utf-8") as f:
+                  for p in csv.DictReader(f):
+                      idx = int(p["row_index"])
+                      if idx < 1 or idx > len(rows):
+                          continue
+                      target = rows[idx - 1]
+                      target["best_fitness"] = p.get("best_fitness", "")
+                      target["best_sol"] = p.get("best_sol", "")
+                      target["best_multi_visit_fitness"] = p.get("best_multi_visit_fitness", "")
+                      target["best_multi_visit_sol"] = p.get("best_multi_visit_sol", "")
+                      applied += 1
+                      if (p.get("status") or "").upper() != "OK":
+                          patch_errors += 1
+
+          compare_rows = []
+          compare_files = sorted(glob.glob("stage2_all/**/stage2_chunk_*_compare.csv", recursive=True))
+          if not compare_files:
+              compare_files = sorted(glob.glob("stage2_all/stage2_chunk_*_compare.csv"))
+          for cp in compare_files:
+              with open(cp, "r", newline="", encoding="utf-8") as f:
+                  compare_rows.extend(csv.DictReader(f))
+          compare_rows.sort(key=lambda r: int(float(r.get("row_index", 0) or 0)))
+
+          out_dir = Path("Result/repair_50_batch_matrix")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          final_csv = out_dir / "50_batch_improved.csv"
+          final_compare = out_dir / "50_batch_improved_compare.csv"
+
+          with final_csv.open("w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(f, fieldnames=fieldnames)
+              writer.writeheader()
+              writer.writerows(rows)
+
+          compare_fieldnames = []
+          for r in compare_rows:
+              for k in r.keys():
+                  if k not in compare_fieldnames:
+                      compare_fieldnames.append(k)
+          with final_compare.open("w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(f, fieldnames=compare_fieldnames)
+              writer.writeheader()
+              writer.writerows(compare_rows)
+
+          ok_rows = sum(1 for r in compare_rows if (r.get("status") or "").upper() == "OK")
+          err_rows = len(compare_rows) - ok_rows
+
+          summary = Path("Result/repair_50_batch_matrix/summary.txt")
+          with summary.open("w", encoding="utf-8") as f:
+              f.write(f"total_rows={len(rows)}\n")
+              f.write(f"compare_rows={len(compare_rows)}\n")
+              f.write(f"ok_rows={ok_rows}\n")
+              f.write(f"error_rows={err_rows}\n")
+              f.write(f"patch_rows_applied={applied}\n")
+              f.write(f"patch_rows_non_ok={patch_errors}\n")
+              f.write(f"final_csv={final_csv.as_posix()}\n")
+              f.write(f"final_compare={final_compare.as_posix()}\n")
+          PY
+
+      - name: Upload merged output
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-improve-50-batch-final-${{ github.run_id }}
+          path: |
+            Result/repair_50_batch_matrix/50_batch_improved.csv
+            Result/repair_50_batch_matrix/50_batch_improved_compare.csv
+            Result/repair_50_batch_matrix/summary.txt

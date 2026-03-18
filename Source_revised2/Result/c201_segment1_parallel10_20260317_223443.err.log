@@ -1,0 +1,5 @@
+usage: run_source_revised2_segment_from_csv.py [-h] [--input-csv INPUT_CSV]
+                                               [--output-csv OUTPUT_CSV]
+                                               [--limit LIMIT] [--nimp NIMP]
+                                               [--workers WORKERS] [--verbose]
+run_source_revised2_segment_from_csv.py: error: unrecognized arguments: (3)\c201_batch_data.csv

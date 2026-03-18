@@ -1,0 +1,180 @@
+name: Summarize Existing Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "GitHub Actions run ID to summarize"
+        required: false
+        type: string
+  push:
+    paths:
+      - ".github/workflows/summarize-existing-run.yml"
+      - ".github/workflows/summarize-run-id.txt"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve run_id
+        id: resolve
+        shell: bash
+        run: |
+          input_run_id="${{ inputs.run_id }}"
+          file_run_id=""
+
+          if [ -f ".github/workflows/summarize-run-id.txt" ]; then
+            file_run_id=$(grep -Eo '[0-9]+' .github/workflows/summarize-run-id.txt | head -n1 || true)
+          fi
+
+          resolved="$input_run_id"
+          if [ -z "$resolved" ]; then
+            resolved="$file_run_id"
+          fi
+
+          if [ -z "$resolved" ]; then
+            echo "Missing run_id. Provide workflow_dispatch input or set .github/workflows/summarize-run-id.txt"
+            exit 1
+          fi
+
+          echo "run_id=$resolved" >> "$GITHUB_OUTPUT"
+          echo "Resolved run_id=$resolved"
+
+      - name: Download process artifacts from target run
+        id: download
+        uses: actions/github-script@v7
+        env:
+          RUN_ID: ${{ steps.resolve.outputs.run_id }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const runId = Number(process.env.RUN_ID);
+            if (!Number.isInteger(runId) || runId <= 0) {
+              core.setFailed(`Invalid run_id: ${process.env.RUN_ID}`);
+              return;
+            }
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const allArtifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              owner,
+              repo,
+              run_id: runId,
+              per_page: 100,
+            });
+
+            const artifacts = allArtifacts.filter(a => a.name.startsWith('process-'));
+            if (artifacts.length === 0) {
+              core.setFailed(`No process-* artifacts found for run_id=${runId}`);
+              return;
+            }
+
+            fs.mkdirSync('artifact_zips', { recursive: true });
+            for (const art of artifacts) {
+              const dl = await github.rest.actions.downloadArtifact({
+                owner,
+                repo,
+                artifact_id: art.id,
+                archive_format: 'zip',
+              });
+              const outPath = path.join('artifact_zips', `${art.name}.zip`);
+              fs.writeFileSync(outPath, Buffer.from(dl.data));
+            }
+
+            core.setOutput('artifact_count', String(artifacts.length));
+            core.info(`Downloaded ${artifacts.length} process-* artifacts from run_id=${runId}`);
+
+      - name: Unzip downloaded artifacts
+        shell: bash
+        run: |
+          mkdir -p downloaded_rows
+          shopt -s nullglob
+          for f in artifact_zips/*.zip; do
+            unzip -oq "$f" -d downloaded_rows
+          done
+
+      - name: Merge all rows into one CSV
+        id: merge
+        run: |
+          python - <<'PY'
+          import csv
+          import glob
+          import os
+
+          files = sorted(glob.glob("downloaded_rows/**/*.csv", recursive=True))
+          if not files:
+              raise SystemExit("No row CSV files found after downloading artifacts.")
+
+          rows = []
+          fieldnames = None
+          for path in files:
+              with open(path, newline="", encoding="utf-8") as f:
+                  reader = csv.DictReader(f)
+                  if fieldnames is None:
+                      fieldnames = reader.fieldnames
+                  rows.extend(reader)
+
+          rows.sort(
+              key=lambda r: (
+                  r.get("instance_name", ""),
+                  r.get("instance_group", ""),
+                  int(r.get("drone_capacity", 0) or 0),
+                  int(r.get("drone_limit_time", 0) or 0),
+                  int(r.get("theta", 0) or 0),
+                  int(r.get("run", 0) or 0),
+              )
+          )
+
+          os.makedirs("result", exist_ok=True)
+          out_path = "result/multivisit_experiment_github_matrix.csv"
+          with open(out_path, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(f, fieldnames=fieldnames)
+              writer.writeheader()
+              writer.writerows(rows)
+
+          ok_rows = sum(1 for r in rows if r.get("status") == "OK")
+          error_rows = len(rows) - ok_rows
+          cluster_rows = sum(1 for r in rows if r.get("instance_group") == "cluster")
+          random_rows = sum(1 for r in rows if r.get("instance_group") == "random")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"summary_csv={out_path}\n")
+              out.write(f"total_rows={len(rows)}\n")
+              out.write(f"ok_rows={ok_rows}\n")
+              out.write(f"error_rows={error_rows}\n")
+              out.write(f"cluster_rows={cluster_rows}\n")
+              out.write(f"random_rows={random_rows}\n")
+          PY
+
+      - name: Write GitHub Summary
+        run: |
+          {
+            echo "# Existing Run Summary"
+            echo ""
+            echo "- Source run_id: ${{ steps.resolve.outputs.run_id }}"
+            echo "- Downloaded process artifacts: ${{ steps.download.outputs.artifact_count }}"
+            echo "- Expected rows ~= artifacts * 2 (cluster + random)"
+            echo "- Total result rows: ${{ steps.merge.outputs.total_rows }}"
+            echo "- OK rows: ${{ steps.merge.outputs.ok_rows }}"
+            echo "- Error rows: ${{ steps.merge.outputs.error_rows }}"
+            echo "- Cluster rows: ${{ steps.merge.outputs.cluster_rows }}"
+            echo "- Random rows: ${{ steps.merge.outputs.random_rows }}"
+            echo "- Merged CSV: \`${{ steps.merge.outputs.summary_csv }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload merged CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: multivisit-experiment-summary-from-existing-run
+          path: result/multivisit_experiment_github_matrix.csv

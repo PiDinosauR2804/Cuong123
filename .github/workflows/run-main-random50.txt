@@ -1,0 +1,436 @@
+name: Run Main On Random50 Sets (Matrix)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "**/*.py"
+      - "requirements.txt"
+      - "test_data/data_demand_random_50_batch_all1_equal_cluster/**"
+      - "test_data/data_demand_random_50_batch_all1_equal_random/**"
+      - ".github/workflows/run-main-random50.yml"
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total_jobs: ${{ steps.make-matrix.outputs.total_jobs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Build Matrix
+        id: make-matrix
+        shell: bash
+        run: |
+          python - <<'PY' > matrix.json
+          import json
+          from pathlib import Path
+
+          root = Path(".")
+          instance_dirs = [
+              root / "test_data" / "data_demand_random_50_batch_all1_equal_cluster",
+              root / "test_data" / "data_demand_random_50_batch_all1_equal_random",
+          ]
+          a_values = [4, 8]
+          ld_values = [120]
+          run_ids = [1, 2]
+
+          tasks = []
+          job_id = 0
+          for folder in instance_dirs:
+              if not folder.exists():
+                  continue
+              group = "cluster" if "equal_cluster" in folder.as_posix() else "random"
+              for inst in sorted(folder.rglob("*.dat")):
+                  for a in a_values:
+                      for ld in ld_values:
+                          for run_id in run_ids:
+                              job_id += 1
+                              tasks.append(
+                                  {
+                                      "job_id": job_id,
+                                      "instance_group": group,
+                                      "instance_path": inst.as_posix(),
+                                      "instance_name": inst.name,
+                                      "A": a,
+                                      "Ld": ld,
+                                      "run": run_id,
+                                  }
+                              )
+
+          print(json.dumps(tasks, separators=(",", ":")))
+          PY
+
+          MATRIX_JSON=$(cat matrix.json)
+          TOTAL_JOBS=$(python - <<'PY'
+          import json
+          with open("matrix.json", "r", encoding="utf-8") as f:
+              print(len(json.load(f)))
+          PY
+          )
+
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$TOTAL_JOBS" >> "$GITHUB_OUTPUT"
+
+  run-matrix:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run 1 Process For This Job
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          import time
+          import traceback
+          from pathlib import Path
+
+          from main import AtsParams, adaptive_tabu_search
+          from Source_revised import evaluate_solution, normalize_solution, read_dat
+
+          task = {
+              "job_id": int("${{ matrix.task.job_id }}"),
+              "instance_group": "${{ matrix.task.instance_group }}",
+              "instance_path": "${{ matrix.task.instance_path }}",
+              "instance_name": "${{ matrix.task.instance_name }}",
+              "A": int("${{ matrix.task.A }}"),
+              "Ld": int("${{ matrix.task.Ld }}"),
+              "run": int("${{ matrix.task.run }}"),
+          }
+
+          out_root = Path("Result/gha_run_main_random50_matrix")
+          log_root = out_root / "logs"
+          log_root.mkdir(parents=True, exist_ok=True)
+          csv_path = out_root / f"job_{task['job_id']:06d}.csv"
+
+          def _drone_trip_metrics(raw_solution, data):
+              trucks, trips = normalize_solution(raw_solution)
+              if not trips:
+                  return {
+                      "avg_customers_per_drone_trip": 0.0,
+                      "avg_demand_per_drone_trip": 0.0,
+                      "drone_trip_distances": [],
+                      "avg_distance_per_drone_trip": 0.0,
+                  }
+              trip_customers = []
+              trip_demands = []
+              trip_distances = []
+              for trip in trips:
+                  cust_count = sum(len(leg.customers) for leg in trip)
+                  demand = sum(sum(data.demands[c] for c in leg.customers) for leg in trip)
+                  dist = 0.0
+                  prev = 0
+                  for leg in trip:
+                      dist += data.drone_travel_time[prev][leg.launch_city]
+                      prev = leg.launch_city
+                  dist += data.drone_travel_time[prev][0]
+                  trip_customers.append(cust_count)
+                  trip_demands.append(demand)
+                  trip_distances.append(dist)
+              return {
+                  "avg_customers_per_drone_trip": sum(trip_customers) / len(trip_customers),
+                  "avg_demand_per_drone_trip": sum(trip_demands) / len(trip_demands),
+                  "drone_trip_distances": trip_distances,
+                  "avg_distance_per_drone_trip": sum(trip_distances) / len(trip_distances),
+              }
+
+          def _wait_metrics(eval_result):
+              truck_wait = dict(sorted(eval_result.truck_wait_by_city.items()))
+              drone_wait = dict(sorted(eval_result.drone_wait_by_city.items()))
+              avg_truck = (sum(truck_wait.values()) / len(truck_wait)) if truck_wait else 0.0
+              avg_drone = (sum(drone_wait.values()) / len(drone_wait)) if drone_wait else 0.0
+              return truck_wait, drone_wait, avg_truck, avg_drone
+
+          rows = []
+          run_id = task["run"]
+          seed = 1000 + run_id
+          t0 = time.time()
+          log_name = (
+              f"{task['job_id']:06d}_{task['instance_group']}_{task['instance_name']}"
+              f"_A{task['A']}_Ld{task['Ld']}_run{run_id}.log"
+          )
+          log_path = log_root / log_name
+
+          row = {
+              "instance": task["instance_path"],
+              "drone_count": "",
+              "truck_count": "",
+              "drone_capacity": task["A"],
+              "drone_limit_time": task["Ld"],
+              "run": run_id,
+              "best_fitness": "",
+              "best_sol": "",
+              "best_sol_multi_visit_trip_count": "",
+              "best_multi_visit_fitness": "",
+              "best_multi_visit_sol": "",
+              "best_multi_visit_sol_multi_visit_trip_count": "",
+              "best_sol_avg_customers_per_drone_trip": "",
+              "best_sol_avg_demand_per_drone_trip": "",
+              "best_sol_drone_trip_distances": "",
+              "best_sol_avg_distance_per_drone_trip": "",
+              "best_sol_truck_wait_by_point": "",
+              "best_sol_drone_wait_by_point": "",
+              "best_sol_avg_truck_wait_by_point": "",
+              "best_sol_avg_drone_wait_by_point": "",
+              "best_multi_visit_sol_avg_customers_per_drone_trip": "",
+              "best_multi_visit_sol_avg_demand_per_drone_trip": "",
+              "best_multi_visit_sol_drone_trip_distances": "",
+              "best_multi_visit_sol_avg_distance_per_drone_trip": "",
+              "best_multi_visit_sol_truck_wait_by_point": "",
+              "best_multi_visit_sol_drone_wait_by_point": "",
+              "best_multi_visit_sol_avg_truck_wait_by_point": "",
+              "best_multi_visit_sol_avg_drone_wait_by_point": "",
+              "status": "DATA_NOT_FOUND",
+              "runtime_sec": "",
+              "instance_group": task["instance_group"],
+              "instance_name": task["instance_name"],
+              "job_id": task["job_id"],
+              "seed": seed,
+              "log_file": log_name,
+          }
+
+          log_lines = []
+          try:
+              data = read_dat(task["instance_path"])
+              data.drone_capacity = task["A"]
+              data.drone_limit_time = task["Ld"]
+              row["drone_count"] = data.number_drone
+              row["truck_count"] = data.number_truck
+
+              params = AtsParams(seed=seed, use_eval_cache=True)
+              best_sol, best_fit, best_mv_sol, best_mv_eval = adaptive_tabu_search(
+                  task["instance_path"],
+                  params,
+                  data_override=data,
+                  verbose=False,
+              )
+              best_eval = evaluate_solution(best_sol, data)
+
+              row["best_fitness"] = best_fit
+              row["best_sol"] = json.dumps(best_sol, ensure_ascii=True)
+              row["best_sol_multi_visit_trip_count"] = best_eval.multi_visit_trip_count
+
+              m = _drone_trip_metrics(best_sol, data)
+              tw, dw, avg_tw, avg_dw = _wait_metrics(best_eval)
+              row["best_sol_avg_customers_per_drone_trip"] = m["avg_customers_per_drone_trip"]
+              row["best_sol_avg_demand_per_drone_trip"] = m["avg_demand_per_drone_trip"]
+              row["best_sol_drone_trip_distances"] = json.dumps(m["drone_trip_distances"], ensure_ascii=True)
+              row["best_sol_avg_distance_per_drone_trip"] = m["avg_distance_per_drone_trip"]
+              row["best_sol_truck_wait_by_point"] = json.dumps(tw, ensure_ascii=True)
+              row["best_sol_drone_wait_by_point"] = json.dumps(dw, ensure_ascii=True)
+              row["best_sol_avg_truck_wait_by_point"] = avg_tw
+              row["best_sol_avg_drone_wait_by_point"] = avg_dw
+
+              if best_mv_sol is not None and best_mv_eval is not None:
+                  mv_eval = evaluate_solution(best_mv_sol, data)
+                  mm = _drone_trip_metrics(best_mv_sol, data)
+                  mtw, mdw, mavg_tw, mavg_dw = _wait_metrics(mv_eval)
+                  row["best_multi_visit_fitness"] = best_mv_eval.system_completion_time
+                  row["best_multi_visit_sol"] = json.dumps(best_mv_sol, ensure_ascii=True)
+                  row["best_multi_visit_sol_multi_visit_trip_count"] = mv_eval.multi_visit_trip_count
+                  row["best_multi_visit_sol_avg_customers_per_drone_trip"] = mm["avg_customers_per_drone_trip"]
+                  row["best_multi_visit_sol_avg_demand_per_drone_trip"] = mm["avg_demand_per_drone_trip"]
+                  row["best_multi_visit_sol_drone_trip_distances"] = json.dumps(mm["drone_trip_distances"], ensure_ascii=True)
+                  row["best_multi_visit_sol_avg_distance_per_drone_trip"] = mm["avg_distance_per_drone_trip"]
+                  row["best_multi_visit_sol_truck_wait_by_point"] = json.dumps(mtw, ensure_ascii=True)
+                  row["best_multi_visit_sol_drone_wait_by_point"] = json.dumps(mdw, ensure_ascii=True)
+                  row["best_multi_visit_sol_avg_truck_wait_by_point"] = mavg_tw
+                  row["best_multi_visit_sol_avg_drone_wait_by_point"] = mavg_dw
+
+              row["status"] = "OK"
+              log_lines.append(f"best_fitness={best_fit}")
+              log_lines.append(f"best_multi_visit_found={best_mv_sol is not None}")
+          except Exception as e:
+              row["status"] = "ERROR"
+              log_lines.append(f"error={type(e).__name__}: {e}")
+              log_lines.append(traceback.format_exc())
+
+          elapsed = time.time() - t0
+          row["runtime_sec"] = f"{elapsed:.3f}"
+          rows.append(row)
+
+          with open(log_path, "w", encoding="utf-8") as f:
+              f.write(
+                  f"instance={task['instance_path']}\nA={task['A']}\nLd={task['Ld']}\nrun={run_id}\nseed={seed}\n"
+              )
+              f.write(f"status={row['status']}\nruntime_sec={row['runtime_sec']}\n\n")
+              f.write("\n".join(log_lines))
+
+          fieldnames = [
+              "instance",
+              "drone_count",
+              "truck_count",
+              "drone_capacity",
+              "drone_limit_time",
+              "run",
+              "best_fitness",
+              "best_sol",
+              "best_sol_multi_visit_trip_count",
+              "best_multi_visit_fitness",
+              "best_multi_visit_sol",
+              "best_multi_visit_sol_multi_visit_trip_count",
+              "best_sol_avg_customers_per_drone_trip",
+              "best_sol_avg_demand_per_drone_trip",
+              "best_sol_drone_trip_distances",
+              "best_sol_avg_distance_per_drone_trip",
+              "best_sol_truck_wait_by_point",
+              "best_sol_drone_wait_by_point",
+              "best_sol_avg_truck_wait_by_point",
+              "best_sol_avg_drone_wait_by_point",
+              "best_multi_visit_sol_avg_customers_per_drone_trip",
+              "best_multi_visit_sol_avg_demand_per_drone_trip",
+              "best_multi_visit_sol_drone_trip_distances",
+              "best_multi_visit_sol_avg_distance_per_drone_trip",
+              "best_multi_visit_sol_truck_wait_by_point",
+              "best_multi_visit_sol_drone_wait_by_point",
+              "best_multi_visit_sol_avg_truck_wait_by_point",
+              "best_multi_visit_sol_avg_drone_wait_by_point",
+              "status",
+              "runtime_sec",
+              "instance_group",
+              "instance_name",
+              "job_id",
+              "seed",
+              "log_file",
+          ]
+          with open(csv_path, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(f, fieldnames=fieldnames)
+              writer.writeheader()
+              writer.writerows(rows)
+          PY
+
+      - name: Upload Job Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-job-${{ matrix.task.job_id }}
+          path: |
+            Result/gha_run_main_random50_matrix/job_*.csv
+            Result/gha_run_main_random50_matrix/logs/*.log
+
+  summary:
+    needs:
+      - build-matrix
+      - run-matrix
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded
+
+      - name: Merge CSV
+        id: merge
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import glob
+          import os
+          from pathlib import Path
+          import pandas as pd
+
+          files = sorted(glob.glob("downloaded/**/*.csv", recursive=True))
+          if not files:
+              raise SystemExit("No CSV artifacts found")
+
+          rows = []
+          fieldnames = None
+          for p in files:
+              with open(p, newline="", encoding="utf-8") as f:
+                  r = csv.DictReader(f)
+                  if fieldnames is None:
+                      fieldnames = r.fieldnames
+                  rows.extend(list(r))
+
+          rows.sort(
+              key=lambda x: (
+                  x["instance_group"],
+                  x["instance_name"],
+                  int(x["drone_capacity"] or 0),
+                  int(x["drone_limit_time"] or 0),
+                  int(x["run"]),
+              )
+          )
+
+          out_root = Path("Result/gha_run_main_random50_matrix")
+          out_root.mkdir(parents=True, exist_ok=True)
+          out_csv = out_root / "summary.csv"
+          out_xlsx = out_root / "summary.xlsx"
+          with open(out_csv, "w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fieldnames)
+              w.writeheader()
+              w.writerows(rows)
+          pd.DataFrame(rows, columns=fieldnames).to_excel(out_xlsx, index=False)
+
+          ok_count = sum(1 for r in rows if r.get("status") == "OK")
+          err_count = len(rows) - ok_count
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"summary_csv={out_csv.as_posix()}\n")
+              out.write(f"summary_xlsx={out_xlsx.as_posix()}\n")
+              out.write(f"total_rows={len(rows)}\n")
+              out.write(f"ok_rows={ok_count}\n")
+              out.write(f"error_rows={err_count}\n")
+          PY
+
+      - name: Write Summary
+        run: |
+          {
+            echo "# Run Main Random50 (Matrix) Summary"
+            echo ""
+            echo "- Total matrix jobs: ${{ needs.build-matrix.outputs.total_jobs }}"
+            echo "- Total rows (1 run per job): ${{ steps.merge.outputs.total_rows }}"
+            echo "- OK rows: ${{ steps.merge.outputs.ok_rows }}"
+            echo "- ERROR rows: ${{ steps.merge.outputs.error_rows }}"
+            echo "- Summary CSV: \`${{ steps.merge.outputs.summary_csv }}\`"
+            echo "- Summary XLSX: \`${{ steps.merge.outputs.summary_xlsx }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Merged Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-main-random50-matrix-summary
+          path: |
+            Result/gha_run_main_random50_matrix/summary.csv
+            Result/gha_run_main_random50_matrix/summary.xlsx

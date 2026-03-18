@@ -1,0 +1,159 @@
+name: Multi-Visit Matrix Test
+
+on:
+  workflow_dispatch:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  run-single-config:
+    name: >-
+      ${{ matrix.instance.name }} |
+      cap=${{ matrix.drone_capacity }} |
+      limit=${{ matrix.drone_limit_time }} |
+      theta=${{ matrix.theta }} |
+      run=${{ matrix.run_id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        instance:
+          - path: test_data/data_demand_random/100/C201_0.5.dat
+            name: C201_0.5
+          - path: test_data/data_demand_random/100/C201_1.5.dat
+            name: C201_1.5
+          - path: test_data/data_demand_random/100/C201_3.dat
+            name: C201_3
+          - path: test_data/data_demand_random/30/C201_1.5.dat
+            name: C201_1.5
+        drone_capacity: [4, 8]
+        drone_limit_time: [60, 120, 90]
+        theta: [1,2]
+        run_id: [1, 2, 3, 4]
+
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run one experiment task
+        env:
+          INSTANCE: ${{ matrix.instance.path }}
+          DRONE_CAPACITY: ${{ matrix.drone_capacity }}
+          DRONE_LIMIT_TIME: ${{ matrix.drone_limit_time }}
+          THETA: ${{ matrix.theta }}
+          RUN_ID: ${{ matrix.run_id }}
+        run: |
+          python - <<'PY'
+          import csv
+          import os
+          import pathlib
+
+          import run_multivisit_experiment as exp
+
+          instance = os.environ["INSTANCE"]
+          drone_capacity = int(os.environ["DRONE_CAPACITY"])
+          drone_limit_time = int(os.environ["DRONE_LIMIT_TIME"])
+          theta = int(os.environ["THETA"])
+          run_id = int(os.environ["RUN_ID"])
+
+          row = exp.run_one_task((instance, theta, run_id, drone_capacity, drone_limit_time))
+
+          out_dir = pathlib.Path("result")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          stem = pathlib.Path(instance).stem
+          out_file = out_dir / f"row_{stem}_cap{drone_capacity}_lt{drone_limit_time}_th{theta}_run{run_id}.csv"
+
+          with out_file.open("w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+              writer.writeheader()
+              writer.writerow(row)
+
+          print(f"wrote={out_file}")
+          PY
+
+      - name: Upload row artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: >-
+            row-${{ matrix.instance.name }}-
+            cap${{ matrix.drone_capacity }}-
+            lt${{ matrix.drone_limit_time }}-
+            th${{ matrix.theta }}-
+            run${{ matrix.run_id }}
+          path: result/row_*.csv
+
+  summary:
+    name: Build Summary CSV
+    needs: run-single-config
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Download row artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded_rows
+
+      - name: Merge all rows into one CSV
+        run: |
+          python - <<'PY'
+          import csv
+          import glob
+          import os
+
+          files = glob.glob("downloaded_rows/**/*.csv", recursive=True)
+          files.sort()
+          if not files:
+              raise SystemExit("No row CSV artifacts found.")
+
+          rows = []
+          fieldnames = None
+          for path in files:
+              with open(path, newline="", encoding="utf-8") as f:
+                  reader = csv.DictReader(f)
+                  if fieldnames is None:
+                      fieldnames = reader.fieldnames
+                  for row in reader:
+                      rows.append(row)
+
+          rows.sort(
+              key=lambda r: (
+                  r.get("instance", ""),
+                  int(r.get("drone_capacity", 0) or 0),
+                  int(r.get("drone_limit_time", 0) or 0),
+                  int(r.get("theta", 0) or 0),
+                  int(r.get("run", 0) or 0),
+              )
+          )
+
+          os.makedirs("result", exist_ok=True)
+          out_path = "result/multivisit_experiment_github_matrix.csv"
+          with open(out_path, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(f, fieldnames=fieldnames)
+              writer.writeheader()
+              writer.writerows(rows)
+
+          ok_rows = sum(1 for r in rows if r.get("status") == "OK")
+          print(f"summary_csv={out_path}")
+          print(f"total_rows={len(rows)}")
+          print(f"ok_rows={ok_rows}")
+          PY
+
+      - name: Upload merged CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: multivisit-experiment-summary
+          path: result/multivisit_experiment_github_matrix.csv

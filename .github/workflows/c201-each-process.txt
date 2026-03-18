@@ -1,0 +1,254 @@
+name: C201 Each Process Job
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "**/*.py"
+      - "test_data/data_demand_random_50_batch_all1_equal_cluster/**"
+      - "test_data/data_demand_random_50_batch_all1_equal_random/**"
+      - ".github/workflows/c201-each-process.yml"
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total_tasks: ${{ steps.make-matrix.outputs.total_tasks }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Build Process Matrix
+        id: make-matrix
+        shell: bash
+        run: |
+          python - <<'PY' > matrix.json
+          import glob
+          import json
+          import os
+
+          cluster = sorted(glob.glob("test_data/data_demand_random_50_batch_all1_equal_cluster/C201*.dat"))
+          random_set = sorted(glob.glob("test_data/data_demand_random_50_batch_all1_equal_random/C201*.dat"))
+
+          cluster_names = {os.path.basename(p) for p in cluster}
+          random_names = {os.path.basename(p) for p in random_set}
+          # Use shared file names as the instance dimension to keep only 180 jobs.
+          instance_names = sorted(cluster_names & random_names)
+
+          theta = 2
+          runs = [1, 2, 3]
+          drone_capacities = [4, 8]
+          drone_limit_times = [60,90,120]
+
+          tasks = []
+          idx = 0
+          for instance_name in instance_names:
+              for drone_capacity in drone_capacities:
+                  for drone_limit_time in drone_limit_times:
+                      for run in runs:
+                          idx += 1
+                          tasks.append(
+                              {
+                                  "id": idx,
+                                  "instance_name": instance_name,
+                                  "drone_capacity": drone_capacity,
+                                  "drone_limit_time": drone_limit_time,
+                                  "theta": theta,
+                                  "run": run,
+                              }
+                          )
+
+          print(json.dumps(tasks, separators=(",", ":")))
+          PY
+
+          MATRIX_JSON=$(cat matrix.json)
+          TOTAL=$(python - <<'PY'
+          import json
+          with open("matrix.json", "r", encoding="utf-8") as f:
+              data = json.load(f)
+          print(len(data))
+          PY
+          )
+
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+          echo "total_tasks=$TOTAL" >> "$GITHUB_OUTPUT"
+
+      - name: Show Matrix Summary
+        run: |
+          echo "Total tasks: ${{ steps.make-matrix.outputs.total_tasks }}"
+
+  run-one-process:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Single Process
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          import os
+          import pathlib
+
+          import run_multivisit_experiment as exp
+
+          instance_name = "${{ matrix.task.instance_name }}"
+          cluster_instance = str(pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_cluster") / instance_name)
+          random_instance = str(pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_random") / instance_name)
+          drone_capacity = int("${{ matrix.task.drone_capacity }}")
+          drone_limit_time = int("${{ matrix.task.drone_limit_time }}")
+          drone_count = 1
+          truck_count = 2
+          theta = 2
+          run_id = int("${{ matrix.task.run }}")
+          task_id = int("${{ matrix.task.id }}")
+
+          results = []
+          for label, instance in (("cluster", cluster_instance), ("random", random_instance)):
+              exp.test_similarity.theta = theta
+              row = exp.run_one_task(
+                (instance, theta, run_id, drone_capacity, drone_limit_time, drone_count, truck_count)
+              )
+              row["instance_group"] = label
+              row["instance_name"] = instance_name
+              results.append(row)
+
+          os.makedirs("result/gha_each_process", exist_ok=True)
+          json_path = f"result/gha_each_process/task_{task_id}.json"
+          csv_path = f"result/gha_each_process/task_{task_id}.csv"
+
+          with open(json_path, "w", encoding="utf-8") as f:
+              json.dump(results, f, ensure_ascii=True)
+
+          with open(csv_path, "w", newline="", encoding="utf-8") as f:
+              fieldnames = list(results[0].keys())
+              writer = csv.DictWriter(f, fieldnames=fieldnames)
+              writer.writeheader()
+              writer.writerows(results)
+
+          print("task_id=", task_id)
+          print("instance_name=", instance_name)
+          print("theta=", theta)
+          print("run=", run_id)
+          print("rows_written=", len(results))
+          PY
+
+      - name: Upload Task Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: process-${{ matrix.task.id }}
+          path: result/gha_each_process/task_${{ matrix.task.id }}.*
+
+  summary:
+    name: Build Summary CSV
+    needs:
+      - build-matrix
+      - run-one-process
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Download row artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded_rows
+
+      - name: Merge all rows into one CSV
+        id: merge
+        run: |
+          python - <<'PY'
+          import csv
+          import glob
+          import os
+
+          files = sorted(glob.glob("downloaded_rows/**/*.csv", recursive=True))
+          if not files:
+              raise SystemExit("No row CSV artifacts found.")
+
+          rows = []
+          fieldnames = None
+          for path in files:
+              with open(path, newline="", encoding="utf-8") as f:
+                  reader = csv.DictReader(f)
+                  if fieldnames is None:
+                      fieldnames = reader.fieldnames
+                  for row in reader:
+                      rows.append(row)
+
+          rows.sort(
+              key=lambda r: (
+                  r.get("instance_name", ""),
+                  r.get("instance_group", ""),
+                  int(r.get("drone_capacity", 0) or 0),
+                  int(r.get("drone_limit_time", 0) or 0),
+                  int(r.get("theta", 0) or 0),
+                  int(r.get("run", 0) or 0),
+              )
+          )
+
+          os.makedirs("result", exist_ok=True)
+          out_path = "result/multivisit_experiment_github_matrix.csv"
+          with open(out_path, "w", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(f, fieldnames=fieldnames)
+              writer.writeheader()
+              writer.writerows(rows)
+
+          ok_rows = sum(1 for r in rows if r.get("status") == "OK")
+          error_rows = len(rows) - ok_rows
+          cluster_rows = sum(1 for r in rows if r.get("instance_group") == "cluster")
+          random_rows = sum(1 for r in rows if r.get("instance_group") == "random")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"summary_csv={out_path}\n")
+              out.write(f"total_rows={len(rows)}\n")
+              out.write(f"ok_rows={ok_rows}\n")
+              out.write(f"error_rows={error_rows}\n")
+              out.write(f"cluster_rows={cluster_rows}\n")
+              out.write(f"random_rows={random_rows}\n")
+          PY
+
+      - name: Write GitHub Summary
+        run: |
+          {
+            echo "# Multi-Visit Run Summary"
+            echo ""
+            echo "- Expected jobs: ${{ needs.build-matrix.outputs.total_tasks }}"
+            echo "- Total result rows: ${{ steps.merge.outputs.total_rows }}"
+            echo "- OK rows: ${{ steps.merge.outputs.ok_rows }}"
+            echo "- Error rows: ${{ steps.merge.outputs.error_rows }}"
+            echo "- Cluster rows: ${{ steps.merge.outputs.cluster_rows }}"
+            echo "- Random rows: ${{ steps.merge.outputs.random_rows }}"
+            echo "- Merged CSV: \`${{ steps.merge.outputs.summary_csv }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload merged CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: multivisit-experiment-summary
+          path: result/multivisit_experiment_github_matrix.csv
