@@ -1,4 +1,0 @@
-row_index,instance,run,old_best_fitness,old_best_multi_visit_fitness,best_sol_initially_feasible,best_sol_repair_mode,best_multi_visit_initially_feasible,best_multi_visit_repair_mode,ats_segments_run,ats_time_limit_reached,ats_elapsed_sec,new_best_fitness,new_best_multi_visit_fitness,best_multi_visit_source,status,error,runtime_sec
-4,test_data/data_demand_random_50_batch_all1_equal_cluster/C201_0.5.dat,4,659,,True,already_feasible,,missing,1,True,30.395,627,,,OK,,30.411
-5,test_data/data_demand_random_50_batch_all1_equal_cluster/C201_0.5.dat,5,647,,True,already_feasible,,missing,1,True,31.079,615,,,OK,,31.089
-6,test_data/data_demand_random_50_batch_all1_equal_cluster/C201_0.5.dat,1,531.5518327,,True,already_feasible,,missing,1,True,30.31,523.5518327,,,OK,,30.459
