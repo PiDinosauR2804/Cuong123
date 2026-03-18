@@ -8,6 +8,11 @@ on:
         required: true
         default: "23226499520"
         type: string
+  push:
+    paths:
+      - "summarize_repair_50_batch_run.py"
+      - ".github/workflows/summarize-repair-50-batch-existing-run.yml"
+      - ".github/workflows/repair-50-batch.yml"
   workflow_run:
     workflows:
       - "Repair + Improve 50 Batch (Matrix)"
@@ -20,9 +25,11 @@ permissions:
 
 jobs:
   summarize-existing-run:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      TARGET_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event_name == 'workflow_run' && github.event.workflow_run.id || '23226499520' }}
 
     steps:
       - name: Checkout
@@ -36,7 +43,6 @@ jobs:
       - name: Aggregate improved solutions from existing run id
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          TARGET_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}
         run: |
           python summarize_repair_50_batch_run.py \
             --run-id "$TARGET_RUN_ID" \
@@ -46,8 +52,8 @@ jobs:
 
       - name: Write GitHub Summary
         env:
-          RUN_ID: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}
-          META_PATH: Result/github_run_summaries/run_${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}/summary_meta.json
+          RUN_ID: ${{ env.TARGET_RUN_ID }}
+          META_PATH: Result/github_run_summaries/run_${{ env.TARGET_RUN_ID }}/summary_meta.json
         run: |
           python - <<'PY'
           import json
@@ -75,5 +81,5 @@ jobs:
       - name: Upload summary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: repair-50-batch-summary-from-run-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}
-          path: Result/github_run_summaries/run_${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_id || github.event.workflow_run.id }}/*
+          name: repair-50-batch-summary-from-run-${{ env.TARGET_RUN_ID }}
+          path: Result/github_run_summaries/run_${{ env.TARGET_RUN_ID }}/*
