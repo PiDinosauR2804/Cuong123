@@ -19,8 +19,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-import Data
-import Function
 from Source_revised2 import (
     AtsParams,
     Solution,
@@ -29,6 +27,15 @@ from Source_revised2 import (
     evaluate_fitness,
     read_data_file,
 )
+
+_LEGACY_IMPORT_ERROR: Optional[Exception] = None
+try:
+    import Data  # type: ignore
+    import Function  # type: ignore
+except Exception as exc:  # noqa: BLE001
+    Data = None  # type: ignore[assignment]
+    Function = None  # type: ignore[assignment]
+    _LEGACY_IMPORT_ERROR = exc
 
 
 CSV_FIELDS: List[str] = [
@@ -256,6 +263,17 @@ def _parse_solution_text(raw: Any) -> Optional[Solution]:
     return None
 
 
+def _ensure_legacy_modules_available() -> None:
+    if Data is None or Function is None:
+        msg = (
+            "Legacy modules Data/Function are unavailable. "
+            "Install dependencies (e.g. numpy) before running solve mode."
+        )
+        if _LEGACY_IMPORT_ERROR is not None:
+            raise ModuleNotFoundError(msg) from _LEGACY_IMPORT_ERROR
+        raise ModuleNotFoundError(msg)
+
+
 def _avg_customers_per_trip(solution: Optional[Solution]) -> float:
     if solution is None or not solution.drone_queue:
         return 0.0
@@ -296,6 +314,7 @@ def _build_initial_solution_from_test_similarity(
     data,
     seed: int,
 ) -> Tuple[Solution, Any, str, bool]:
+    _ensure_legacy_modules_available()
     random.seed(seed)
     Data.read_data_random(str(instance_path))
     Data.number_of_trucks = int(data.number_truck)
