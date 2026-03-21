@@ -1,0 +1,171 @@
+name: Run Missing Instances A4A8 L60
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      max_jobs:
+        description: "Only run first N grouped jobs (instance,A,L) from jobs_missing_instances_A4A8_L60.yml (0 = all)."
+        required: true
+        default: "0"
+      max_parallel:
+        description: "Max parallel matrix jobs (groups)."
+        required: true
+        default: "8"
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  MAX_JOBS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.max_jobs || '0' }}
+  MAX_PARALLEL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.max_parallel || '8' }}
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total_jobs: ${{ steps.make-matrix.outputs.total_jobs }}
+      max_parallel: ${{ steps.set-parallel.outputs.max_parallel }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build matrix from jobs YAML
+        id: make-matrix
+        shell: bash
+        run: |
+          python run_jobs_missing_instances_A4A8_L60.py \
+            --config jobs_missing_instances_A4A8_L60.yml \
+            --emit-matrix matrix.json \
+            --max-jobs "$MAX_JOBS"
+
+          TOTAL_JOBS=$(python - <<'PY'
+          import json
+          with open("matrix.json", "r", encoding="utf-8") as f:
+              print(len(json.load(f)))
+          PY
+          )
+
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$TOTAL_JOBS" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$TOTAL_JOBS"
+
+      - name: Export max_parallel
+        id: set-parallel
+        run: echo "max_parallel=${MAX_PARALLEL}" >> "$GITHUB_OUTPUT"
+
+  solve-matrix:
+    needs: build-matrix
+    if: ${{ needs.build-matrix.outputs.total_jobs != '0' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJson(needs.build-matrix.outputs.max_parallel) }}
+      matrix:
+        job: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Solve one grouped job (run_index in parallel)
+        shell: bash
+        run: |
+          python run_jobs_missing_instances_A4A8_L60.py \
+            --config jobs_missing_instances_A4A8_L60.yml \
+            --group-id "${{ matrix.job.group_id }}" \
+            --parallel-runs 2 \
+            --nimp 50 \
+            --seg 12 \
+            --div 3 \
+            --max-runtime-sec 7200 \
+            --output-json "group_${{ matrix.job.group_id }}.json"
+
+      - name: Upload job artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: missing-group-${{ matrix.job.group_id }}-${{ github.run_id }}
+          path: group_${{ matrix.job.group_id }}.json
+
+  merge-results:
+    needs: [build-matrix, solve-matrix]
+    if: ${{ always() && needs.build-matrix.outputs.total_jobs != '0' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download all job artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: missing-group-*-${{ github.run_id }}
+          path: job_results
+          merge-multiple: true
+
+      - name: Merge JSON results to CSV
+        shell: bash
+        run: |
+          python run_jobs_missing_instances_A4A8_L60.py \
+            --merge-results-dir job_results \
+            --output-csv Result/jobs_missing_instances_A4A8_L60_results.csv \
+            --output-batch-init-summary Result/jobs_missing_instances_A4A8_L60_summary_batch_init.csv
+
+      - name: Write summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import os
+          output = "Result/jobs_missing_instances_A4A8_L60_results.csv"
+          summary_csv = "Result/jobs_missing_instances_A4A8_L60_summary_batch_init.csv"
+          summary = os.environ["GITHUB_STEP_SUMMARY"]
+          rows = 0
+          ok = 0
+          if os.path.exists(output):
+              with open(output, newline="", encoding="utf-8") as f:
+                  for row in csv.DictReader(f):
+                      rows += 1
+                      if row.get("status") == "OK":
+                          ok += 1
+          with open(summary, "a", encoding="utf-8") as out:
+              out.write("# Missing Instances Run Summary\n\n")
+              out.write(f"- total_rows: {rows}\n")
+              out.write(f"- ok_rows: {ok}\n")
+              out.write(f"- output_csv: `{output}`\n")
+              out.write(f"- batch_init_like_summary_csv: `{summary_csv}`\n")
+          PY
+
+      - name: Upload merged artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: missing-instances-results-${{ github.run_id }}
+          path: |
+            Result/jobs_missing_instances_A4A8_L60_results.csv
+            Result/jobs_missing_instances_A4A8_L60_summary_batch_init.csv
