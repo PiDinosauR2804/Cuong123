@@ -1,0 +1,142 @@
+[CFG] solver_time_limit_sec 120
+Loaded instance: test_data/data_demand_random/10/C101_0.5.dat
+Customers (incl. depot): 11
+Trucks: 2, Drones: 2
+Truck time matrix [0..4][0..4]:
+0.00	46.00	50.00	36.00	40.00
+46.00	0.00	4.00	10.00	6.00
+50.00	4.00	0.00	14.00	10.00
+36.00	10.00	14.00	0.00	4.00
+40.00	6.00	10.00	4.00	0.00
+Drone time matrix [0..4][0..4]:
+0.00	18.68	20.62	16.12	18.11
+18.68	0.00	2.00	3.61	3.00
+20.62	2.00	0.00	5.00	3.61
+16.12	3.61	5.00	0.00	2.00
+18.11	3.00	3.61	2.00	0.00
+--- After initial truck build ---
+Truck 0: 0 -> 7 -> 10 -> 3 -> 5 -> 4 -> 1 -> 0
+Truck 1: 0 -> 9 -> 8 -> 6 -> 2 -> 0
+Fitness_full (makespan): 139.00
+Objective (full) makespan: 139.00
+Truck-only makespan: 116.00
+--- After truck 2-opt ---
+Truck 0: 0 -> 7 -> 10 -> 3 -> 5 -> 4 -> 1 -> 0
+Truck 1: 0 -> 9 -> 8 -> 6 -> 2 -> 0
+Fitness_full (makespan): 139.00
+Objective (full) makespan: 139.00
+Truck-only makespan: 116.00
+[ATS] seg 0 iter 0 div_round 0 nid 0 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00 *
+[ATS] seg 0 iter 1 div_round 0 nid 2 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00
+[ATS] seg 0 iter 2 div_round 0 nid 2 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00
+[ATS] seg 0 iter 3 div_round 0 nid 2 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00
+[ATS] seg 0 iter 4 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00 *
+[ATS] seg 0 iter 5 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 6 div_round 0 nid 2 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 7 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 8 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 9 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 10 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 11 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 12 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 13 div_round 0 nid 2 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 14 div_round 0 nid 1 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00 *
+[ATS] seg 0 iter 15 div_round 0 nid 2 fit_cur 136.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 0 iter 16 div_round 0 nid 1 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 0 iter 17 div_round 0 nid 1 fit_cur 131.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 0 iter 18 div_round 0 nid 1 fit_cur 132.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 0 iter 19 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 0 iter 20 div_round 0 nid 1 fit_cur 132.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 0 iter 21 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 0 iter 22 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 0 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 1 div_round 0 nid 2 fit_cur 132.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 2 div_round 0 nid 1 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 3 div_round 0 nid 2 fit_cur 135.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 4 div_round 0 nid 1 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 5 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 6 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 7 div_round 0 nid 2 fit_cur 136.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 8 div_round 0 nid 2 fit_cur 139.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 9 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 10 div_round 0 nid 0 fit_cur 128.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 11 div_round 0 nid 0 fit_cur 131.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 12 div_round 0 nid 2 fit_cur 140.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 13 div_round 0 nid 0 fit_cur 131.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 14 div_round 0 nid 1 fit_cur 131.00 fit_best_global 128.00 fit_best_segment 128.00
+[REPAIR] feasible endpoint swap truck 0 city 9 <-> 5 changed_events 1 fit 143.00
+[ATS] seg 1 iter 15 div_round 0 nid 1 fit_cur 131.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 16 div_round 0 nid 2 fit_cur 143.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] seg 1 iter 17 div_round 0 nid 0 fit_cur 131.00 fit_best_global 128.00 fit_best_segment 128.00
+[REPAIR] feasible endpoint swap truck 0 city 9 <-> 5 changed_events 1 fit 143.00
+[REPAIR] feasible endpoint swap truck 0 city 9 <-> 3 changed_events 1 fit 139.00
+[REPAIR] feasible endpoint swap truck 0 city 10 <-> 9 changed_events 1 fit 131.00
+[ATS] seg 1 iter 18 div_round 0 nid 1 fit_cur 131.00 fit_best_global 128.00 fit_best_segment 128.00
+[ATS] diversification round 0 best_fit 128.00
+[ATS] light-LS repeated-state skips: 12
+[ATS] no multi-visit solution found during search
+[ATS] log saved to ats_log_C101_0.5.dat.csv
+--- After ATS ---
+Fitness_full (makespan): 128.00
+Truck 0: 0 -> 5 -> 3 -> 4 -> 9[9] -> 10 -> 0
+Truck 1: 0 -> 7 -> 8 -> 1 -> 2 -> 6 -> 0
+[LS] start fitness: 128.00
+[LS] phase 1
+[LS] phase 2
+[LS] repeated-state skips: 0
+--- After drone local search init ---
+Truck 0: 0 -> 5 -> 3 -> 4 -> 9[9] -> 10 -> 0
+Truck 1: 0 -> 7 -> 8 -> 1 -> 2 -> 6 -> 0
+TRUCK 0 idx 0 city 0 arr 10.00 dep 10.00 wait 0.00
+TRUCK 1 idx 0 city 0 arr 20.00 dep 20.00 wait 0.00
+TRUCK 0 idx 1 city 5 arr 44.00 dep 44.00 wait 0.00
+TRUCK 0 idx 2 city 3 arr 46.00 dep 46.00 wait 0.00
+TRUCK 0 idx 3 city 4 arr 50.00 dep 50.00 wait 0.00
+TRUCK 0 idx 4 city 9 arr 62.00 dep 67.00 wait 0.00
+TRUCK 0 idx 5 city 10 arr 81.00 dep 81.00 wait 0.00
+TRUCK 0 idx 6 city 0 arr 123.00 dep 123.00 wait 0.00
+TRUCK 1 idx 1 city 7 arr 52.00 dep 52.00 wait 0.00
+TRUCK 1 idx 2 city 8 arr 60.00 dep 60.00 wait 0.00
+TRUCK 1 idx 3 city 1 arr 74.00 dep 74.00 wait 0.00
+TRUCK 1 idx 4 city 2 arr 78.00 dep 78.00 wait 0.00
+TRUCK 1 idx 5 city 6 arr 90.00 dep 90.00 wait 0.00
+TRUCK 1 idx 6 city 0 arr 128.00 dep 128.00 wait 0.00
+DRONE trip 0 id 0 ready 0.00 dep 41.90 ret 87.10
+  leg 0 city 9 truck 0 d_arr 62.00 t_arr 62.00 d_wait 0.00 t_wait 0.00 service_end 67.00 pkgs 9 
+Makespan: 128.00 (truck max 128.00, drone max 87.10)
+[SOL] best solution detail:
+solution = [
+    [
+        [
+            [0, [5, 3, 4, 10]],
+            [5, []],
+            [3, []],
+            [4, []],
+            [9, [9]],
+            [10, []]
+        ],
+        [
+            [0, [7, 8, 1, 2, 6]],
+            [7, []],
+            [8, []],
+            [1, []],
+            [2, []],
+            [6, []]
+        ]
+    ],
+    [
+        [
+            [9, [9]]
+        ]
+    ]
+]
+[SOL] best solution file: ./sol_best_C101_0.5.dat_A4_L60_pid79345.txt
+[SOL] best multi-visit solution file: (not found)
+[PROF] validate_calls 109579 validate_sec 0.117919
+[PROF] fitness_calls 103617 fitness_sec 0.228257
+[PROF] op_reloc_sync calls 3365 sec 0.000100
+[PROF] op_merge_single calls 3365 sec 0.000178
+[PROF] op_insert_rv calls 3365 sec 0.015065
+[PROF] op_reorder_events calls 3365 sec 0.013518
+[PROF] op_reloc_pkg calls 3365 sec 0.438168
+[PROF] op_reorder_queue calls 3365 sec 0.002796

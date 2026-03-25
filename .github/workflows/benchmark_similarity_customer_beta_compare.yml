@@ -1,0 +1,550 @@
+name: Benchmark Similarity Customer Beta Compare
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      customers:
+        description: "Comma-separated customer sizes (e.g. 10,15,20)"
+        required: true
+        default: "10,15,20,30"
+      betas:
+        description: "Comma-separated beta values (e.g. 0.5,2,3)"
+        required: true
+        default: "0.5,2,3"
+      runs:
+        description: "Number of runs per instance"
+        required: true
+        default: "5"
+      time_limit:
+        description: "TIME_LIMIT env"
+        required: true
+        default: "20000"
+      drone_capacity:
+        description: "Drone capacity A"
+        required: true
+        default: "4"
+      drone_limit_time:
+        description: "Drone limit time L"
+        required: true
+        default: "90"
+
+permissions:
+  contents: read
+
+jobs:
+  prepare_matrix:
+    name: Prepare Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build dynamic matrix from folder structure
+        id: build
+        env:
+          INPUT_CUSTOMERS: ${{ github.event.inputs.customers || '100' }}
+          INPUT_BETAS: ${{ github.event.inputs.betas || '0.5,2,3' }}
+          INPUT_RUNS: ${{ github.event.inputs.runs || '5' }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          def parse_csv_tokens(raw):
+              return [x.strip() for x in raw.split(",") if x.strip()]
+
+          customers = parse_csv_tokens(os.environ["INPUT_CUSTOMERS"])
+          betas = parse_csv_tokens(os.environ["INPUT_BETAS"])
+          runs = int(os.environ["INPUT_RUNS"])
+          if runs < 1:
+              raise ValueError("runs must be >= 1")
+
+          base = Path("test_data/data_demand_random")
+          include = []
+
+          for customer in customers:
+              customer_dir = base / customer
+              if not customer_dir.exists():
+                  print(f"[WARN] Missing folder: {customer_dir}")
+                  continue
+              for beta in betas:
+                  pattern = f"*_{beta}.dat"
+                  matches = sorted(customer_dir.glob(pattern))
+                  if not matches:
+                      print(f"[WARN] No instances for customer={customer}, beta={beta}, pattern={pattern}")
+                      continue
+                  for run_index in range(1, runs + 1):
+                      for fp in matches:
+                          include.append(
+                              {
+                                  "customer": customer,
+                                  "beta": beta,
+                                  "data_set": fp.name,
+                                  "run_index": run_index,
+                              }
+                          )
+
+          if not include:
+              raise RuntimeError(
+                  "No instances matched selected customers/betas in test_data/data_demand_random."
+              )
+
+          matrix_obj = {"include": include}
+          matrix_json = json.dumps(matrix_obj)
+          print(f"Resolved {len(include)} jobs")
+          print(matrix_json)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"matrix={matrix_json}\n")
+          PY
+
+  benchmark_instances:
+    name: c${{ matrix.customer }} | beta-${{ matrix.beta }} | ${{ matrix.data_set }} | run-${{ matrix.run_index }}
+    needs: prepare_matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJson(needs.prepare_matrix.outputs.matrix) }}
+    env:
+      NUMBER_OF_CITIES: ${{ matrix.customer }}
+      DATA_SET: ${{ matrix.data_set }}
+      ITERATION: ${{ matrix.run_index }}
+      TIME_LIMIT: ${{ github.event.inputs.time_limit || '20000' }}
+      A: ${{ github.event.inputs.drone_capacity || '4' }}
+      L: ${{ github.event.inputs.drone_limit_time || '90' }}
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      VECLIB_MAXIMUM_THREADS: "1"
+      BLIS_NUM_THREADS: "1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run no diversification
+        run: |
+          rm -f Random_*_CL2.xlsx
+          python test_similarity_no_diversification.py
+
+      - name: Extract no_div row
+        env:
+          STRATEGY: no_div
+          BETA: ${{ matrix.beta }}
+          RUN_INDEX: ${{ matrix.run_index }}
+        run: |
+          python - <<'PY'
+          import ast
+          import csv
+          import glob
+          import os
+          import shutil
+          from pathlib import Path
+          import openpyxl
+
+          def has_multi_visit_drone_trip(solution_obj):
+              if not isinstance(solution_obj, list) or len(solution_obj) < 2:
+                  return False
+              drone_trips = solution_obj[1]
+              if not isinstance(drone_trips, list):
+                  return False
+              for trip in drone_trips:
+                  if not isinstance(trip, list):
+                      continue
+                  delivered_points = set()
+                  for stop in trip:
+                      if (
+                          isinstance(stop, list)
+                          and len(stop) >= 2
+                          and isinstance(stop[1], list)
+                      ):
+                          for point in stop[1]:
+                              delivered_points.add(point)
+                  if len(delivered_points) > 1:
+                      return True
+              return False
+
+          strategy = os.environ["STRATEGY"]
+          customer = os.environ["NUMBER_OF_CITIES"]
+          beta = os.environ["BETA"]
+          run_index = int(os.environ["RUN_INDEX"])
+          dataset = os.environ["DATA_SET"]
+
+          pattern = f"Random_{customer}_{dataset}_*_iter-_*_CL2.xlsx"
+          candidates = glob.glob(pattern)
+          if not candidates:
+              raise FileNotFoundError(f"No xlsx found for pattern: {pattern}")
+          xlsx_path = max(candidates, key=os.path.getmtime)
+
+          out_dir = Path("job_outputs")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          safe_dataset = dataset.replace(".", "_")
+          safe_beta = str(beta).replace(".", "_")
+          shutil.copy2(xlsx_path, out_dir / f"{strategy}_{customer}_{safe_beta}_{safe_dataset}.xlsx")
+
+          wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+          sh = wb.active
+          best_fitness = sh.cell(1, 2).value
+          runtime_sec = sh.cell(1, 3).value
+          best_solution = sh.cell(1, 4).value
+          best_t_segment = sh.cell(1, 5).value
+          end_segments = sh.cell(1, 6).value
+          tabu_iterations = sh.cell(1, 7).value
+          segments_done = sh.cell(1, 8).value
+          best_single_visit_fitness = sh.cell(1, 13).value
+          best_single_visit_solution = sh.cell(1, 14).value
+          best_multi_visit_fitness = sh.cell(1, 15).value
+          best_multi_visit_solution = sh.cell(1, 16).value
+          wb.close()
+
+          best_solution_str = "" if best_solution is None else str(best_solution)
+          segments = segments_done if segments_done not in ("", None) else end_segments
+
+          best_solution_one_visit = "" if best_single_visit_solution is None else str(best_single_visit_solution)
+          best_solution_multi_visit = "" if best_multi_visit_solution is None else str(best_multi_visit_solution)
+          fitness_best_solution_one_visit = best_single_visit_fitness
+          fitness_best_solution_multi_visit = best_multi_visit_fitness
+
+          if not best_solution_one_visit and not best_solution_multi_visit and best_solution_str:
+              try:
+                  sol = ast.literal_eval(best_solution_str)
+                  if has_multi_visit_drone_trip(sol):
+                      best_solution_multi_visit = best_solution_str
+                      fitness_best_solution_multi_visit = best_fitness
+                  else:
+                      best_solution_one_visit = best_solution_str
+                      fitness_best_solution_one_visit = best_fitness
+              except Exception:
+                  pass
+
+          row = {
+              "customer": customer,
+              "beta": beta,
+              "dataset": dataset,
+              "run": run_index,
+              "strategy": strategy,
+              "segments": segments,
+              "tabu_iterations": tabu_iterations,
+              "best_solution": best_solution_str,
+              "best_solution_one_visit": best_solution_one_visit,
+              "best_solution_multi_visit": best_solution_multi_visit,
+              "fitness_best_solution": best_fitness,
+              "fitness_best_solution_one_visit": fitness_best_solution_one_visit,
+              "fitness_best_solution_multi_visit": fitness_best_solution_multi_visit,
+              "runtime_sec": runtime_sec,
+              "best_t_segment": best_t_segment,
+          }
+
+          row_csv = out_dir / f"rows_{customer}_{safe_beta}_{safe_dataset}_run{run_index}.csv"
+          write_header = not row_csv.exists()
+          with open(row_csv, "a", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(
+                  f,
+                  fieldnames=[
+                      "customer",
+                      "beta",
+                      "dataset",
+                      "run",
+                      "strategy",
+                      "segments",
+                      "tabu_iterations",
+                      "best_solution",
+                      "best_solution_one_visit",
+                      "best_solution_multi_visit",
+                      "fitness_best_solution",
+                      "fitness_best_solution_one_visit",
+                      "fitness_best_solution_multi_visit",
+                      "runtime_sec",
+                      "best_t_segment",
+                  ],
+              )
+              if write_header:
+                  writer.writeheader()
+              writer.writerow(row)
+          PY
+
+      - name: Run diversification
+        run: |
+          rm -f Random_*_CL2.xlsx
+          python test_similarity_with_diversification.py
+
+      - name: Extract div row
+        env:
+          STRATEGY: div
+          BETA: ${{ matrix.beta }}
+          RUN_INDEX: ${{ matrix.run_index }}
+        run: |
+          python - <<'PY'
+          import ast
+          import csv
+          import glob
+          import os
+          import shutil
+          from pathlib import Path
+          import openpyxl
+
+          def has_multi_visit_drone_trip(solution_obj):
+              if not isinstance(solution_obj, list) or len(solution_obj) < 2:
+                  return False
+              drone_trips = solution_obj[1]
+              if not isinstance(drone_trips, list):
+                  return False
+              for trip in drone_trips:
+                  if not isinstance(trip, list):
+                      continue
+                  delivered_points = set()
+                  for stop in trip:
+                      if (
+                          isinstance(stop, list)
+                          and len(stop) >= 2
+                          and isinstance(stop[1], list)
+                      ):
+                          for point in stop[1]:
+                              delivered_points.add(point)
+                  if len(delivered_points) > 1:
+                      return True
+              return False
+
+          strategy = os.environ["STRATEGY"]
+          customer = os.environ["NUMBER_OF_CITIES"]
+          beta = os.environ["BETA"]
+          run_index = int(os.environ["RUN_INDEX"])
+          dataset = os.environ["DATA_SET"]
+
+          pattern = f"Random_{customer}_{dataset}_*_iter-_*_CL2.xlsx"
+          candidates = glob.glob(pattern)
+          if not candidates:
+              raise FileNotFoundError(f"No xlsx found for pattern: {pattern}")
+          xlsx_path = max(candidates, key=os.path.getmtime)
+
+          out_dir = Path("job_outputs")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          safe_dataset = dataset.replace(".", "_")
+          safe_beta = str(beta).replace(".", "_")
+          shutil.copy2(xlsx_path, out_dir / f"{strategy}_{customer}_{safe_beta}_{safe_dataset}.xlsx")
+
+          wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+          sh = wb.active
+          best_fitness = sh.cell(1, 2).value
+          runtime_sec = sh.cell(1, 3).value
+          best_solution = sh.cell(1, 4).value
+          best_t_segment = sh.cell(1, 5).value
+          end_segments = sh.cell(1, 6).value
+          tabu_iterations = sh.cell(1, 7).value
+          segments_done = sh.cell(1, 8).value
+          best_single_visit_fitness = sh.cell(1, 13).value
+          best_single_visit_solution = sh.cell(1, 14).value
+          best_multi_visit_fitness = sh.cell(1, 15).value
+          best_multi_visit_solution = sh.cell(1, 16).value
+          wb.close()
+
+          best_solution_str = "" if best_solution is None else str(best_solution)
+          segments = segments_done if segments_done not in ("", None) else end_segments
+
+          best_solution_one_visit = "" if best_single_visit_solution is None else str(best_single_visit_solution)
+          best_solution_multi_visit = "" if best_multi_visit_solution is None else str(best_multi_visit_solution)
+          fitness_best_solution_one_visit = best_single_visit_fitness
+          fitness_best_solution_multi_visit = best_multi_visit_fitness
+
+          if not best_solution_one_visit and not best_solution_multi_visit and best_solution_str:
+              try:
+                  sol = ast.literal_eval(best_solution_str)
+                  if has_multi_visit_drone_trip(sol):
+                      best_solution_multi_visit = best_solution_str
+                      fitness_best_solution_multi_visit = best_fitness
+                  else:
+                      best_solution_one_visit = best_solution_str
+                      fitness_best_solution_one_visit = best_fitness
+              except Exception:
+                  pass
+
+          row = {
+              "customer": customer,
+              "beta": beta,
+              "dataset": dataset,
+              "run": run_index,
+              "strategy": strategy,
+              "segments": segments,
+              "tabu_iterations": tabu_iterations,
+              "best_solution": best_solution_str,
+              "best_solution_one_visit": best_solution_one_visit,
+              "best_solution_multi_visit": best_solution_multi_visit,
+              "fitness_best_solution": best_fitness,
+              "fitness_best_solution_one_visit": fitness_best_solution_one_visit,
+              "fitness_best_solution_multi_visit": fitness_best_solution_multi_visit,
+              "runtime_sec": runtime_sec,
+              "best_t_segment": best_t_segment,
+          }
+
+          row_csv = out_dir / f"rows_{customer}_{safe_beta}_{safe_dataset}_run{run_index}.csv"
+          write_header = not row_csv.exists()
+          with open(row_csv, "a", newline="", encoding="utf-8") as f:
+              writer = csv.DictWriter(
+                  f,
+                  fieldnames=[
+                      "customer",
+                      "beta",
+                      "dataset",
+                      "run",
+                      "strategy",
+                      "segments",
+                      "tabu_iterations",
+                      "best_solution",
+                      "best_solution_one_visit",
+                      "best_solution_multi_visit",
+                      "fitness_best_solution",
+                      "fitness_best_solution_one_visit",
+                      "fitness_best_solution_multi_visit",
+                      "runtime_sec",
+                      "best_t_segment",
+                  ],
+              )
+              if write_header:
+                  writer.writeheader()
+              writer.writerow(row)
+          PY
+
+      - name: Upload instance artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rows-c${{ matrix.customer }}-b${{ matrix.beta }}-${{ matrix.data_set }}-run-${{ matrix.run_index }}
+          path: job_outputs/*
+
+  build_report:
+    name: Build Final Excel Report (after all jobs)
+    needs: benchmark_instances
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install report dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas openpyxl
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: collected
+          merge-multiple: true
+
+      - name: Build report workbook (no_div, div, compare)
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          root = Path("collected")
+          csv_files = sorted(root.glob("rows_*.csv"))
+          if not csv_files:
+              raise RuntimeError("No rows_*.csv files found in collected artifacts.")
+
+          dfs = []
+          for fp in csv_files:
+              dfs.append(pd.read_csv(fp))
+          all_df = pd.concat(dfs, ignore_index=True)
+
+          for col in ["segments", "tabu_iterations", "fitness_best_solution", "fitness_best_solution_one_visit", "fitness_best_solution_multi_visit", "runtime_sec", "best_t_segment"]:
+              all_df[col] = pd.to_numeric(all_df[col], errors="coerce")
+          all_df["customer"] = pd.to_numeric(all_df["customer"], errors="coerce").astype("Int64")
+          all_df["run"] = pd.to_numeric(all_df["run"], errors="coerce").astype("Int64")
+          all_df["beta"] = all_df["beta"].astype(str)
+
+          sort_cols = ["customer", "beta", "dataset", "run"]
+          no_div = all_df[all_df["strategy"] == "no_div"].copy().sort_values(sort_cols)
+          div = all_df[all_df["strategy"] == "div"].copy().sort_values(sort_cols)
+
+          no_div_keys = set(no_div[sort_cols].itertuples(index=False, name=None))
+          div_keys = set(div[sort_cols].itertuples(index=False, name=None))
+          missing_in_div = sorted(no_div_keys - div_keys)
+          missing_in_no_div = sorted(div_keys - no_div_keys)
+          if missing_in_div or missing_in_no_div:
+              msg = [
+                  "Cannot build full compare because some run keys do not have both strategies.",
+                  f"missing_in_div={missing_in_div[:10]}",
+                  f"missing_in_no_div={missing_in_no_div[:10]}",
+              ]
+              raise RuntimeError(" | ".join(msg))
+
+          compare = no_div.merge(
+              div,
+              on=["customer", "beta", "dataset", "run"],
+              suffixes=("_no_div", "_div"),
+              how="inner",
+          )
+          compare["delta_segments_div_minus_no_div"] = compare["segments_div"] - compare["segments_no_div"]
+          compare["delta_tabu_iterations_div_minus_no_div"] = compare["tabu_iterations_div"] - compare["tabu_iterations_no_div"]
+
+          compare = compare[
+              [
+                  "customer",
+                  "beta",
+                  "dataset",
+                  "run",
+                  "segments_no_div",
+                  "tabu_iterations_no_div",
+                  "segments_div",
+                  "tabu_iterations_div",
+                  "delta_segments_div_minus_no_div",
+                  "delta_tabu_iterations_div_minus_no_div",
+                  "fitness_best_solution_no_div",
+                  "fitness_best_solution_div",
+                  "runtime_sec_no_div",
+                  "runtime_sec_div",
+              ]
+          ].sort_values(sort_cols)
+
+          no_div_cols = [
+              "customer",
+              "beta",
+              "dataset",
+              "run",
+              "segments",
+              "tabu_iterations",
+              "best_solution",
+              "best_solution_one_visit",
+              "best_solution_multi_visit",
+              "fitness_best_solution",
+              "fitness_best_solution_one_visit",
+              "fitness_best_solution_multi_visit",
+              "runtime_sec",
+              "best_t_segment",
+          ]
+
+          div_cols = no_div_cols
+
+          out_dir = Path("Result/github_actions_similarity_customer_beta_compare")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          out_xlsx = out_dir / "similarity_compare_report.xlsx"
+
+          with pd.ExcelWriter(out_xlsx, engine="openpyxl") as writer:
+              no_div[no_div_cols].to_excel(writer, sheet_name="no_div", index=False)
+              div[div_cols].to_excel(writer, sheet_name="div", index=False)
+              compare.to_excel(writer, sheet_name="compare", index=False)
+
+          print(f"Wrote report: {out_xlsx}")
+          PY
+
+      - name: Upload final report
+        uses: actions/upload-artifact@v4
+        with:
+          name: similarity-customer-beta-report
+          path: Result/github_actions_similarity_customer_beta_compare/similarity_compare_report.xlsx

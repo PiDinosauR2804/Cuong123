@@ -1,0 +1,145 @@
+[CFG] solver_time_limit_sec 30
+Loaded instance: tmp_compare_f3_f4/demand1_c101_1p5/C101_1.5_demand1.dat
+Customers (incl. depot): 11
+Trucks: 2, Drones: 2
+Truck time matrix [0..4][0..4]:
+0.00	46.00	50.00	36.00	40.00
+46.00	0.00	4.00	10.00	6.00
+50.00	4.00	0.00	14.00	10.00
+36.00	10.00	14.00	0.00	4.00
+40.00	6.00	10.00	4.00	0.00
+Drone time matrix [0..4][0..4]:
+0.00	18.68	20.62	16.12	18.11
+18.68	0.00	2.00	3.61	3.00
+20.62	2.00	0.00	5.00	3.61
+16.12	3.61	5.00	0.00	2.00
+18.11	3.00	3.61	2.00	0.00
+[SEED] load failed: Seed parse error: expected '['
+[SEED] fallback to heuristic initialization
+--- After initial truck build ---
+Truck 0: 0 -> 3 -> 5 -> 4 -> 1 -> 7 -> 10 -> 0
+Truck 1: 0 -> 2 -> 8 -> 9 -> 6 -> 0
+Fitness_full (makespan): 185.00
+Objective (full) makespan: 185.00
+Truck-only makespan: 133.10
+--- After truck 2-opt ---
+Truck 0: 0 -> 3 -> 5 -> 4 -> 1 -> 7 -> 10 -> 0
+Truck 1: 0 -> 2 -> 8 -> 9 -> 6 -> 0
+Fitness_full (makespan): 185.00
+Objective (full) makespan: 185.00
+Truck-only makespan: 133.10
+[ATS] seg 0 iter 0 div_round 0 nid 0 fit_cur 153.00 fit_best_global 153.00 fit_best_segment 153.00 *
+[ATS] new best multi-visit fit 149.47
+[ATS] seg 0 iter 1 div_round 0 nid 2 fit_cur 149.47 fit_best_global 149.47 fit_best_segment 149.47 *
+[ATS] seg 0 iter 2 div_round 0 nid 0 fit_cur 163.10 fit_best_global 149.47 fit_best_segment 149.47
+[REPAIR] feasible endpoint swap truck 1 city 9 <-> 4 changed_events 2 fit 150.10
+[ATS] seg 0 iter 3 div_round 0 nid 1 fit_cur 150.10 fit_best_global 149.47 fit_best_segment 149.47
+[REPAIR] feasible endpoint swap truck 1 city 9 <-> 8 changed_events 1 fit 174.32
+[ATS] seg 0 iter 4 div_round 0 nid 1 fit_cur 153.47 fit_best_global 149.47 fit_best_segment 149.47
+[ATS] seg 0 iter 5 div_round 0 nid 2 fit_cur 163.10 fit_best_global 149.47 fit_best_segment 149.47
+[ATS] seg 0 iter 6 div_round 0 nid 0 fit_cur 168.33 fit_best_global 149.47 fit_best_segment 149.47
+[ATS] new best multi-visit fit 148.00
+[ATS] seg 0 iter 7 div_round 0 nid 0 fit_cur 148.00 fit_best_global 148.00 fit_best_segment 148.00 *
+[ATS] new best multi-visit fit 144.11
+[ATS] seg 0 iter 8 div_round 0 nid 0 fit_cur 144.11 fit_best_global 144.11 fit_best_segment 144.11 *
+[ATS] seg 0 iter 9 div_round 0 nid 0 fit_cur 144.11 fit_best_global 144.11 fit_best_segment 144.11
+[ATS] iteration cap reached (ATS_MAX_ITERS=10), returning best-so-far
+[ATS] light-LS repeated-state skips: 1
+[ATS] best multi-visit makespan: 144.11
+Truck 0: 0 -> 1 -> 2 -> 10[10] -> 0
+Truck 1: 0 -> 3 -> 5 -> 4[8,6] -> 8 -> 9[9,7] -> 6 -> 7 -> 0
+[ATS] log saved to ats_log_C101_1.5_demand1.dat.csv
+--- After ATS ---
+Fitness_full (makespan): 144.11
+Truck 0: 0 -> 1 -> 2 -> 10[10] -> 0
+Truck 1: 0 -> 3 -> 5 -> 4[8,6] -> 8 -> 9[9,7] -> 6 -> 7 -> 0
+[LS] start fitness: 144.11
+[LS] phase 1
+[LS] phase 2
+[LS] repeated-state skips: 0
+--- After drone local search init ---
+Truck 0: 0 -> 1 -> 2 -> 10[10] -> 0
+Truck 1: 0 -> 3 -> 5 -> 4[8,6] -> 8 -> 9[9,7] -> 6 -> 7 -> 0
+TRUCK 0 idx 0 city 0 arr 18.00 dep 18.00 wait 0.00
+TRUCK 1 idx 0 city 0 arr 23.00 dep 23.00 wait 0.00
+TRUCK 1 idx 1 city 3 arr 59.00 dep 59.00 wait 0.00
+TRUCK 1 idx 2 city 5 arr 61.00 dep 61.00 wait 0.00
+TRUCK 1 idx 3 city 4 arr 67.00 dep 83.11 wait 11.11
+TRUCK 0 idx 1 city 1 arr 64.00 dep 64.00 wait 0.00
+TRUCK 0 idx 2 city 2 arr 68.00 dep 68.00 wait 0.00
+TRUCK 0 idx 3 city 10 arr 96.00 dep 101.00 wait 0.00
+TRUCK 1 idx 4 city 8 arr 91.11 dep 91.11 wait 0.00
+TRUCK 1 idx 5 city 9 arr 95.11 dep 100.11 wait 0.00
+TRUCK 0 idx 4 city 0 arr 143.00 dep 143.00 wait 0.00
+TRUCK 1 idx 6 city 6 arr 106.11 dep 106.11 wait 0.00
+TRUCK 1 idx 7 city 7 arr 112.11 dep 112.11 wait 0.00
+TRUCK 1 idx 8 city 0 arr 144.11 dep 144.11 wait 0.00
+DRONE trip 0 id 0 ready 0.00 dep 60.00 ret 117.76
+  leg 0 city 4 truck 1 d_arr 67.00 t_arr 67.00 d_wait 0.00 t_wait 11.11 service_end 83.11 pkgs 8 6 
+  leg 1 city 10 truck 0 d_arr 96.00 t_arr 96.00 d_wait 5.61 t_wait 0.00 service_end 101.00 pkgs 10 
+DRONE trip 1 id 1 ready 0.00 dep 75.01 ret 120.21
+  leg 0 city 9 truck 1 d_arr 95.11 t_arr 95.11 d_wait 0.00 t_wait 0.00 service_end 100.11 pkgs 9 7 
+Makespan: 144.11 (truck max 144.11, drone max 120.21)
+[SOL] best solution detail:
+solution = [
+    [
+        [
+            [0, [1, 2]],
+            [1, []],
+            [2, []],
+            [10, [10]]
+        ],
+        [
+            [0, [3, 5, 4]],
+            [3, []],
+            [5, []],
+            [4, [8, 6]],
+            [8, []],
+            [9, [9, 7]],
+            [6, []],
+            [7, []]
+        ]
+    ],
+    [
+        [
+            [4, [8, 6]],
+            [10, [10]]
+        ],
+        [
+            [9, [9, 7]]
+        ]
+    ]
+]
+[SOL] best solution file: ./sol_best_C101_1.5_demand1.dat_A4_L90_pid95764.txt
+[SOL] best multi-visit makespan: 144.110770276275
+[SOL] best multi-visit solution detail:
+solution = [
+    [
+        [
+            [0, [1, 2]],
+            [1, []],
+            [2, []],
+            [10, [10]]
+        ],
+        [
+            [0, [3, 5, 4]],
+            [3, []],
+            [5, []],
+            [4, [8, 6]],
+            [8, []],
+            [9, [9, 7]],
+            [6, []],
+            [7, []]
+        ]
+    ],
+    [
+        [
+            [4, [8, 6]],
+            [10, [10]]
+        ],
+        [
+            [9, [9, 7]]
+        ]
+    ]
+]
+[SOL] best multi-visit solution file: ./sol_best_multi_C101_1.5_demand1.dat_A4_L90_pid95764.txt

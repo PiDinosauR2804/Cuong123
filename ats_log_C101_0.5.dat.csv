@@ -1,0 +1,4 @@
+seg,iter,div_round,nid,fit_cur,fit_best_global,fit_best_segment,improved,multi_visit,best_multi_fit
+0,0,0,2,527,527,527,0,0,inf
+0,1,0,1,527,527,527,0,0,inf
+0,2,0,0,519,519,519,1,0,inf

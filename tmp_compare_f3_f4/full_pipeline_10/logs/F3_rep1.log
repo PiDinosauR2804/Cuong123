@@ -1,0 +1,142 @@
+[CFG] solver_time_limit_sec 30
+Loaded instance: tmp_compare_f3_f4/demand1_c101_1p5/C101_1.5_demand1.dat
+Customers (incl. depot): 11
+Trucks: 2, Drones: 2
+Truck time matrix [0..4][0..4]:
+0.00	46.00	50.00	36.00	40.00
+46.00	0.00	4.00	10.00	6.00
+50.00	4.00	0.00	14.00	10.00
+36.00	10.00	14.00	0.00	4.00
+40.00	6.00	10.00	4.00	0.00
+Drone time matrix [0..4][0..4]:
+0.00	18.68	20.62	16.12	18.11
+18.68	0.00	2.00	3.61	3.00
+20.62	2.00	0.00	5.00	3.61
+16.12	3.61	5.00	0.00	2.00
+18.11	3.00	3.61	2.00	0.00
+[SEED] load failed: Seed parse error: expected '['
+[SEED] fallback to heuristic initialization
+--- After initial truck build ---
+Truck 0: 0 -> 3 -> 5 -> 4 -> 1 -> 7 -> 10 -> 0
+Truck 1: 0 -> 2 -> 8 -> 9 -> 6 -> 0
+Fitness_full (makespan): 185.00
+Objective (full) makespan: 185.00
+Truck-only makespan: 133.10
+--- After truck 2-opt ---
+Truck 0: 0 -> 3 -> 5 -> 4 -> 1 -> 7 -> 10 -> 0
+Truck 1: 0 -> 2 -> 8 -> 9 -> 6 -> 0
+Fitness_full (makespan): 185.00
+Objective (full) makespan: 185.00
+Truck-only makespan: 133.10
+[ATS] new best multi-visit fit 165.00
+[ATS] seg 0 iter 0 div_round 0 nid 1 fit_cur 165.00 fit_best_global 165.00 fit_best_segment 165.00 *
+[ATS] seg 0 iter 1 div_round 0 nid 3 fit_cur 156.00 fit_best_global 156.00 fit_best_segment 156.00 *
+[ATS] new best multi-visit fit 144.76
+[ATS] seg 0 iter 2 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76 *
+[ATS] seg 0 iter 3 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 4 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 5 div_round 0 nid 2 fit_cur 148.00 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 6 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 7 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 8 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 9 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] iteration cap reached (ATS_MAX_ITERS=10), returning best-so-far
+[ATS] light-LS repeated-state skips: 2
+[ATS] best multi-visit makespan: 144.76
+Truck 0: 0 -> 5 -> 3 -> 4 -> 1 -> 2 -> 7[7] -> 0
+Truck 1: 0 -> 10[8,6] -> 8 -> 9[9] -> 6 -> 0
+[ATS] log saved to ats_log_C101_1.5_demand1.dat.csv
+--- After ATS ---
+Fitness_full (makespan): 144.76
+Truck 0: 0 -> 5 -> 3 -> 4 -> 1 -> 2 -> 7[7] -> 0
+Truck 1: 0 -> 10[8,6] -> 8 -> 9[9] -> 6 -> 0
+[LS] start fitness: 144.76
+[LS] phase 1
+[LS] phase 2
+[LS] repeated-state skips: 0
+--- After drone local search init ---
+Truck 0: 0 -> 5 -> 3 -> 4 -> 1 -> 2 -> 7[7] -> 0
+Truck 1: 0 -> 10[8,6] -> 8 -> 9[9] -> 6 -> 0
+TRUCK 0 idx 0 city 0 arr 23.00 dep 23.00 wait 0.00
+TRUCK 1 idx 0 city 0 arr 31.00 dep 31.00 wait 0.00
+TRUCK 1 idx 1 city 10 arr 73.00 dep 81.76 wait 3.76
+TRUCK 1 idx 2 city 8 arr 91.76 dep 91.76 wait 0.00
+TRUCK 1 idx 3 city 9 arr 95.76 dep 100.76 wait 0.00
+TRUCK 0 idx 1 city 5 arr 57.00 dep 57.00 wait 0.00
+TRUCK 0 idx 2 city 3 arr 59.00 dep 59.00 wait 0.00
+TRUCK 0 idx 3 city 4 arr 63.00 dep 63.00 wait 0.00
+TRUCK 0 idx 4 city 1 arr 69.00 dep 69.00 wait 0.00
+TRUCK 0 idx 5 city 2 arr 73.00 dep 73.00 wait 0.00
+TRUCK 0 idx 6 city 7 arr 91.00 dep 110.24 wait 14.24
+TRUCK 0 idx 7 city 0 arr 142.24 dep 142.24 wait 0.00
+TRUCK 1 idx 4 city 6 arr 106.76 dep 106.76 wait 0.00
+TRUCK 1 idx 5 city 0 arr 144.76 dep 144.76 wait 0.00
+DRONE trip 0 id 0 ready 0.00 dep 60.00 ret 98.53
+  leg 0 city 10 truck 1 d_arr 73.00 t_arr 73.00 d_wait 0.00 t_wait 3.76 service_end 81.76 pkgs 8 6 
+DRONE trip 1 id 1 ready 0.00 dep 75.66 ret 126.24
+  leg 0 city 9 truck 1 d_arr 95.76 t_arr 95.76 d_wait 0.00 t_wait 0.00 service_end 100.76 pkgs 9 
+  leg 1 city 7 truck 0 d_arr 91.00 t_arr 91.00 d_wait 0.00 t_wait 14.24 service_end 110.24 pkgs 7 
+Makespan: 144.76 (truck max 144.76, drone max 126.24)
+[SOL] best solution detail:
+solution = [
+    [
+        [
+            [0, [5, 3, 4, 1, 2]],
+            [5, []],
+            [3, []],
+            [4, []],
+            [1, []],
+            [2, []],
+            [7, [7]]
+        ],
+        [
+            [0, [10]],
+            [10, [8, 6]],
+            [8, []],
+            [9, [9]],
+            [6, []]
+        ]
+    ],
+    [
+        [
+            [10, [8, 6]]
+        ],
+        [
+            [9, [9]],
+            [7, [7]]
+        ]
+    ]
+]
+[SOL] best solution file: ./sol_best_C101_1.5_demand1.dat_A4_L90_pid95763.txt
+[SOL] best multi-visit makespan: 144.763054614240
+[SOL] best multi-visit solution detail:
+solution = [
+    [
+        [
+            [0, [5, 3, 4, 1, 2]],
+            [5, []],
+            [3, []],
+            [4, []],
+            [1, []],
+            [2, []],
+            [7, [7]]
+        ],
+        [
+            [0, [10]],
+            [10, [8, 6]],
+            [8, []],
+            [9, [9]],
+            [6, []]
+        ]
+    ],
+    [
+        [
+            [10, [8, 6]]
+        ],
+        [
+            [9, [9]],
+            [7, [7]]
+        ]
+    ]
+]
+[SOL] best multi-visit solution file: ./sol_best_multi_C101_1.5_demand1.dat_A4_L90_pid95763.txt

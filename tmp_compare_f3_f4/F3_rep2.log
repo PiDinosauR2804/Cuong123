@@ -1,0 +1,208 @@
+[CFG] solver_time_limit_sec 120
+Loaded instance: test_data/data_demand_random/10/C101_0.5.dat
+Customers (incl. depot): 11
+Trucks: 2, Drones: 2
+Truck time matrix [0..4][0..4]:
+0.00	46.00	50.00	36.00	40.00
+46.00	0.00	4.00	10.00	6.00
+50.00	4.00	0.00	14.00	10.00
+36.00	10.00	14.00	0.00	4.00
+40.00	6.00	10.00	4.00	0.00
+Drone time matrix [0..4][0..4]:
+0.00	18.68	20.62	16.12	18.11
+18.68	0.00	2.00	3.61	3.00
+20.62	2.00	0.00	5.00	3.61
+16.12	3.61	5.00	0.00	2.00
+18.11	3.00	3.61	2.00	0.00
+--- After initial truck build ---
+Truck 0: 0 -> 7 -> 10 -> 3 -> 5 -> 4 -> 1 -> 0
+Truck 1: 0 -> 9 -> 8 -> 6 -> 2 -> 0
+Fitness_full (makespan): 139.00
+Objective (full) makespan: 139.00
+Truck-only makespan: 116.00
+--- After truck 2-opt ---
+Truck 0: 0 -> 7 -> 10 -> 3 -> 5 -> 4 -> 1 -> 0
+Truck 1: 0 -> 9 -> 8 -> 6 -> 2 -> 0
+Fitness_full (makespan): 139.00
+Objective (full) makespan: 139.00
+Truck-only makespan: 116.00
+[ATS] seg 0 iter 0 div_round 0 nid 0 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00 *
+[ATS] seg 0 iter 1 div_round 0 nid 3 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00
+[ATS] seg 0 iter 2 div_round 0 nid 2 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00
+[ATS] seg 0 iter 3 div_round 0 nid 2 fit_cur 135.00 fit_best_global 135.00 fit_best_segment 135.00
+[ATS] seg 0 iter 4 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00 *
+[ATS] seg 0 iter 5 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 6 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 7 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 8 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 9 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 10 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 11 div_round 0 nid 1 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 12 div_round 0 nid 1 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 13 div_round 0 nid 2 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 14 div_round 0 nid 2 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 15 div_round 0 nid 2 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 16 div_round 0 nid 1 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 17 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 18 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 19 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 20 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 21 div_round 0 nid 3 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 22 div_round 0 nid 0 fit_cur 132.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 23 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 24 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 25 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 26 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 27 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 28 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 29 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 30 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 31 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 32 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 33 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 34 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 35 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 36 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 37 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 38 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 39 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 40 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 41 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 42 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 43 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 44 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 45 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 46 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 47 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 48 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 49 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 50 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 51 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 52 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 53 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 54 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 55 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 56 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 57 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 58 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 59 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 60 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 61 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 62 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 63 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 64 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 65 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 66 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 67 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 68 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 69 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 70 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 71 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 72 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 73 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 74 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 75 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 76 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 77 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 78 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 79 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 80 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 81 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 82 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 83 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 84 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 85 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 86 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 87 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 88 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 89 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 90 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 91 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 0 iter 92 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 0 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 1 div_round 0 nid 2 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 2 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 3 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 4 div_round 0 nid 1 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 5 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 6 div_round 0 nid 1 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 7 div_round 0 nid 1 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 8 div_round 0 nid 2 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 9 div_round 0 nid 1 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 10 div_round 0 nid 2 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 11 div_round 0 nid 3 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 12 div_round 0 nid 2 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 13 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 14 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 15 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 16 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 17 div_round 0 nid 2 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 18 div_round 0 nid 0 fit_cur 131.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 19 div_round 0 nid 2 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 20 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 21 div_round 0 nid 0 fit_cur 135.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 22 div_round 0 nid 0 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] seg 1 iter 23 div_round 0 nid 0 fit_cur 139.00 fit_best_global 131.00 fit_best_segment 131.00
+[ATS] diversification round 0 best_fit 131.00
+[ATS] light-LS repeated-state skips: 67
+[ATS] no multi-visit solution found during search
+[ATS] log saved to ats_log_C101_0.5.dat.csv
+--- After ATS ---
+Fitness_full (makespan): 131.00
+Truck 0: 0 -> 7 -> 10 -> 3 -> 1 -> 4 -> 5 -> 0
+Truck 1: 0 -> 8 -> 9 -> 2 -> 6 -> 0
+[LS] start fitness: 131.00
+[LS] phase 1
+[LS] phase 2
+[LS] repeated-state skips: 0
+--- After drone local search init ---
+Truck 0: 0 -> 7 -> 10 -> 3 -> 1 -> 4 -> 5 -> 0
+Truck 1: 0 -> 8 -> 9 -> 2 -> 6 -> 0
+TRUCK 0 idx 0 city 0 arr 15.00 dep 15.00 wait 0.00
+TRUCK 1 idx 0 city 0 arr 23.00 dep 23.00 wait 0.00
+TRUCK 0 idx 1 city 7 arr 47.00 dep 47.00 wait 0.00
+TRUCK 0 idx 2 city 10 arr 57.00 dep 57.00 wait 0.00
+TRUCK 0 idx 3 city 3 arr 71.00 dep 71.00 wait 0.00
+TRUCK 0 idx 4 city 1 arr 81.00 dep 81.00 wait 0.00
+TRUCK 0 idx 5 city 4 arr 87.00 dep 87.00 wait 0.00
+TRUCK 0 idx 6 city 5 arr 93.00 dep 93.00 wait 0.00
+TRUCK 0 idx 7 city 0 arr 127.00 dep 127.00 wait 0.00
+TRUCK 1 idx 1 city 8 arr 63.00 dep 63.00 wait 0.00
+TRUCK 1 idx 2 city 9 arr 67.00 dep 67.00 wait 0.00
+TRUCK 1 idx 3 city 2 arr 81.00 dep 81.00 wait 0.00
+TRUCK 1 idx 4 city 6 arr 93.00 dep 93.00 wait 0.00
+TRUCK 1 idx 5 city 0 arr 131.00 dep 131.00 wait 0.00
+Makespan: 131.00 (truck max 131.00, drone max 0.00)
+[SOL] best solution detail:
+solution = [
+    [
+        [
+            [0, [7, 10, 3, 1, 4, 5]],
+            [7, []],
+            [10, []],
+            [3, []],
+            [1, []],
+            [4, []],
+            [5, []]
+        ],
+        [
+            [0, [8, 9, 2, 6]],
+            [8, []],
+            [9, []],
+            [2, []],
+            [6, []]
+        ]
+    ],
+    [
+    ]
+]
+[SOL] best solution file: ./sol_best_C101_0.5.dat_A4_L60_pid79347.txt
+[SOL] best multi-visit solution file: (not found)
+[PROF] validate_calls 645213 validate_sec 0.540147
+[PROF] fitness_calls 623577 fitness_sec 1.123932
+[PROF] op_reloc_sync calls 19642 sec 0.000371
+[PROF] op_merge_single calls 19642 sec 0.000464
+[PROF] op_insert_rv calls 19642 sec 0.000374
+[PROF] op_reorder_events calls 19642 sec 0.000384
+[PROF] op_reloc_pkg calls 19642 sec 2.099307
+[PROF] op_reorder_queue calls 19642 sec 0.000378

@@ -1,0 +1,110 @@
+[CFG] solver_time_limit_sec 40
+Loaded instance: test_data/data_demand_random/25/C101_0.5.dat
+Customers (incl. depot): 26
+Trucks: 2, Drones: 2
+Truck time matrix [0..4][0..4]:
+0.00	46.00	50.00	36.00	40.00
+46.00	0.00	4.00	10.00	6.00
+50.00	4.00	0.00	14.00	10.00
+36.00	10.00	14.00	0.00	4.00
+40.00	6.00	10.00	4.00	0.00
+Drone time matrix [0..4][0..4]:
+0.00	18.68	20.62	16.12	18.11
+18.68	0.00	2.00	3.61	3.00
+20.62	2.00	0.00	5.00	3.61
+16.12	3.61	5.00	0.00	2.00
+18.11	3.00	3.61	2.00	0.00
+[SEED] load failed: Seed parse error: expected '['
+[SEED] fallback to heuristic initialization
+--- After initial truck build ---
+Truck 0: 0 -> 20 -> 25 -> 24 -> 21 -> 22 -> 7 -> 10 -> 8 -> 4 -> 3 -> 2 -> 5 -> 6 -> 9 -> 11 -> 1 -> 0
+Truck 1: 0 -> 17 -> 18 -> 19 -> 15 -> 16 -> 12 -> 14 -> 13 -> 23 -> 0
+Fitness_full (makespan): 330.00
+Objective (full) makespan: 330.00
+Truck-only makespan: 315.00
+[TRUCK] 2-opt skipped by SKIP_TRUCK_2OPT
+[ATS] skipped by SKIP_ATS
+[LS] start fitness: 330.00
+[LS] phase 1
+[LS] phase 2
+--- After drone local search init ---
+Truck 0: 0 -> 20 -> 25 -> 24 -> 21 -> 22 -> 7 -> 10 -> 8 -> 4 -> 3 -> 2 -> 5 -> 6 -> 9 -> 11 -> 1 -> 0
+Truck 1: 0 -> 17 -> 18 -> 19 -> 15 -> 16 -> 12 -> 14 -> 13 -> 23 -> 0
+TRUCK 0 idx 0 city 0 arr 66.00 dep 66.00 wait 0.00
+TRUCK 1 idx 0 city 0 arr 63.00 dep 63.00 wait 0.00
+TRUCK 0 idx 1 city 20 arr 86.00 dep 86.00 wait 0.00
+TRUCK 0 idx 2 city 25 arr 100.00 dep 100.00 wait 0.00
+TRUCK 0 idx 3 city 24 arr 104.00 dep 104.00 wait 0.00
+TRUCK 0 idx 4 city 21 arr 118.00 dep 118.00 wait 0.00
+TRUCK 0 idx 5 city 22 arr 122.00 dep 122.00 wait 0.00
+TRUCK 0 idx 6 city 7 arr 174.00 dep 174.00 wait 0.00
+TRUCK 0 idx 7 city 10 arr 184.00 dep 184.00 wait 0.00
+TRUCK 0 idx 8 city 8 arr 194.00 dep 194.00 wait 0.00
+TRUCK 0 idx 9 city 4 arr 202.00 dep 202.00 wait 0.00
+TRUCK 0 idx 10 city 3 arr 206.00 dep 206.00 wait 0.00
+TRUCK 0 idx 11 city 2 arr 220.00 dep 220.00 wait 0.00
+TRUCK 0 idx 12 city 5 arr 236.00 dep 236.00 wait 0.00
+TRUCK 0 idx 13 city 6 arr 248.00 dep 248.00 wait 0.00
+TRUCK 0 idx 14 city 9 arr 254.00 dep 254.00 wait 0.00
+TRUCK 0 idx 15 city 11 arr 262.00 dep 262.00 wait 0.00
+TRUCK 0 idx 16 city 1 arr 284.00 dep 284.00 wait 0.00
+TRUCK 0 idx 17 city 0 arr 330.00 dep 330.00 wait 0.00
+TRUCK 1 idx 1 city 17 arr 157.00 dep 157.00 wait 0.00
+TRUCK 1 idx 2 city 18 arr 163.00 dep 163.00 wait 0.00
+TRUCK 1 idx 3 city 19 arr 173.00 dep 173.00 wait 0.00
+TRUCK 1 idx 4 city 15 arr 183.00 dep 183.00 wait 0.00
+TRUCK 1 idx 5 city 16 arr 193.00 dep 193.00 wait 0.00
+TRUCK 1 idx 6 city 12 arr 203.00 dep 203.00 wait 0.00
+TRUCK 1 idx 7 city 14 arr 209.00 dep 209.00 wait 0.00
+TRUCK 1 idx 8 city 13 arr 229.00 dep 229.00 wait 0.00
+TRUCK 1 idx 9 city 23 arr 281.00 dep 281.00 wait 0.00
+TRUCK 1 idx 10 city 0 arr 315.00 dep 315.00 wait 0.00
+Makespan: 330.00 (truck max 330.00, drone max 0.00)
+[SOL] best solution detail:
+solution = [
+    [
+        [
+            [0, [20, 25, 24, 21, 22, 7, 10, 8, 4, 3, 2, 5, 6, 9, 11, 1]],
+            [20, []],
+            [25, []],
+            [24, []],
+            [21, []],
+            [22, []],
+            [7, []],
+            [10, []],
+            [8, []],
+            [4, []],
+            [3, []],
+            [2, []],
+            [5, []],
+            [6, []],
+            [9, []],
+            [11, []],
+            [1, []]
+        ],
+        [
+            [0, [17, 18, 19, 15, 16, 12, 14, 13, 23]],
+            [17, []],
+            [18, []],
+            [19, []],
+            [15, []],
+            [16, []],
+            [12, []],
+            [14, []],
+            [13, []],
+            [23, []]
+        ]
+    ],
+    [
+    ]
+]
+[SOL] best solution file: ./sol_best_C101_0.5.dat_A4_L60_pid86951.txt
+[SOL] best multi-visit solution file: (not found)
+[PROF] validate_calls 279 validate_sec 0.000207
+[PROF] fitness_calls 279 fitness_sec 0.000272
+[PROF] op_reloc_sync calls 2 sec 0.000000
+[PROF] op_merge_single calls 2 sec 0.000009
+[PROF] op_insert_rv calls 2 sec 0.000000
+[PROF] op_reorder_events calls 2 sec 0.000000
+[PROF] op_reloc_pkg calls 2 sec 0.000793
+[PROF] op_reorder_queue calls 2 sec 0.000000

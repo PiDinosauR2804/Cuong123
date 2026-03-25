@@ -1,0 +1,3 @@
+customer,beta,dataset,run,strategy,segments,tabu_iterations,best_solution,best_solution_one_visit,best_solution_multi_visit,fitness_best_solution,fitness_best_solution_one_visit,fitness_best_solution_multi_visit,runtime_sec,best_t_segment
+10,0.5,C101_0.5.dat,5,no_div,12,246,"[[[[0, [3, 4, 2, 1, 5]], [3, []], [4, []], [2, []], [1, []], [5, []]], [[0, [7, 6, 9, 8, 10]], [7, []], [6, []], [9, []], [8, []], [10, []]]], []]","[[0, 3, 4, 2, 1, 5], [0, 7, 6, 9, 8, 10]]",[],123,123,123,5.036151885986328,0
+10,0.5,C101_0.5.dat,5,div,13,264,"[[[[0, [3, 4, 2, 1, 5]], [3, []], [4, []], [2, []], [1, []], [5, []]], [[0, [7, 6, 9, 8, 10]], [7, []], [6, []], [9, []], [8, []], [10, []]]], []]","[[0, 3, 4, 2, 1, 5], [0, 7, 6, 9, 8, 10]]",[],123,123,123,5.04615330696106,0

@@ -1,0 +1,159 @@
+[CFG] solver_time_limit_sec 30
+Loaded instance: test_data/data_demand_random_50_batch_all1_equal_cluster/C101_0.5.dat
+Customers (incl. depot): 51
+Trucks: 2, Drones: 2
+Truck time matrix [0..4][0..4]:
+0.00	20.00	24.00	28.00	34.00
+20.00	0.00	4.00	8.00	14.00
+24.00	4.00	0.00	4.00	10.00
+28.00	8.00	4.00	0.00	6.00
+34.00	14.00	10.00	6.00	0.00
+Drone time matrix [0..4][0..4]:
+0.00	10.00	10.20	12.17	13.00
+10.00	0.00	2.00	2.83	5.39
+10.20	2.00	0.00	2.00	3.61
+12.17	2.83	2.00	0.00	3.00
+13.00	5.39	3.61	3.00	0.00
+--- After initial truck build ---
+Truck 0: 0 -> 11 -> 13 -> 14 -> 12 -> 10 -> 9 -> 8 -> 31 -> 32 -> 30 -> 29 -> 49 -> 38 -> 37 -> 36 -> 35 -> 28 -> 27 -> 26 -> 25 -> 24 -> 23 -> 22 -> 4 -> 3 -> 1 -> 0
+Truck 1: 0 -> 50 -> 43 -> 42 -> 41 -> 40 -> 39 -> 21 -> 20 -> 19 -> 18 -> 17 -> 48 -> 47 -> 46 -> 45 -> 44 -> 34 -> 33 -> 16 -> 15 -> 6 -> 7 -> 5 -> 2 -> 0
+Fitness_full (makespan): 539.00
+Objective (full) makespan: 539.00
+Truck-only makespan: 539.00
+--- After truck 2-opt ---
+Truck 0: 0 -> 11 -> 13 -> 14 -> 12 -> 10 -> 9 -> 8 -> 31 -> 32 -> 30 -> 29 -> 49 -> 37 -> 38 -> 36 -> 35 -> 28 -> 27 -> 26 -> 25 -> 24 -> 23 -> 22 -> 4 -> 3 -> 1 -> 0
+Truck 1: 0 -> 21 -> 39 -> 40 -> 41 -> 42 -> 43 -> 50 -> 20 -> 19 -> 18 -> 17 -> 48 -> 47 -> 46 -> 45 -> 44 -> 34 -> 33 -> 16 -> 15 -> 6 -> 7 -> 5 -> 2 -> 0
+Fitness_full (makespan): 527.00
+Objective (full) makespan: 527.00
+Truck-only makespan: 527.00
+[ATS] time limit reached at 37.79s, returning best-so-far
+[ATS] no multi-visit solution found during search
+[ATS] log saved to ats_log_C101_0.5.dat.csv
+--- After ATS ---
+Fitness_full (makespan): 527.00
+Truck 0: 0 -> 11 -> 13 -> 14 -> 12 -> 10 -> 9 -> 8 -> 31 -> 32 -> 30 -> 29 -> 49 -> 37 -> 38 -> 36 -> 35 -> 28 -> 27 -> 26 -> 25 -> 24 -> 23 -> 22 -> 4 -> 3 -> 1 -> 0
+Truck 1: 0 -> 21 -> 39 -> 40 -> 41 -> 42 -> 43 -> 50 -> 20 -> 19 -> 18 -> 17 -> 48 -> 47 -> 46 -> 45 -> 44 -> 34 -> 33 -> 16 -> 15 -> 6 -> 7 -> 5 -> 2 -> 0
+[LS] start fitness: 527.00
+--- After drone local search init ---
+Truck 0: 0 -> 11 -> 13 -> 14 -> 12 -> 10 -> 9 -> 8 -> 31 -> 32 -> 30 -> 29 -> 49 -> 37 -> 38 -> 36 -> 35 -> 28 -> 27 -> 26 -> 25 -> 24 -> 23 -> 22 -> 4 -> 3 -> 1 -> 0
+Truck 1: 0 -> 21 -> 39 -> 40 -> 41 -> 42 -> 43 -> 50 -> 20 -> 19 -> 18 -> 17 -> 48 -> 47 -> 46 -> 45 -> 44 -> 34 -> 33 -> 16 -> 15 -> 6 -> 7 -> 5 -> 2 -> 0
+TRUCK 0 idx 0 city 0 arr 115.00 dep 115.00 wait 0.00
+TRUCK 1 idx 0 city 0 arr 115.00 dep 115.00 wait 0.00
+TRUCK 0 idx 1 city 11 arr 147.00 dep 147.00 wait 0.00
+TRUCK 0 idx 2 city 13 arr 155.00 dep 155.00 wait 0.00
+TRUCK 0 idx 3 city 14 arr 159.00 dep 159.00 wait 0.00
+TRUCK 0 idx 4 city 12 arr 165.00 dep 165.00 wait 0.00
+TRUCK 0 idx 5 city 10 arr 171.00 dep 171.00 wait 0.00
+TRUCK 0 idx 6 city 9 arr 175.00 dep 175.00 wait 0.00
+TRUCK 0 idx 7 city 8 arr 177.00 dep 177.00 wait 0.00
+TRUCK 0 idx 8 city 31 arr 189.00 dep 189.00 wait 0.00
+TRUCK 0 idx 9 city 32 arr 193.00 dep 193.00 wait 0.00
+TRUCK 0 idx 10 city 30 arr 215.00 dep 215.00 wait 0.00
+TRUCK 0 idx 11 city 29 arr 221.00 dep 221.00 wait 0.00
+TRUCK 0 idx 12 city 49 arr 279.00 dep 279.00 wait 0.00
+TRUCK 0 idx 13 city 37 arr 387.00 dep 387.00 wait 0.00
+TRUCK 0 idx 14 city 38 arr 395.00 dep 395.00 wait 0.00
+TRUCK 0 idx 15 city 36 arr 405.00 dep 405.00 wait 0.00
+TRUCK 0 idx 16 city 35 arr 409.00 dep 409.00 wait 0.00
+TRUCK 0 idx 17 city 28 arr 415.00 dep 415.00 wait 0.00
+TRUCK 0 idx 18 city 27 arr 419.00 dep 419.00 wait 0.00
+TRUCK 0 idx 19 city 26 arr 423.00 dep 423.00 wait 0.00
+TRUCK 0 idx 20 city 25 arr 429.00 dep 429.00 wait 0.00
+TRUCK 0 idx 21 city 24 arr 433.00 dep 433.00 wait 0.00
+TRUCK 0 idx 22 city 23 arr 437.00 dep 437.00 wait 0.00
+TRUCK 0 idx 23 city 22 arr 443.00 dep 443.00 wait 0.00
+TRUCK 0 idx 24 city 4 arr 493.00 dep 493.00 wait 0.00
+TRUCK 0 idx 25 city 3 arr 499.00 dep 499.00 wait 0.00
+TRUCK 0 idx 26 city 1 arr 507.00 dep 507.00 wait 0.00
+TRUCK 0 idx 27 city 0 arr 527.00 dep 527.00 wait 0.00
+TRUCK 1 idx 1 city 21 arr 199.00 dep 199.00 wait 0.00
+TRUCK 1 idx 2 city 39 arr 203.00 dep 203.00 wait 0.00
+TRUCK 1 idx 3 city 40 arr 213.00 dep 213.00 wait 0.00
+TRUCK 1 idx 4 city 41 arr 223.00 dep 223.00 wait 0.00
+TRUCK 1 idx 5 city 42 arr 239.00 dep 239.00 wait 0.00
+TRUCK 1 idx 6 city 43 arr 243.00 dep 243.00 wait 0.00
+TRUCK 1 idx 7 city 50 arr 253.00 dep 253.00 wait 0.00
+TRUCK 1 idx 8 city 20 arr 263.00 dep 263.00 wait 0.00
+TRUCK 1 idx 9 city 19 arr 269.00 dep 269.00 wait 0.00
+TRUCK 1 idx 10 city 18 arr 303.00 dep 303.00 wait 0.00
+TRUCK 1 idx 11 city 17 arr 313.00 dep 313.00 wait 0.00
+TRUCK 1 idx 12 city 48 arr 377.00 dep 377.00 wait 0.00
+TRUCK 1 idx 13 city 47 arr 381.00 dep 381.00 wait 0.00
+TRUCK 1 idx 14 city 46 arr 391.00 dep 391.00 wait 0.00
+TRUCK 1 idx 15 city 45 arr 401.00 dep 401.00 wait 0.00
+TRUCK 1 idx 16 city 44 arr 411.00 dep 411.00 wait 0.00
+TRUCK 1 idx 17 city 34 arr 417.00 dep 417.00 wait 0.00
+TRUCK 1 idx 18 city 33 arr 425.00 dep 425.00 wait 0.00
+TRUCK 1 idx 19 city 16 arr 467.00 dep 467.00 wait 0.00
+TRUCK 1 idx 20 city 15 arr 471.00 dep 471.00 wait 0.00
+TRUCK 1 idx 21 city 6 arr 481.00 dep 481.00 wait 0.00
+TRUCK 1 idx 22 city 7 arr 489.00 dep 489.00 wait 0.00
+TRUCK 1 idx 23 city 5 arr 493.00 dep 493.00 wait 0.00
+TRUCK 1 idx 24 city 2 arr 503.00 dep 503.00 wait 0.00
+TRUCK 1 idx 25 city 0 arr 527.00 dep 527.00 wait 0.00
+Makespan: 527.00 (truck max 527.00, drone max 0.00)
+[SOL] best solution detail:
+solution = [
+    [
+        [
+            [0, [11, 13, 14, 12, 10, 9, 8, 31, 32, 30, 29, 49, 37, 38, 36, 35, 28, 27, 26, 25, 24, 23, 22, 4, 3, 1]],
+            [11, []],
+            [13, []],
+            [14, []],
+            [12, []],
+            [10, []],
+            [9, []],
+            [8, []],
+            [31, []],
+            [32, []],
+            [30, []],
+            [29, []],
+            [49, []],
+            [37, []],
+            [38, []],
+            [36, []],
+            [35, []],
+            [28, []],
+            [27, []],
+            [26, []],
+            [25, []],
+            [24, []],
+            [23, []],
+            [22, []],
+            [4, []],
+            [3, []],
+            [1, []]
+        ],
+        [
+            [0, [21, 39, 40, 41, 42, 43, 50, 20, 19, 18, 17, 48, 47, 46, 45, 44, 34, 33, 16, 15, 6, 7, 5, 2]],
+            [21, []],
+            [39, []],
+            [40, []],
+            [41, []],
+            [42, []],
+            [43, []],
+            [50, []],
+            [20, []],
+            [19, []],
+            [18, []],
+            [17, []],
+            [48, []],
+            [47, []],
+            [46, []],
+            [45, []],
+            [44, []],
+            [34, []],
+            [33, []],
+            [16, []],
+            [15, []],
+            [6, []],
+            [7, []],
+            [5, []],
+            [2, []]
+        ]
+    ],
+    [
+    ]
+]
+[SOL] best solution file: tmp_smoke_f4/results/sol_best_C101_0.5.dat_A4_L60_pid85602.txt
+[SOL] best multi-visit solution file: (not found)

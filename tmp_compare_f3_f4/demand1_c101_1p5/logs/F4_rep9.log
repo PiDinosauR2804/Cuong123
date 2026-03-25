@@ -1,0 +1,393 @@
+[CFG] solver_time_limit_sec 9000
+Loaded instance: tmp_compare_f3_f4/demand1_c101_1p5/C101_1.5_demand1.dat
+Customers (incl. depot): 11
+Trucks: 2, Drones: 2
+Truck time matrix [0..4][0..4]:
+0.00	46.00	50.00	36.00	40.00
+46.00	0.00	4.00	10.00	6.00
+50.00	4.00	0.00	14.00	10.00
+36.00	10.00	14.00	0.00	4.00
+40.00	6.00	10.00	4.00	0.00
+Drone time matrix [0..4][0..4]:
+0.00	18.68	20.62	16.12	18.11
+18.68	0.00	2.00	3.61	3.00
+20.62	2.00	0.00	5.00	3.61
+16.12	3.61	5.00	0.00	2.00
+18.11	3.00	3.61	2.00	0.00
+[SEED] load failed: Seed parse error: expected '['
+[SEED] fallback to heuristic initialization
+--- After initial truck build ---
+Truck 0: 0 -> 3 -> 5 -> 4 -> 1 -> 7 -> 10 -> 0
+Truck 1: 0 -> 2 -> 8 -> 9 -> 6 -> 0
+Fitness_full (makespan): 185.00
+Objective (full) makespan: 185.00
+Truck-only makespan: 133.10
+--- After truck 2-opt ---
+Truck 0: 0 -> 3 -> 5 -> 4 -> 1 -> 7 -> 10 -> 0
+Truck 1: 0 -> 2 -> 8 -> 9 -> 6 -> 0
+Fitness_full (makespan): 185.00
+Objective (full) makespan: 185.00
+Truck-only makespan: 133.10
+[ATS] new best multi-visit fit 165.00
+[ATS] seg 0 iter 0 div_round 0 nid 1 fit_cur 165.00 fit_best_global 165.00 fit_best_segment 165.00 *
+[ATS] new best multi-visit fit 148.00
+[ATS] seg 0 iter 1 div_round 0 nid 1 fit_cur 148.00 fit_best_global 148.00 fit_best_segment 148.00 *
+[ATS] new best multi-visit fit 144.76
+[ATS] seg 0 iter 2 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76 *
+[ATS] seg 0 iter 3 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] new best multi-visit fit 144.76
+[ATS] seg 0 iter 4 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 5 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 6 div_round 0 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 7 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 8 div_round 0 nid 2 fit_cur 156.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 9 div_round 0 nid 2 fit_cur 167.10 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 10 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 11 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] new best multi-visit fit 144.76
+[ATS] seg 0 iter 12 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 0 iter 13 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 14 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 15 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 0 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 1 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 2 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 3 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 4 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 5 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 1 iter 6 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 1 iter 7 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[REPAIR] feasible endpoint swap truck 1 city 6 <-> 9 changed_events 1 fit 154.00
+[ATS] seg 1 iter 8 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 9 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 1 iter 10 div_round 0 nid 1 fit_cur 156.11 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 11 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 0 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 1 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 2 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 3 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 4 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 5 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 6 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 7 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 8 div_round 0 nid 0 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 9 div_round 0 nid 0 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 10 div_round 0 nid 0 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 11 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 2 iter 12 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 13 div_round 0 nid 0 fit_cur 156.11 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 14 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 15 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 2 iter 16 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[REPAIR] feasible endpoint swap truck 1 city 6 <-> 9 changed_events 1 fit 154.00
+[ATS] seg 2 iter 17 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 2 iter 18 div_round 0 nid 1 fit_cur 156.11 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 0 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 1 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 2 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 3 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 4 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 5 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 6 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 3 iter 7 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 3 iter 8 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 9 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 10 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 11 div_round 0 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 12 div_round 0 nid 2 fit_cur 156.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 13 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[REPAIR] feasible endpoint swap truck 1 city 6 <-> 9 changed_events 1 fit 154.00
+[ATS] seg 3 iter 14 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 15 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 16 div_round 0 nid 2 fit_cur 167.10 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 0 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 1 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 2 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 3 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 4 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 5 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 6 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 7 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 8 div_round 0 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 9 div_round 0 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 4 iter 10 div_round 0 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 4 iter 11 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[REPAIR] feasible endpoint swap truck 1 city 6 <-> 9 changed_events 1 fit 154.00
+[ATS] seg 4 iter 12 div_round 0 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 13 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 4 iter 14 div_round 0 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 4 iter 15 div_round 0 nid 1 fit_cur 156.11 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] diversification round 0 best_fit 144.76
+[ATS] seg 0 iter 0 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 1 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 2 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 3 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 4 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 5 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 6 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 7 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 8 div_round 1 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 9 div_round 1 nid 2 fit_cur 156.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 10 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 11 div_round 1 nid 2 fit_cur 167.10 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 12 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 13 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 0 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 1 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 2 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 3 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 4 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 5 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 6 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 7 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 8 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 9 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 10 div_round 1 nid 0 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 11 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 12 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 13 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 14 div_round 1 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 15 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 16 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 17 div_round 1 nid 2 fit_cur 156.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 18 div_round 1 nid 2 fit_cur 167.10 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 0 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 1 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 2 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 3 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 4 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 5 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 6 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 2 iter 7 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 8 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 9 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 10 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 2 iter 11 div_round 1 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 12 div_round 1 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[REPAIR] feasible endpoint swap truck 1 city 6 <-> 9 changed_events 1 fit 154.00
+[ATS] seg 2 iter 13 div_round 1 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 2 iter 14 div_round 1 nid 1 fit_cur 156.11 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 15 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 0 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 1 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 2 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 3 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 4 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 5 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 6 div_round 1 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 7 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 3 iter 8 div_round 1 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 3 iter 9 div_round 1 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 10 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 11 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 12 div_round 1 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 13 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 14 div_round 1 nid 2 fit_cur 156.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 15 div_round 1 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 16 div_round 1 nid 2 fit_cur 167.10 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] diversification round 1 best_fit 144.76
+[ATS] seg 0 iter 0 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 1 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 2 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 3 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 4 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 5 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 6 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 0 iter 7 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 8 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 9 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 10 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 11 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 12 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 0 iter 13 div_round 2 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 0 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 1 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 2 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 3 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 4 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 5 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 1 iter 6 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 7 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 1 iter 8 div_round 2 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 9 div_round 2 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 10 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[REPAIR] feasible endpoint swap truck 1 city 6 <-> 9 changed_events 1 fit 154.00
+[ATS] seg 1 iter 11 div_round 2 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 12 div_round 2 nid 2 fit_cur 156.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 13 div_round 2 nid 2 fit_cur 167.10 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 14 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 1 iter 15 div_round 2 nid 1 fit_cur 156.11 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 1 iter 16 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 0 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 1 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 2 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 3 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 4 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 5 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 6 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 7 div_round 2 nid 2 fit_cur 148.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 8 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 9 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 10 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 11 div_round 2 nid 2 fit_cur 156.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 12 div_round 2 nid 2 fit_cur 167.10 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 2 iter 13 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 0 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 1 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 2 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 3 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 3 iter 4 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 5 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 6 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 1 city 8 <-> 10 changed_events 1 fit 156.11
+[ATS] seg 3 iter 7 div_round 2 nid 1 fit_cur 152.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 8 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 9 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 10 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 11 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 12 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 13 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[REPAIR] feasible endpoint swap truck 0 city 7 <-> 1 changed_events 1 fit 154.00
+[REPAIR] feasible endpoint swap truck 0 city 5 <-> 7 changed_events 1 fit 150.17
+[ATS] seg 3 iter 14 div_round 2 nid 1 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 15 div_round 2 nid 0 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 16 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] seg 3 iter 17 div_round 2 nid 2 fit_cur 144.76 fit_best_global 144.76 fit_best_segment 144.76
+[ATS] diversification round 2 best_fit 144.76
+[ATS] best multi-visit makespan: 144.76
+Truck 0: 0 -> 1 -> 2 -> 4 -> 3[3] -> 5 -> 7[7] -> 0
+Truck 1: 0 -> 10[8,6] -> 8 -> 9[9] -> 6 -> 0
+[ATS] log saved to ats_log_C101_1.5_demand1.dat.csv
+--- After ATS ---
+Fitness_full (makespan): 144.76
+Truck 0: 0 -> 1 -> 2 -> 4 -> 3 -> 7 -> 5 -> 0
+Truck 1: 0 -> 10[8,6] -> 8 -> 9[9] -> 6 -> 0
+[LS] start fitness: 144.76
+[LS] phase 1
+[LS] phase 2
+--- After drone local search init ---
+Truck 0: 0 -> 1 -> 2 -> 4 -> 3 -> 7 -> 5 -> 0
+Truck 1: 0 -> 10[8,6] -> 8 -> 9[9] -> 6 -> 0
+TRUCK 0 idx 0 city 0 arr 23.00 dep 23.00 wait 0.00
+TRUCK 1 idx 0 city 0 arr 31.00 dep 31.00 wait 0.00
+TRUCK 1 idx 1 city 10 arr 73.00 dep 81.76 wait 3.76
+TRUCK 0 idx 1 city 1 arr 69.00 dep 69.00 wait 0.00
+TRUCK 0 idx 2 city 2 arr 73.00 dep 73.00 wait 0.00
+TRUCK 0 idx 3 city 4 arr 83.00 dep 83.00 wait 0.00
+TRUCK 0 idx 4 city 3 arr 87.00 dep 87.00 wait 0.00
+TRUCK 0 idx 5 city 7 arr 91.00 dep 96.00 wait 0.00
+TRUCK 1 idx 2 city 8 arr 91.76 dep 91.76 wait 0.00
+TRUCK 1 idx 3 city 9 arr 95.76 dep 100.76 wait 0.00
+TRUCK 0 idx 6 city 5 arr 102.00 dep 102.00 wait 0.00
+TRUCK 0 idx 7 city 0 arr 136.00 dep 136.00 wait 0.00
+TRUCK 1 idx 4 city 6 arr 106.76 dep 106.76 wait 0.00
+TRUCK 1 idx 5 city 0 arr 144.76 dep 144.76 wait 0.00
+DRONE trip 0 id 0 ready 0.00 dep 60.00 ret 112.00
+  leg 0 city 10 truck 1 d_arr 73.00 t_arr 73.00 d_wait 0.00 t_wait 3.76 service_end 81.76 pkgs 8 6 
+  leg 1 city 7 truck 0 d_arr 91.00 t_arr 91.00 d_wait 4.24 t_wait 0.00 service_end 96.00 pkgs 7 
+DRONE trip 1 id 1 ready 0.00 dep 75.66 ret 120.86
+  leg 0 city 9 truck 1 d_arr 95.76 t_arr 95.76 d_wait 0.00 t_wait 0.00 service_end 100.76 pkgs 9 
+Makespan: 144.76 (truck max 144.76, drone max 120.86)
+[SOL] best solution detail:
+solution = [
+    [
+        [
+            [0, [1, 2, 4, 3, 5]],
+            [1, []],
+            [2, []],
+            [4, []],
+            [3, []],
+            [7, [7]],
+            [5, []]
+        ],
+        [
+            [0, [10]],
+            [10, [8, 6]],
+            [8, []],
+            [9, [9]],
+            [6, []]
+        ]
+    ],
+    [
+        [
+            [10, [8, 6]],
+            [7, [7]]
+        ],
+        [
+            [9, [9]]
+        ]
+    ]
+]
+[SOL] best solution file: ./sol_best_C101_1.5_demand1.dat_A4_L90_pid98741.txt
+[SOL] best multi-visit makespan: 144.763054614240
+[SOL] best multi-visit solution detail:
+solution = [
+    [
+        [
+            [0, [1, 2, 4, 5]],
+            [1, []],
+            [2, []],
+            [4, []],
+            [3, [3]],
+            [5, []],
+            [7, [7]]
+        ],
+        [
+            [0, [10]],
+            [10, [8, 6]],
+            [8, []],
+            [9, [9]],
+            [6, []]
+        ]
+    ],
+    [
+        [
+            [10, [8, 6]],
+            [3, [3]]
+        ],
+        [
+            [9, [9]],
+            [7, [7]]
+        ]
+    ]
+]
+[SOL] best multi-visit solution file: ./sol_best_multi_C101_1.5_demand1.dat_A4_L90_pid98741.txt
