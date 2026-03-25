@@ -1,0 +1,139 @@
+name: Source C_version C201 Matrix
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "Source_revised2/**"
+      - "run_source_revised2_single.py"
+      - "gha_source_revised2_build_matrix.py"
+      - "gha_source_revised2_run_one.py"
+      - "gha_source_revised2_summarize.py"
+      - "source_revised2_c201_batch.yml"
+      - "test_data/data_demand_random_50_batch_all1_equal_cluster/**"
+      - "test_data/data_demand_random_50_batch_all1_equal_random/**"
+      - ".github/workflows/source-revised2-c201.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total_jobs: ${{ steps.make-matrix.outputs.total_jobs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build Matrix
+        id: make-matrix
+        shell: bash
+        run: |
+          python gha_source_revised2_build_matrix.py --config source_revised2_c201_batch.yml > matrix.json
+          MATRIX_JSON=$(cat matrix.json)
+          TOTAL_JOBS=$(python - <<'PY'
+          import json
+          with open("matrix.json", "r", encoding="utf-8") as f:
+              print(len(json.load(f)))
+          PY
+          )
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$TOTAL_JOBS" >> "$GITHUB_OUTPUT"
+          echo "Total jobs: $TOTAL_JOBS"
+
+  run-one-job:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 130
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy openpyxl
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+
+      - name: Run Matrix Task
+        shell: bash
+        run: |
+          mkdir -p Result/gha_source_revised2
+          python gha_source_revised2_run_one.py \
+            --instance "${{ matrix.task.instance_path }}" \
+            --instance-group "${{ matrix.task.instance_group }}" \
+            --job-id "${{ matrix.task.job_id }}" \
+            --run-index "${{ matrix.task.run_index }}" \
+            --A "${{ matrix.task.A }}" \
+            --L "${{ matrix.task.L }}" \
+            --config source_revised2_c201_batch.yml \
+            --output "Result/gha_source_revised2/job_${{ matrix.task.job_id }}.json"
+
+      - name: Upload Task Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-revised2-job-${{ matrix.task.job_id }}
+          path: Result/gha_source_revised2/job_${{ matrix.task.job_id }}.json
+
+  summarize:
+    needs:
+      - build-matrix
+      - run-one-job
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install openpyxl
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded_source_revised2
+
+      - name: Build Excel Summary
+        shell: bash
+        run: |
+          mkdir -p Result
+          python gha_source_revised2_summarize.py \
+            --input-dir downloaded_source_revised2 \
+            --output-xlsx Result/source_revised2_c201_summary.xlsx \
+            --output-json Result/source_revised2_c201_summary.json
+
+      - name: Upload Summary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-revised2-c201-summary
+          path: |
+            Result/source_revised2_c201_summary.xlsx
+            Result/source_revised2_c201_summary.json

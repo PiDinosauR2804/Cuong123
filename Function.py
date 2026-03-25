@@ -517,7 +517,7 @@ def initial_solution6():
     
     for i in range(len(init_solution[0])):
         for j in range(1, len(init_solution[0][i])):
-            init_solution = Neighborhood.findLocationForDropPackage(init_solution, i, binit_solutionst_sol[0][i][j][0])            
+            init_solution = Neighborhood.findLocationForDropPackage(init_solution, i, init_solution[0][i][j][0])
     return init_solution       
 
 def initial_solution7():
@@ -1151,8 +1151,190 @@ def fitness(solution):
         drone_queue.put((end, drone[1]))
         '''print(drone[1], "flight from", truck_position[position[-1]][truck_current_point[position[-1]]], "to 0")
         print("nah",truck_time)'''
-    value = max(truck_time)
+    # System completion time: all trucks and all drones must be back at depot.
+    drone_finish_time = 0
+    while not drone_queue.empty():
+        available_time, _ = drone_queue.get()
+        if available_time > drone_finish_time:
+            drone_finish_time = available_time
+    value = max(max(truck_time), drone_finish_time)
     return value, data_truck, sum(truck_time)
+
+
+def _collect_wait_time_events(solution):
+    """Simulate solution timeline and collect waiting-time events at each rendezvous point."""
+    drone_package = copy.deepcopy(solution[1])
+    base_path = copy.deepcopy(solution[0])
+
+    truck_time = [0] * Data.number_of_trucks
+    truck_position = []
+    temp = []
+    for i in range(len(base_path)):
+        for j in range(len(base_path[i])):
+            temp.append(base_path[i][j][0])
+        temp.append(0)
+        truck_position.append(temp)
+        temp = []
+
+    truck_current_point = [0] * Data.number_of_trucks
+    drone_queue = queue.PriorityQueue()
+    for i in range(Data.number_of_drones):
+        drone_queue.put((0, "Drone %i" % i))
+
+    for i in range(Data.number_of_trucks):
+        if len(truck_position[i]) != 2:
+            distance = Data.manhattan_move_matrix[
+                truck_position[i][truck_current_point[i]]
+            ][
+                truck_position[i][truck_current_point[i] + 1]
+            ]
+            truck_time[i] = max_release_date(base_path[i][truck_position[i][truck_current_point[i]]][1]) + distance
+            base_path[i][truck_current_point[i]][1] = []
+            truck_current_point[i] += 1
+
+    wait_events = []
+    trip_index = 0
+    while True:
+        for i in range(Data.number_of_trucks):
+            while base_path[i][truck_current_point[i]][1] == []:
+                if truck_position[i][truck_current_point[i]] == 0:
+                    break
+                distance = Data.manhattan_move_matrix[
+                    truck_position[i][truck_current_point[i]]
+                ][
+                    truck_position[i][truck_current_point[i] + 1]
+                ]
+                truck_time[i] += distance
+
+                if truck_position[i][truck_current_point[i] + 1] != 0:
+                    truck_current_point[i] += 1
+                else:
+                    truck_current_point[i] = 0
+                    break
+
+        finished = 0
+        for i in range(Data.number_of_trucks):
+            if truck_position[i][truck_current_point[i]] == 0:
+                finished += 1
+        if finished == Data.number_of_trucks:
+            break
+
+        if not drone_package:
+            # No more drone trips available, cannot collect additional wait events.
+            break
+
+        drone_pack = []
+        for loop in range(len(drone_package[0])):
+            for loop1 in range(len(drone_package[0][loop][1])):
+                drone_pack.append(drone_package[0][loop][1][loop1])
+        _, position = find_drone_flight_shortest(solution, drone_package[0])
+
+        drone_package.pop(0)
+        drone = drone_queue.get()
+        start = max(drone[0], max_release_date(drone_pack))
+
+        last_city_of_drone = -1
+        for visit_order in range(len(position)):
+            truck_idx = position[visit_order]
+
+            deliver = []
+            for j in range(len(drone_pack)):
+                if package_in_which_truck(base_path, drone_pack[j]) == truck_idx:
+                    deliver.append(drone_pack[j])
+
+            if visit_order == 0:
+                flight = Data.euclid_flight_matrix[0][truck_position[truck_idx][truck_current_point[truck_idx]]]
+                start += flight
+                last_city_of_drone = truck_position[truck_idx][truck_current_point[truck_idx]]
+            else:
+                prev_truck_idx = position[visit_order - 1]
+                flight = Data.euclid_flight_matrix[
+                    truck_position[prev_truck_idx][truck_current_point[prev_truck_idx]]
+                ][
+                    truck_position[truck_idx][truck_current_point[truck_idx]]
+                ]
+                start += flight
+                last_city_of_drone = truck_position[truck_idx][truck_current_point[truck_idx]]
+
+            for delivered_customer in deliver:
+                for k in range(Data.number_of_trucks):
+                    for l in range(truck_current_point[k], len(base_path[k])):
+                        if delivered_customer in base_path[k][l][1]:
+                            base_path[k][l][1].remove(delivered_customer)
+                            break
+
+            drone_arrival = start
+            truck_arrival = truck_time[truck_idx]
+            sync_time = max(drone_arrival, truck_arrival)
+
+            wait_events.append(
+                {
+                    "trip_index": trip_index,
+                    "visit_order": visit_order,
+                    "truck_index": truck_idx,
+                    "city": truck_position[truck_idx][truck_current_point[truck_idx]],
+                    "drone_wait_time": max(0.0, sync_time - drone_arrival),
+                    "truck_wait_time": max(0.0, sync_time - truck_arrival),
+                }
+            )
+
+            start = sync_time + Data.unloading_time
+
+            num = 0
+            while base_path[truck_idx][truck_current_point[truck_idx]][1] == []:
+                if truck_position[truck_idx][truck_current_point[truck_idx]] == 0:
+                    break
+                distance = Data.manhattan_move_matrix[
+                    truck_position[truck_idx][truck_current_point[truck_idx]]
+                ][
+                    truck_position[truck_idx][truck_current_point[truck_idx] + 1]
+                ]
+
+                if num == 0:
+                    truck_time[truck_idx] = start + distance
+                else:
+                    truck_time[truck_idx] += distance
+
+                num += 1
+                if truck_position[truck_idx][truck_current_point[truck_idx] + 1] != 0:
+                    truck_current_point[truck_idx] += 1
+                else:
+                    truck_current_point[truck_idx] = 0
+                    break
+
+        end = start + Data.euclid_flight_matrix[last_city_of_drone][0]
+        drone_queue.put((end, drone[1]))
+        trip_index += 1
+
+    return wait_events
+
+
+def cal_truck_wait_time_by_point(solution):
+    """Return truck waiting time aggregated by rendezvous city.
+
+    Returns:
+        dict[int, float]: {city: total_truck_wait_time_at_city}
+    """
+    events = _collect_wait_time_events(solution)
+    wait_by_city = {}
+    for event in events:
+        city = event["city"]
+        wait_by_city[city] = wait_by_city.get(city, 0.0) + event["truck_wait_time"]
+    return wait_by_city
+
+
+def cal_drone_wait_time_by_point(solution):
+    """Return drone waiting time aggregated by rendezvous city.
+
+    Returns:
+        dict[int, float]: {city: total_drone_wait_time_at_city}
+    """
+    events = _collect_wait_time_events(solution)
+    wait_by_city = {}
+    for event in events:
+        city = event["city"]
+        wait_by_city[city] = wait_by_city.get(city, 0.0) + event["drone_wait_time"]
+    return wait_by_city
 
 def cal_truck_time(solution):
     drone_package = copy.deepcopy(solution[1])

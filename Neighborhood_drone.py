@@ -307,8 +307,6 @@ def Neighborhood_group_trip(solution):
     temp.append([fit, dt, tt])
     neighborhood.append(temp)
     for i in range(len(solution[1])):
-        if Data.number_of_drones < 2:
-            return neighborhood
         max = -1
         min = -1
         if i <= len(solution[1]) - 4:

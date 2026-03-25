@@ -1,0 +1,22 @@
+{
+  "job_id": 1,
+  "run_index": 1,
+  "instance": "test_data/data_demand_random_50_batch_all1_equal_cluster/C101_0.5.dat",
+  "A": 4.0,
+  "L": 60.0,
+  "best_fitness": 527.0,
+  "best_solution": "[\n    [\n        [\n            [0, [11, 13, 14, 12, 10, 9, 8, 31, 32, 30, 29, 49, 37, 38, 36, 35, 28, 27, 26, 25, 24, 23, 22, 4, 3, 1]],\n            [11, []],\n            [13, []],\n            [14, []],\n            [12, []],\n            [10, []],\n            [9, []],\n            [8, []],\n            [31, []],\n            [32, []],\n            [30, []],\n            [29, []],\n            [49, []],\n            [37, []],\n            [38, []],\n            [36, []],\n            [35, []],\n            [28, []],\n            [27, []],\n            [26, []],\n            [25, []],\n            [24, []],\n            [23, []],\n            [22, []],\n            [4, []],\n            [3, []],\n            [1, []]\n        ],\n        [\n            [0, [21, 39, 40, 41, 42, 43, 50, 20, 19, 18, 17, 48, 47, 46, 45, 44, 34, 33, 16, 15, 6, 7, 5, 2]],\n            [21, []],\n            [39, []],\n            [40, []],\n            [41, []],\n            [42, []],\n            [43, []],\n            [50, []],\n            [20, []],\n            [19, []],\n            [18, []],\n            [17, []],\n            [48, []],\n            [47, []],\n            [46, []],\n            [45, []],\n            [44, []],\n            [34, []],\n            [33, []],\n            [16, []],\n            [15, []],\n            [6, []],\n            [7, []],\n            [5, []],\n            [2, []]\n        ]\n    ],\n    [\n    ]\n]",
+  "best_multi_fitness": null,
+  "best_multi_solution": null,
+  "best_solution_file": "tmp_smoke_f4/results/sol_best_C101_0.5.dat_A4_L60_pid85602.txt",
+  "best_multi_solution_file": "(not found)",
+  "best_drone_avg_trip_time": 0.0,
+  "best_multi_visit_trip_count": 0,
+  "best_drone_trip_count": 0,
+  "best_avg_customers_per_trip": 0.0,
+  "best_multi_drone_avg_trip_time": null,
+  "best_multi_multi_visit_trip_count": null,
+  "best_multi_drone_trip_count": null,
+  "best_multi_avg_customers_per_trip": null,
+  "log": "C101_0.5.dat_A4_L60_r1.log"
+}

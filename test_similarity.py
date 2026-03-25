@@ -49,12 +49,26 @@ def roulette_wheel_selection(population, fitness_scores):
     selected_index = np.random.choice(len(population), p=probabilities)
     return population[selected_index]
 
+def has_multi_visit(solution):
+    """Return True if any drone trip visits more than one rendezvous point."""
+    if len(solution) < 2:
+        return False
+    for trip in solution[1]:
+        if len(trip) > 1:
+            return True
+    return False
+
 def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_consider_elite_set, start_time):
     solution_pack = []
 
     current_fitness, current_truck_time, current_sum_fitness = Function.fitness(init_solution)
     best_sol = init_solution
     best_fitness = current_fitness
+    best_multi_visit_sol = None
+    best_multi_visit_fitness = float("inf")
+    if has_multi_visit(init_solution):
+        best_multi_visit_sol = init_solution
+        best_multi_visit_fitness = current_fitness
     sol_chosen_to_break = init_solution
     fit_of_sol_chosen_to_break = current_fitness
     
@@ -301,6 +315,9 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
             current_fitness = current_neighborhood[index_best_nei][1][index[index_best_nei]][1][0]
             current_truck_time = current_neighborhood[index_best_nei][1][index[index_best_nei]][1][1]
             current_sum_fitness = current_neighborhood[index_best_nei][1][index[index_best_nei]][1][2]
+            if has_multi_visit(current_sol) and current_fitness < best_multi_visit_fitness:
+                best_multi_visit_sol = current_sol
+                best_multi_visit_fitness = current_fitness
             print(current_fitness, current_sol)
             Data1.append(current_fitness)
             Data1.append(current_sol)
@@ -371,6 +388,11 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
         else: 
             T += 1
         END += 1
+    # Recompute objective values from final solutions to avoid stale fitness values.
+    best_fitness = Function.fitness(best_sol)[0]
+    if best_multi_visit_sol is not None:
+        best_multi_visit_fitness = Function.fitness(best_multi_visit_sol)[0]
+
     if data_to_write == {}:
         data_to_write = {
             "Done": True,
@@ -379,6 +401,11 @@ def Tabu_search(init_solution, tabu_tenure, CC, first_time, Data1, index_conside
             "Best_T": Best_T,
             "END": END
         }
+    else:
+        data_to_write["best_fitness"] = best_fitness
+        data_to_write["best_sol"] = best_sol
+    data_to_write["best_multi_visit_sol"] = best_multi_visit_sol
+    data_to_write["best_multi_visit_fitness"] = best_multi_visit_fitness if best_multi_visit_sol is not None else None
         
     return best_sol, best_fitness, Result_print, solution_pack, data_to_write
     
@@ -416,6 +443,8 @@ def Tabu_search_for_CVRP(CC):
     # print(best_fitness)
     # print(Function.Check_if_feasible(best_sol))
     best_sol, best_fitness, result_print, solution_pack, data_to_write = Tabu_search(init_solution=current_sol, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=True, Data1=Data1, index_consider_elite_set=0, start_time=start_time)
+    best_multi_visit_sol = data_to_write.get("best_multi_visit_sol")
+    best_multi_visit_fitness = data_to_write.get("best_multi_visit_fitness")
     for pi in range(solution_pack_len):
         print("+++++++++++++++++++++++++",len(solution_pack),"+++++++++++++++++++++++++",)
         for iiii in range(len(solution_pack)):
@@ -432,84 +461,108 @@ def Tabu_search_for_CVRP(CC):
                     best_sol_in_brnei = current_neighborhood5[i][0]
                     best_fitness_in_brnei = cfnode
             temp = ["break", "break", "break", "break", "break", "break", "break"]
-            best_sol1, best_fitness1, result_print1, solution_pack, Data1 = Tabu_search(init_solution=best_sol_in_brnei, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=False, Data1=Data1, index_consider_elite_set=pi+1, start_time=start_time)
+            best_sol1, best_fitness1, result_print1, solution_pack, data_to_write_1 = Tabu_search(init_solution=best_sol_in_brnei, tabu_tenure=Data.number_of_cities-1, CC=CC, first_time=False, Data1=Data1, index_consider_elite_set=pi+1, start_time=start_time)
             print("-----------------", pi, "------------------------")
             print(best_sol1)
             print(best_fitness1)
+            mv_fit_1 = data_to_write_1.get("best_multi_visit_fitness")
+            mv_sol_1 = data_to_write_1.get("best_multi_visit_sol")
+            if mv_sol_1 is not None:
+                if best_multi_visit_sol is None or mv_fit_1 < best_multi_visit_fitness:
+                    best_multi_visit_sol = mv_sol_1
+                    best_multi_visit_fitness = mv_fit_1
             if best_fitness1 - best_fitness < epsilon:
                 best_sol = best_sol1
                 best_fitness = best_fitness1
         # if end_time - start_time > 3000:
         #     break
 
+    # Recompute objective values from final picked solutions before returning.
+    best_fitness = Function.fitness(best_sol)[0]
+    if best_multi_visit_sol is not None:
+        best_multi_visit_fitness = Function.fitness(best_multi_visit_sol)[0]
+
+    data_to_write["best_sol"] = best_sol
+    data_to_write["best_fitness"] = best_fitness
+    data_to_write["best_multi_visit_sol"] = best_multi_visit_sol
+    data_to_write["best_multi_visit_fitness"] = best_multi_visit_fitness if best_multi_visit_sol is not None else None
     return best_fitness, best_sol, data_to_write
 
-# Thư mục chứa các file .txt
-folder_path = "test_data/data_demand_random/"+str(number_of_cities)
-# folder_path = "test_data/Smith/TSPrd(time)/Solomon/"+str(number_of_cities)
-# folder_path = "test_data\\Smith\\TSPrd(time)\\Solomon\\50\\0_5TSP_50"
-# folder_path = "test_data\\Smith\\TSPrd(time)\\Solomon\\15"
+def run_default_cli():
+    # Thư mục chứa các file .txt
+    folder_path = "test_data/data_demand_random/"+str(number_of_cities)
+    # folder_path = "test_data/Smith/TSPrd(time)/Solomon/"+str(number_of_cities)
+    # folder_path = "test_data\\Smith\\TSPrd(time)\\Solomon\\50\\0_5TSP_50"
+    # folder_path = "test_data\\Smith\\TSPrd(time)\\Solomon\\15"
 
-# Tìm các file với đuôi là 0.5.dat, 2.dat hoặc 3.dat
-# txt_files = glob.glob(os.path.join(folder_path, "*0.5.dat")) + \
-#             glob.glob(os.path.join(folder_path, "*2.dat")) + \
-#             glob.glob(os.path.join(folder_path, "*3.dat"))
-txt_files = glob.glob(os.path.join(folder_path, data_set))
-# txt_files = ["test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_1.dat", "test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_2.5.dat", "test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_2.dat", "test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_3.dat"]
-# Tạo một tệp Excel mới
-workbook = openpyxl.Workbook()
-sheet = workbook.active
+    # Tìm các file với đuôi là 0.5.dat, 2.dat hoặc 3.dat
+    # txt_files = glob.glob(os.path.join(folder_path, "*0.5.dat")) + \
+    #             glob.glob(os.path.join(folder_path, "*2.dat")) + \
+    #             glob.glob(os.path.join(folder_path, "*3.dat"))
+    #txt_files = glob.glob(os.path.join(folder_path, data_set))
+    # txt_files = ["test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_1.dat", "test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_2.5.dat", "test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_2.dat", "test_data\\Smith\\TSPrd(time)\\Solomon\\15\\RC101_3.dat"]
+    txt_files = [r"/Users/huetran/CheckzingHueTT/test_data/data_demand_random/15/C101_3.dat"]
+    #test_data\data_new\C101_0.5_MR15_autotuned.dat
+    # Tạo một tệp Excel mới
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
 
-# # Dòng và cột bắt đầu ghi kết quả
-row = 1
-for txt_file in txt_files:
-    column = 2
-    with open(txt_file, 'r') as file:
-        # Đọc nội dung từ file .txt và xử lý nó
-        # print(txt_file)
-        # log = os.path.basename(txt_file)+ f'{number_of_cities}_{delta}_{alpha}_CL2.log'
-        # log_folder = 'Result\log_result'
-        # log_file_path = os.path.join(log_folder, log)
-        # log_file = open(log_file_path, 'w')
-        # sys.stdout = log_file
-        #Data.read_data_random(txt_file)
-        Data.read_data_random(txt_file)
-        result = []
-        run_time = []
-        avg = 0
-        avg_run_time = 0
-        best_csv_fitness = 1000000
-        for i in range(ITE):
-            BEST = []
-            print("------------------------",i,"------------------------")
-            start_time = time.time()
-            best_fitness, best_sol, data_to_write = Tabu_search_for_CVRP(1)
-            end_time = time.time()
-            workbook = openpyxl.Workbook()
-            sheet = workbook.active
-            row = 1
-            column = 1
-            sheet.cell(row=row, column=column, value=os.path.basename(txt_file))
-            print("---------- RESULT ----------")
-            print(best_sol)
-            print(best_fitness)
-            avg += best_fitness/ITE
-            result.append(best_fitness)
-            # print(Function.Check_if_feasible(best_sol))
-            column += 1
-            run = end_time - start_time
-            run_time.append(run)
-            avg_run_time += run/ITE
-            sheet.cell(row=row, column=column, value=best_fitness)
+    # # Dòng và cột bắt đầu ghi kết quả
+    row = 1
+    for txt_file in txt_files:
+        column = 2
+        with open(txt_file, 'r') as file:
+            # Đọc nội dung từ file .txt và xử lý nó
+            # print(txt_file)
+            # log = os.path.basename(txt_file)+ f'{number_of_cities}_{delta}_{alpha}_CL2.log'
+            # log_folder = 'Result\log_result'
+            # log_file_path = os.path.join(log_folder, log)
+            # log_file = open(log_file_path, 'w')
+            # sys.stdout = log_file
+            Data.read_data_random(txt_file)
+            #Data.read_data_random_fixeDemandEqual1(txt_file)
+            result = []
+            run_time = []
+            avg = 0
+            avg_run_time = 0
+            best_csv_fitness = 1000000
+            for i in range(ITE):
+                BEST = []
+                print("------------------------",i,"------------------------")
+                start_time = time.time()
+                best_fitness, best_sol, data_to_write = Tabu_search_for_CVRP(1)
+                end_time = time.time()
+                workbook = openpyxl.Workbook()
+                sheet = workbook.active
+                row = 1
+                column = 1
+                sheet.cell(row=row, column=column, value=os.path.basename(txt_file))
+                print("---------- RESULT ----------")
+                print(best_sol)
+                print(best_fitness)
+                avg += best_fitness/ITE
+                result.append(best_fitness)
+                # print(Function.Check_if_feasible(best_sol))
+                column += 1
+                run = end_time - start_time
+                run_time.append(run)
+                avg_run_time += run/ITE
+                sheet.cell(row=row, column=column, value=best_fitness)
 
-            column += 1
-            if best_csv_fitness > best_fitness:
-                best_csv_sol = best_sol
-                best_csv_fitness = best_fitness
-            if i == ITE - 1:
-                sheet.cell(row=row, column=column, value=avg_run_time)
-                sheet.cell(row=row, column=column+1, value=str(best_csv_sol))
-            sheet.cell(row=row, column=column+2, value=data_to_write["Best_T"])
-            sheet.cell(row=row, column=column+3, value=data_to_write["END"])
-            workbook.save(f"Random_{number_of_cities}_{data_set}_{SEGMENT}_iter-_{ite}_CL2.xlsx")
-            workbook.close()
+                column += 1
+                if best_csv_fitness > best_fitness:
+                    best_csv_sol = best_sol
+                    best_csv_fitness = best_fitness
+                if i == ITE - 1:
+                    sheet.cell(row=row, column=column, value=avg_run_time)
+                    sheet.cell(row=row, column=column+1, value=str(best_csv_sol))
+                sheet.cell(row=row, column=column+2, value=data_to_write["Best_T"])
+                sheet.cell(row=row, column=column+3, value=data_to_write["END"])
+                sheet.cell(row=row, column=column+4, value=data_to_write.get("best_multi_visit_fitness"))
+                sheet.cell(row=row, column=column+5, value=str(data_to_write.get("best_multi_visit_sol")))
+                #workbook.save(f"Random_{number_of_cities}_{data_set}_{SEGMENT}_iter-_{ite}_CL2.xlsx")
+                workbook.save(f"result//{time.time()}_{txt_files[:-4]}.xlsx")
+                workbook.close()
+
+if __name__ == "__main__":
+    run_default_cli()

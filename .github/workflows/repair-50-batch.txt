@@ -1,16 +1,12 @@
 name: Repair + Improve 50 Batch (Matrix)
 
-permissions:
-  contents: read
-  actions: read
-
 on:
   workflow_dispatch:
     inputs:
       rows_per_job:
-        description: "Number of CSV rows handled by each matrix job (set to 2 rows/job)"
+        description: "Number of CSV rows handled by each matrix job"
         required: true
-        default: "2"
+        default: "20"
       workers_per_job:
         description: "Parallel processes per matrix job (2 as requested)"
         required: true
@@ -51,7 +47,7 @@ on:
       - ".github/workflows/repair-50-batch.yml"
 
 env:
-  ROWS_PER_JOB: ${{ github.event.inputs.rows_per_job || '2' }}
+  ROWS_PER_JOB: ${{ github.event.inputs.rows_per_job || '20' }}
   WORKERS_PER_JOB: ${{ github.event.inputs.workers_per_job || '2' }}
   REPAIR_WORKERS: ${{ github.event.inputs.repair_workers || '2' }}
   ATS_NIMP: ${{ github.event.inputs.nimp || '30' }}
@@ -339,59 +335,3 @@ jobs:
             Result/repair_50_batch_matrix/50_batch_improved.csv
             Result/repair_50_batch_matrix/50_batch_improved_compare.csv
             Result/repair_50_batch_matrix/summary.txt
-
-  summarize-by-run-id:
-    name: Summarize This Run Artifacts
-    needs: [merge-results]
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Aggregate improved solutions by current run_id
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          python summarize_repair_50_batch_run.py \
-            --run-id "${{ github.run_id }}" \
-            --output-dir "Result/github_run_summaries"
-
-      - name: Write Summary
-        env:
-          RUN_ID: ${{ github.run_id }}
-          META_PATH: Result/github_run_summaries/run_${{ github.run_id }}/summary_meta.json
-        run: |
-          python - <<'PY'
-          import json
-          import os
-
-          run_id = os.environ["RUN_ID"]
-          meta_path = os.environ["META_PATH"]
-          step_summary = os.environ["GITHUB_STEP_SUMMARY"]
-
-          with open(step_summary, "a", encoding="utf-8") as out:
-              out.write(f"# Auto Summary (run_id={run_id})\n\n")
-              if not os.path.exists(meta_path):
-                  out.write("- summary_meta.json not found\n")
-              else:
-                  with open(meta_path, "r", encoding="utf-8") as f:
-                      m = json.load(f)
-                  out.write(f"- rows: {m.get('summary_rows', '')}\n")
-                  out.write(f"- ok_rows: {m.get('ok_rows', '')}\n")
-                  out.write(f"- error_rows: {m.get('error_rows', '')}\n")
-                  out.write(f"- final_csv: `{m.get('final_csv', '')}`\n")
-                  out.write(f"- compact_summary_csv: `{m.get('compact_summary_csv', '')}`\n")
-          PY
-
-      - name: Upload run summary artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: repair-improve-50-batch-auto-summary-${{ github.run_id }}
-          path: Result/github_run_summaries/run_${{ github.run_id }}/*

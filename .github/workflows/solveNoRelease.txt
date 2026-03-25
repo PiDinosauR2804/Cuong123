@@ -1,0 +1,92 @@
+name: Solve NoRelease Cluster Instances
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      reps:
+        description: "Number of runs per instance"
+        required: false
+        default: "10"
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total: ${{ steps.make-matrix.outputs.total }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build matrix
+        id: make-matrix
+        run: |
+          REPS="${{ github.event.inputs.reps }}"
+          if [ -z "$REPS" ]; then REPS=10; fi
+          python -c "import glob,json,os; reps=int(os.environ['REPS']); files=sorted(glob.glob('test_data/data_demand_random/50/*0.5.dat')); jobs=[]; jid=0; [jobs.append({'job_id':(jid:=jid+1),'instance':f,'base':os.path.basename(f),'r':r}) for f in files for r in range(1,reps+1)]; json.dump(jobs, open('matrix.json','w')); print(json.dumps(jobs))"
+          TOTAL=$(python -c "import json; print(len(json.load(open('matrix.json'))))")
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+          echo "Total jobs: $TOTAL"
+        env:
+          REPS: ${{ github.event.inputs.reps }}
+
+  solve:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 220
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build solver (NoRelease)
+        run: g++ -std=c++17 C_Version/Funtion_noReleaseDate.cpp -O2 -o C_Version/read_data_noRelease
+      - name: Run task (single run/job)
+        run: |
+          mkdir -p results
+          # Keep log naming compatible with gha_write_run_meta (expects ..._A0_L0_r1.log for reps=1).
+          SOL_OUT_DIR=results ./C_Version/read_data_noRelease '${{ matrix.task.instance }}' > results/${{ matrix.task.base }}_A0_L0_r1.log
+
+          python gha_write_run_meta.py \
+            --results-dir results \
+            --base "${{ matrix.task.base }}" \
+            --a "0" \
+            --l "0" \
+            --reps "1" \
+            --job-id "${{ matrix.task.job_id }}" \
+            --instance "${{ matrix.task.instance }}"
+
+          # Rewrite run_index from 1 -> matrix.task.r so summary reflects the true repetition id.
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path("results/meta_run1.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          d["run_index"] = int("${{ matrix.task.r }}")
+          p.write_text(json.dumps(d, indent=2), encoding="utf-8")
+          print(f"Adjusted run_index -> {d['run_index']} in {p}")
+          PY
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: solvenorelease-job-${{ matrix.task.job_id }}
+          path: results/
+
+  summarize:
+    needs: [build-matrix, solve]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded
+      - name: Build summary
+        run: |
+          python -c "import json,pathlib,csv; rows=[json.load(open(p)) for p in pathlib.Path('downloaded').rglob('meta_run*.json') if p.is_file()]; out=pathlib.Path('summary_no_release.csv'); f=open(out,'w',newline=''); fields=['job_id','instance','A','L','run_index','best_fitness','best_solution','best_multi_fitness','best_multi_solution','best_drone_avg_trip_time','best_multi_visit_trip_count','best_drone_trip_count','best_avg_customers_per_trip','best_multi_drone_avg_trip_time','best_multi_multi_visit_trip_count','best_multi_drone_trip_count','best_multi_avg_customers_per_trip','best_solution_file','best_multi_solution_file','log']; w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore'); w.writeheader(); w.writerows(sorted(rows,key=lambda x:(x['job_id'], x.get('run_index',0)))); f.close(); print(f'Wrote {len(rows)} rows to {out}')"
+      - name: Upload summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: solvenorelease-summary
+          path: summary_no_release.csv
