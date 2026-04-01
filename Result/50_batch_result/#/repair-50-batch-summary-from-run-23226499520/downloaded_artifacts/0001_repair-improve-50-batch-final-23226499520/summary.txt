@@ -1,0 +1,8 @@
+total_rows=360
+compare_rows=360
+ok_rows=360
+error_rows=0
+patch_rows_applied=360
+patch_rows_non_ok=0
+final_csv=Result/repair_50_batch_matrix/50_batch_improved.csv
+final_compare=Result/repair_50_batch_matrix/50_batch_improved_compare.csv

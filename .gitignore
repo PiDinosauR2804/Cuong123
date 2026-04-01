@@ -1,5 +1,11 @@
 .env
 *.csv
 *.xlsx
+!result/Question4,14/50_best_fix_demand1.xlsx
+!result/Question4,14/#/*.xlsx
+!result/Question4,14/#/50_fix_demand_all.xlsx
+!result/Question4,14/tracked_inputs_2truck_1drone/*.csv
+!result/Question4,14/refined_csv_2truck_1drone/*.csv
+!result/Question4,14/To_refine_csv_2truck_1drone/*.csv
 *.bak*
 *.log

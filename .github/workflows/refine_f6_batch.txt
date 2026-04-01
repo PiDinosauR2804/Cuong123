@@ -1,0 +1,403 @@
+name: Refine F6 Batch CSV
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      n_truck:
+        description: "Number of trucks"
+        required: false
+        default: "2"
+      n_drone:
+        description: "Number of drones"
+        required: false
+        default: "2"
+      ls_time_limit_sec:
+        description: "Local-search time limit per row (seconds)"
+        required: false
+        default: "120"
+      max_jobs:
+        description: "Maximum matrix jobs"
+        required: false
+        default: "250"
+      csv_files:
+        description: "CSV list (JSON array or newline list). Empty = defaults in YAML."
+        required: false
+        default: ""
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+      total_jobs: ${{ steps.mk.outputs.total_jobs }}
+      total_chunks: ${{ steps.mk.outputs.total_chunks }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install matrix deps
+        run: python -m pip install --upgrade pip openpyxl
+      - name: Build row-chunk matrix (balanced, max 250 jobs)
+        id: mk
+        env:
+          CSV_FILES_INPUT: ${{ github.event.inputs.csv_files || 'result/Question4,14/#/50_batch_all_valid.xlsx' }}
+          MAX_JOBS_INPUT: ${{ github.event.inputs.max_jobs || '250' }}
+          DEFAULT_CSV_FILES: |
+            result/Question4,14/#/50_batch_all_valid.xlsx
+            result/Question4,14/To_refine_csv_2truck_1drone/50 batch cluster 2 truck 1 drone.csv
+        run: |
+          python - << 'PY'
+          import csv
+          import json
+          import math
+          import os
+          import pathlib
+          import re
+          from collections import defaultdict
+          from openpyxl import load_workbook
+
+          def parse_csv_list(raw: str):
+              raw = (raw or "").strip()
+              if not raw:
+                  return []
+              if raw.startswith("["):
+                  arr = json.loads(raw)
+                  if not isinstance(arr, list):
+                      raise SystemExit("csv_files JSON must be an array")
+                  return [str(x).strip() for x in arr if str(x).strip()]
+              out = []
+              for ln in raw.splitlines():
+                  s = ln.strip()
+                  if s:
+                      out.append(s)
+              return out
+
+          def sanitize(s: str) -> str:
+              return re.sub(r"[^A-Za-z0-9_.-]+", "_", s)
+
+          user_list = parse_csv_list(os.environ.get("CSV_FILES_INPUT", ""))
+          default_list = parse_csv_list(os.environ.get("DEFAULT_CSV_FILES", ""))
+          chosen = user_list if user_list else default_list
+          if not chosen:
+              raise SystemExit("No csv_files provided and DEFAULT_CSV_FILES is empty")
+
+          max_jobs = int((os.environ.get("MAX_JOBS_INPUT") or "250").strip())
+          if max_jobs <= 0:
+              max_jobs = 250
+
+          files = []
+          seen = set()
+          missing = []
+          for s in chosen:
+              p = pathlib.Path(s)
+              if not p.is_file():
+                  missing.append(str(p))
+                  continue
+              key = str(p)
+              if key in seen:
+                  continue
+              seen.add(key)
+              files.append(p)
+
+          for m in missing:
+              print(f"[WARN] input not found on runner, skip: {m}")
+          if not files:
+              raise SystemExit("No input files found on runner after filtering missing paths")
+
+          row_count = {}
+          total_rows = 0
+          for p in files:
+              if p.suffix.lower() == ".xlsx":
+                  wb = load_workbook(p, read_only=True, data_only=True)
+                  ws = wb[wb.sheetnames[0]]
+                  n_data = max(0, sum(1 for _ in ws.iter_rows(values_only=True)) - 1)
+              else:
+                  with p.open(newline="", encoding="utf-8") as f:
+                      n_data = max(0, sum(1 for _ in f) - 1)
+              row_count[p] = n_data
+              total_rows += n_data
+
+          if total_rows <= 0:
+              raise SystemExit("All CSV files are empty (no data rows)")
+
+          total_jobs = min(max_jobs, total_rows)
+          # Allocate jobs proportionally by row counts.
+          jobs_per_file = {p: 0 for p in files}
+          for p in files:
+              n = row_count[p]
+              if n > 0:
+                  jobs_per_file[p] = max(1, int((n * total_jobs) // total_rows))
+          assigned = sum(jobs_per_file.values())
+          # Adjust to exact total_jobs.
+          if assigned < total_jobs:
+              extra = total_jobs - assigned
+              order = sorted(
+                  [p for p in files if row_count[p] > 0],
+                  key=lambda p: (row_count[p] / max(1, jobs_per_file[p])),
+                  reverse=True,
+              )
+              i = 0
+              while extra > 0 and order:
+                  p = order[i % len(order)]
+                  jobs_per_file[p] += 1
+                  extra -= 1
+                  i += 1
+          elif assigned > total_jobs:
+              need = assigned - total_jobs
+              order = sorted(
+                  [p for p in files if jobs_per_file[p] > 1],
+                  key=lambda p: jobs_per_file[p],
+                  reverse=True,
+              )
+              i = 0
+              while need > 0 and order:
+                  p = order[i % len(order)]
+                  if jobs_per_file[p] > 1:
+                      jobs_per_file[p] -= 1
+                      need -= 1
+                  i += 1
+
+          tasks = []
+          job_id = 0
+          for p in files:
+              n_data = row_count[p]
+              k = min(jobs_per_file[p], n_data) if n_data > 0 else 0
+              if k <= 0:
+                  continue
+              base = n_data // k
+              rem = n_data % k
+              start = 1
+              csv_key = sanitize(p.stem)
+              for chunk_id in range(1, k + 1):
+                  span = base + (1 if chunk_id <= rem else 0)
+                  end = start + span - 1
+                  job_id += 1
+                  tasks.append({
+                      "job_id": job_id,
+                      "csv": str(p),
+                      "csv_stem": p.stem,
+                      "csv_key": csv_key,
+                      "chunk_id": chunk_id,
+                      "row_start": start,
+                      "row_end": end,
+                      "chunk_size": span
+                  })
+                  start = end + 1
+
+          if not tasks:
+              raise SystemExit("No chunk tasks generated")
+
+          with open("matrix.json", "w", encoding="utf-8") as f:
+              json.dump(tasks, f)
+
+          print(f"Total rows: {total_rows}")
+          print(f"Total matrix jobs: {len(tasks)} (max_jobs={max_jobs})")
+          for p in files:
+              n_data = row_count[p]
+              print(f" - {p}: rows={n_data}, chunks={jobs_per_file[p]}")
+          PY
+
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$(python - << 'PY'
+          import json
+          print(len(json.load(open("matrix.json"))))
+          PY
+          )" >> "$GITHUB_OUTPUT"
+          echo "total_chunks=$(python - << 'PY'
+          import json
+          m = json.load(open("matrix.json"))
+          print(len(m))
+          PY
+          )" >> "$GITHUB_OUTPUT"
+
+  refine:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install matrix deps
+        run: python -m pip install --upgrade pip openpyxl
+
+      - name: Build read_data_f6
+        run: g++ -std=c++17 -O2 C_Version/Function6.cpp -o C_Version/read_data_f6
+
+      - name: Build sub-CSV for this chunk
+        env:
+          CSV_PATH: ${{ matrix.task.csv }}
+          ROW_START: ${{ matrix.task.row_start }}
+          ROW_END: ${{ matrix.task.row_end }}
+          CSV_KEY: ${{ matrix.task.csv_key }}
+          CHUNK_ID: ${{ matrix.task.chunk_id }}
+        run: |
+          mkdir -p chunk_work
+          python - << 'PY'
+          import csv
+          import os
+          import pathlib
+          from openpyxl import load_workbook
+
+          src = pathlib.Path(os.environ["CSV_PATH"])
+          row_start = int(os.environ["ROW_START"])
+          row_end = int(os.environ["ROW_END"])
+          csv_key = os.environ["CSV_KEY"]
+          chunk_id = int(os.environ["CHUNK_ID"])
+
+          out = pathlib.Path("chunk_work") / f"{csv_key}__chunk_{chunk_id}.csv"
+          rows = []
+          if src.suffix.lower() == ".xlsx":
+              wb = load_workbook(src, read_only=True, data_only=True)
+              ws = wb[wb.sheetnames[0]]
+              it = ws.iter_rows(values_only=True)
+              header = next(it, None)
+              fields = [str(x) if x is not None else "" for x in (header or [])]
+              if "__row_idx" not in fields:
+                  fields.append("__row_idx")
+              for idx, vals in enumerate(it, start=1):
+                  if idx < row_start or idx > row_end:
+                      continue
+                  row = {}
+                  for i, c in enumerate(fields):
+                      if c == "__row_idx":
+                          continue
+                      row[c] = "" if i >= len(vals) or vals[i] is None else str(vals[i])
+                  row["__row_idx"] = str(idx)
+                  rows.append(row)
+          else:
+              with src.open(newline="", encoding="utf-8") as f:
+                  r = csv.DictReader(f)
+                  fields = list(r.fieldnames or [])
+                  if "__row_idx" not in fields:
+                      fields.append("__row_idx")
+                  for idx, row in enumerate(r, start=1):
+                      if idx < row_start or idx > row_end:
+                          continue
+                      row["__row_idx"] = str(idx)
+                      rows.append(row)
+          with out.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fields)
+              w.writeheader()
+              w.writerows(rows)
+          print(f"Wrote chunk csv: {out} rows={len(rows)}")
+          PY
+
+      - name: Run refine/improve/recompute for this chunk
+        env:
+          WORKERS: "3"
+          LS_TIME_LIMIT_SEC: ${{ github.event.inputs.ls_time_limit_sec || '120' }}
+          N_TRUCK: ${{ github.event.inputs.n_truck || '2' }}
+          N_DRONE: ${{ github.event.inputs.n_drone || '2' }}
+          CSV_KEY: ${{ matrix.task.csv_key }}
+          CHUNK_ID: ${{ matrix.task.chunk_id }}
+        run: |
+          INPUT_CSV="chunk_work/${CSV_KEY}__chunk_${CHUNK_ID}.csv"
+          python refine_improve_recompute_batch_f6.py \
+            --inputs "$INPUT_CSV" \
+            --tracked-input-dir "chunk_work/tracked_inputs" \
+            --out-dir "chunk_work/refined" \
+            --ls-out-dir "chunk_work/ls_outputs" \
+            --solver-bin C_Version/read_data_f6 \
+            --n-truck "$N_TRUCK" \
+            --n-drone "$N_DRONE" \
+            --workers "$WORKERS" \
+            --ls-time-limit-sec "$LS_TIME_LIMIT_SEC"
+
+      - name: Prepare chunk artifact
+        env:
+          CSV_KEY: ${{ matrix.task.csv_key }}
+          CHUNK_ID: ${{ matrix.task.chunk_id }}
+        run: |
+          mkdir -p chunk_out
+          cp "chunk_work/refined/${CSV_KEY}__chunk_${CHUNK_ID}_refine.csv" \
+             "chunk_out/${CSV_KEY}__chunk_${CHUNK_ID}.csv"
+
+      - name: Upload chunk artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chunk-${{ matrix.task.csv_key }}-${{ matrix.task.chunk_id }}
+          path: chunk_out/
+          if-no-files-found: error
+
+  merge:
+    needs: [build-matrix, refine]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: downloaded
+      - name: Merge chunk outputs back to full refined CSV
+        env:
+          MATRIX_JSON: ${{ needs.build-matrix.outputs.matrix }}
+        run: |
+          python - << 'PY'
+          import csv
+          import json
+          import pathlib
+          from collections import defaultdict
+
+          def normalized_output_stem(stem: str) -> str:
+              s = (stem or "").strip()
+              if s.endswith("_input"):
+                  s = s[: -len("_input")]
+              return s or stem
+
+          tasks = json.loads((pathlib.os.environ.get("MATRIX_JSON") or "[]"))
+          by_csv = defaultdict(list)
+          for t in tasks:
+              by_csv[t["csv"]].append(t)
+
+          out_dir = pathlib.Path("result/Question4,14/refined_csv_2truck_1drone")
+          out_dir.mkdir(parents=True, exist_ok=True)
+
+          for csv_path, group in by_csv.items():
+              group = sorted(group, key=lambda x: int(x["chunk_id"]))
+              csv_stem = normalized_output_stem(group[0]["csv_stem"])
+              csv_key = group[0]["csv_key"]
+              merged_rows = []
+              fieldnames = None
+
+              for t in group:
+                  chunk_name = f"{csv_key}__chunk_{t['chunk_id']}.csv"
+                  candidates = list(pathlib.Path("downloaded").rglob(chunk_name))
+                  if not candidates:
+                      raise SystemExit(f"Missing chunk artifact file: {chunk_name}")
+                  cp = candidates[0]
+                  with cp.open(newline="", encoding="utf-8") as f:
+                      r = csv.DictReader(f)
+                      if fieldnames is None:
+                          fieldnames = list(r.fieldnames or [])
+                      for row in r:
+                          merged_rows.append(row)
+
+              if fieldnames is None:
+                  continue
+              merged_rows.sort(key=lambda r: int(r.get("__row_idx", "0")))
+              out_fields = [c for c in fieldnames if c != "__row_idx"]
+              out_path = out_dir / f"{csv_stem}_refine.csv"
+              with out_path.open("w", newline="", encoding="utf-8") as f:
+                  w = csv.DictWriter(f, fieldnames=out_fields)
+                  w.writeheader()
+                  for r in merged_rows:
+                      r.pop("__row_idx", None)
+                      w.writerow({k: r.get(k, "") for k in out_fields})
+              print(f"Wrote merged refined csv: {out_path} rows={len(merged_rows)}")
+          PY
+
+      - name: Upload merged refined outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refined-f6-merged
+          path: result/Question4,14/refined_csv_2truck_1drone
+          if-no-files-found: warn

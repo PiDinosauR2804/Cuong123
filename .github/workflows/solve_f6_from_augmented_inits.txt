@@ -1,0 +1,585 @@
+name: Solve F6 From Augmented Inits
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      base_dir:
+        description: "Folder containing *.dat and *_solution.json"
+        required: false
+        default: "result/generated_instances/c101_cluster5_strategies_augmented"
+      dat_glob:
+        description: "Glob pattern for dat files inside base_dir"
+        required: false
+        default: "*.dat"
+      a_values:
+        description: "Comma-separated A (M_d) values, e.g. 4,8"
+        required: false
+        default: "8"
+      l_values:
+        description: "Comma-separated L (L_d) values, e.g. 40,60,90"
+        required: false
+        default: "60,90,120"
+      solver_time_limit_sec:
+        description: "Solver time limit per instance in seconds (capped at 3600)"
+        required: false
+        default: "3600"
+      ats_seg:
+        description: "ATS SEG (segments without global improvement before diversification)"
+        required: false
+        default: "4"
+      ats_div:
+        description: "ATS DIV (diversification rounds without improvement before stop)"
+        required: false
+        default: "3"
+      ats_max_iters:
+        description: "ATS_MAX_ITERS cap (-1 means no cap)"
+        required: false
+        default: "-1"
+      ls_shake_on_stagnation:
+        description: "Enable LS shake when stagnated (1/0)"
+        required: false
+        default: "1"
+      ls_max_shakes:
+        description: "Maximum stagnation shakes in LS"
+        required: false
+        default: "500"
+      ls_max_applied:
+        description: "Cap LS accepted moves (-1 means no cap)"
+        required: false
+        default: "-1"
+      runs_per_instance:
+        description: "Number of repeated runs per instance"
+        required: false
+        default: "2"
+      target_jobs:
+        description: "Target number of shard jobs to split tasks across"
+        required: false
+        default: "250"
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+      total_jobs: ${{ steps.mk.outputs.total_jobs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build instance/seed matrix
+        id: mk
+        env:
+          BASE_DIR: ${{ github.event.inputs.base_dir || 'result/generated_instances/c101_cluster5_strategies_augmented' }}
+          DAT_GLOB: ${{ github.event.inputs.dat_glob || '*.dat' }}
+          A_VALUES: ${{ github.event.inputs.a_values || '8' }}
+          L_VALUES: ${{ github.event.inputs.l_values || '60,90,120' }}
+          RUNS_PER_INSTANCE: ${{ github.event.inputs.runs_per_instance || '2' }}
+          TARGET_JOBS: ${{ github.event.inputs.target_jobs || '250' }}
+        run: |
+          python - << 'PY'
+          import json
+          import os
+          import pathlib
+          import sys
+
+          base_dir = pathlib.Path("${{ env.BASE_DIR }}")
+          dat_glob = "${{ env.DAT_GLOB }}"
+          a_values_raw = "${{ env.A_VALUES }}"
+          l_values_raw = "${{ env.L_VALUES }}"
+          runs_per_instance = int("${{ env.RUNS_PER_INSTANCE }}")
+          target_jobs = int("${{ env.TARGET_JOBS }}")
+          if runs_per_instance <= 0:
+              runs_per_instance = 1
+          if target_jobs <= 0:
+              target_jobs = 1
+
+          def parse_values(raw):
+              vals = []
+              for x in raw.replace(";", ",").split(","):
+                  s = x.strip()
+                  if s:
+                      vals.append(s)
+              return vals
+
+          a_values = parse_values(a_values_raw)
+          l_values = parse_values(l_values_raw)
+          if not a_values:
+              raise SystemExit("No A values provided (A_VALUES is empty)")
+          if not l_values:
+              raise SystemExit("No L values provided (L_VALUES is empty)")
+
+          if not base_dir.is_dir():
+              raise SystemExit(f"BASE_DIR not found: {base_dir}")
+
+          base_tasks = []
+          for dat in sorted(base_dir.glob(dat_glob)):
+              if dat.name.endswith("_solution.json"):
+                  continue
+              sol = dat.with_name(f"{dat.stem}_solution.json")
+              if not sol.is_file():
+                  raise SystemExit(f"Missing seed solution for {dat.name}: expected {sol.name}")
+              base_tasks.append({
+                  "name": dat.stem,
+                  "dat": str(dat),
+                  "seed": str(sol),
+              })
+
+          if not base_tasks:
+              raise SystemExit(f"No instances found with pattern {dat_glob} under {base_dir}")
+
+          tasks = []
+          for t in base_tasks:
+              for a in a_values:
+                  for l in l_values:
+                      for run_id in range(1, runs_per_instance + 1):
+                          x = dict(t)
+                          x["A"] = a
+                          x["L"] = l
+                          x["run_id"] = run_id
+                          x["name_run"] = f'{t["name"]}__A{a}_L{l}__run{run_id}'
+                          tasks.append(x)
+
+          shard_count = min(target_jobs, len(tasks))
+          shards = [{"shard_id": i + 1, "tasks": []} for i in range(shard_count)]
+          for i, task in enumerate(tasks):
+              shards[i % shard_count]["tasks"].append(task)
+
+          pathlib.Path("matrix.json").write_text(json.dumps(shards), encoding="utf-8")
+          print(
+              f"Prepared {len(tasks)} tasks into {shard_count} shard jobs "
+              f"({len(base_tasks)} instances x {len(a_values)} A-values x {len(l_values)} L-values x {runs_per_instance} runs)"
+          )
+          PY
+
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$(python - << 'PY'
+          import json
+          print(len(json.load(open("matrix.json", "r", encoding="utf-8"))))
+          PY
+          )" >> "$GITHUB_OUTPUT"
+
+  solve:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 250
+      matrix:
+        shard: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build read_data_f6
+        run: g++ -std=c++17 -O2 C_Version/Function6.cpp -o C_Version/read_data_f6
+
+      - name: Solve shard tasks and build per-run summaries
+        env:
+          SHARD_ID: ${{ matrix.shard.shard_id }}
+          SHARD_TASKS: ${{ toJson(matrix.shard.tasks) }}
+          SOLVER_TIME_LIMIT_SEC: ${{ github.event.inputs.solver_time_limit_sec || '3600' }}
+          ATS_SEG: ${{ github.event.inputs.ats_seg || '4' }}
+          ATS_DIV: ${{ github.event.inputs.ats_div || '3' }}
+          ATS_MAX_ITERS: ${{ github.event.inputs.ats_max_iters || '-1' }}
+          LS_SHAKE_ON_STAGNATION: ${{ github.event.inputs.ls_shake_on_stagnation || '1' }}
+          LS_MAX_SHAKES: ${{ github.event.inputs.ls_max_shakes || '500' }}
+          LS_MAX_APPLIED: ${{ github.event.inputs.ls_max_applied || '-1' }}
+          N_TRUCK: "2"
+          N_DRONE: "1"
+          SKIP_ATS: "0"
+          SOL_OUT_DIR: run_outputs
+        run: |
+          mkdir -p run_logs
+          mkdir -p run_outputs
+          python - << 'PY'
+          import json
+          import pathlib
+          import re
+          import os
+          import ast
+          import math
+          import subprocess
+          import sys
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+
+          shard_id = os.environ["SHARD_ID"]
+          tasks = json.loads(os.environ["SHARD_TASKS"])
+          if not isinstance(tasks, list):
+              raise SystemExit("SHARD_TASKS is not a list")
+          print(f"[SHARD] id={shard_id} size={len(tasks)}")
+          max_workers = 2
+          print(f"[SHARD] parallel workers={max_workers}")
+          try:
+              solver_limit_sec = float(os.environ.get("SOLVER_TIME_LIMIT_SEC", "3600"))
+          except Exception:
+              solver_limit_sec = 3600.0
+          solver_limit_sec = max(1.0, min(3600.0, solver_limit_sec))
+          solver_limit_str = str(int(solver_limit_sec)) if abs(solver_limit_sec - int(solver_limit_sec)) < 1e-9 else str(solver_limit_sec)
+          print(f"[SHARD] solver time limit cap applied: {solver_limit_str}s")
+
+          def first_float(txt, pattern):
+              m = re.search(pattern, txt)
+              if not m:
+                  return None
+              try:
+                  return float(m.group(1))
+              except Exception:
+                  return None
+
+          def first_text(txt, pattern):
+              m = re.search(pattern, txt)
+              return m.group(1).strip() if m else ""
+
+          def clean_path(p):
+              x = (p or "").strip()
+              if x in {"(write failed)", "(not found)"}:
+                  return ""
+              return x
+
+          def read_solution_text(path_str):
+              if not path_str:
+                  return ""
+              p = pathlib.Path(path_str)
+              if not p.is_absolute():
+                  p = pathlib.Path(".") / p
+              if not p.exists():
+                  return ""
+              return p.read_text(encoding="utf-8", errors="replace").strip()
+
+          def parse_solution(sol_text):
+              if not sol_text:
+                  return None
+              try:
+                  return ast.literal_eval(sol_text)
+              except Exception:
+                  return None
+
+          def parse_dat_meta(dat_path):
+              sigma = 1.0
+              coords = {}
+              lines = pathlib.Path(dat_path).read_text(encoding="utf-8", errors="replace").splitlines()
+              i = 0
+              while i < len(lines):
+                  ln = lines[i].strip()
+                  if not ln:
+                      i += 1
+                      continue
+                  t = ln.split()
+                  key = t[0]
+                  if key.upper() == "SIGMA" and len(t) >= 2:
+                      try:
+                          sigma = float(t[-1])
+                      except Exception:
+                          pass
+                  if key.upper() == "XCOORD":
+                      i += 1
+                      while i < len(lines):
+                          s = lines[i].strip()
+                          if not s:
+                              i += 1
+                              continue
+                          if s.split()[0].isalpha():
+                              break
+                          tok = s.split()
+                          if len(tok) >= 3:
+                              try:
+                                  cid = int(tok[0]); x = float(tok[1]); y = float(tok[2])
+                                  coords[cid] = (x, y)
+                              except Exception:
+                                  pass
+                          i += 1
+                      continue
+                  i += 1
+              return sigma, coords
+
+          def dist(coords, a, b):
+              ax, ay = coords.get(a, (0.0, 0.0))
+              bx, by = coords.get(b, (0.0, 0.0))
+              return math.hypot(ax - bx, ay - by)
+
+          def metrics_from_solution(sol, sigma, coords):
+              # sol shape: [truck_routes, drone_queue]
+              if not isinstance(sol, list) or len(sol) < 2:
+                  return {"trip_count": 0, "multi_count": 0, "avg_customers": None, "avg_trip_time": None}
+              dq = sol[1] if isinstance(sol[1], list) else []
+              trip_count = len(dq)
+              if trip_count == 0:
+                  return {"trip_count": 0, "multi_count": 0, "avg_customers": 0.0, "avg_trip_time": 0.0}
+              multi_count = 0
+              total_pkg = 0
+              total_trip_time = 0.0
+              for tr in dq:
+                  events = tr if isinstance(tr, list) else []
+                  if len(events) >= 2:
+                      multi_count += 1
+                  total_pkg += sum(len(ev[1]) for ev in events if isinstance(ev, list) and len(ev) >= 2 and isinstance(ev[1], list))
+                  nodes = [0] + [int(ev[0]) for ev in events if isinstance(ev, list) and len(ev) >= 1] + [0]
+                  t = 0.0
+                  for i in range(len(nodes) - 1):
+                      t += dist(coords, nodes[i], nodes[i + 1]) / max(1e-9, sigma)
+                  total_trip_time += t
+              avg_customers = total_pkg / trip_count if trip_count > 0 else 0.0
+              avg_trip_time = total_trip_time / trip_count if trip_count > 0 else 0.0
+              return {
+                  "trip_count": trip_count,
+                  "multi_count": multi_count,
+                  "avg_customers": avg_customers,
+                  "avg_trip_time": avg_trip_time,
+              }
+
+          def process_task(t):
+              dat_path = t["dat"]
+              seed_path = t["seed"]
+              instance_name = t["name"]
+              run_name = t["name_run"]
+              run_id = int(t["run_id"])
+              m_d = str(t["A"])
+              l_d = str(t["L"])
+
+              print(f"[RUN] {run_name}")
+              print(f"DAT={dat_path}")
+              print(f"SEED={seed_path}")
+              print(f"RUN_ID={run_id}")
+              print(f"M_d={m_d} L_d={l_d}")
+              print(f"SOLVER_TIME_LIMIT_SEC={solver_limit_str}")
+              print(f"ATS_SEG={os.environ['ATS_SEG']} ATS_DIV={os.environ['ATS_DIV']} ATS_MAX_ITERS={os.environ['ATS_MAX_ITERS']}")
+              print(f"LS_SHAKE_ON_STAGNATION={os.environ['LS_SHAKE_ON_STAGNATION']} LS_MAX_SHAKES={os.environ['LS_MAX_SHAKES']} LS_MAX_APPLIED={os.environ['LS_MAX_APPLIED']}")
+              print(f"N_TRUCK={os.environ['N_TRUCK']} N_DRONE={os.environ['N_DRONE']}")
+              print(f"SKIP_ATS={os.environ['SKIP_ATS']}")
+
+              log_path = pathlib.Path(f"run_logs/{run_name}.log")
+              run_out_dir = pathlib.Path("run_outputs") / run_name
+              run_out_dir.mkdir(parents=True, exist_ok=True)
+              env = os.environ.copy()
+              env["SOLVER_TIME_LIMIT_SEC"] = solver_limit_str
+              env["SOL_OUT_DIR"] = str(run_out_dir)
+              with log_path.open("w", encoding="utf-8") as lf:
+                  proc = subprocess.run(
+                      ["C_Version/read_data_f6", dat_path, m_d, l_d, seed_path],
+                      stdout=lf,
+                      stderr=subprocess.STDOUT,
+                      env=env,
+                      check=False,
+                  )
+
+              txt = log_path.read_text(encoding="utf-8", errors="replace") if log_path.exists() else ""
+              best_solution_path = first_text(txt, r"\[SOL\] best solution file:\s*(.+)")
+              best_multi_path = first_text(txt, r"\[SOL\] best multi-visit solution file:\s*(.+)")
+              best_multi_fit = first_float(txt, r"\[SOL\] best multi-visit makespan:\s*([0-9]+(?:\.[0-9]+)?)")
+              best_fit = first_float(txt, r"Makespan:\s*([0-9]+(?:\.[0-9]+)?)")
+              best_solution_path = clean_path(best_solution_path)
+              best_multi_path = clean_path(best_multi_path)
+              best_solution_text = read_solution_text(best_solution_path)
+              best_multi_text = read_solution_text(best_multi_path)
+              best_sol_obj = parse_solution(best_solution_text)
+              best_multi_obj = parse_solution(best_multi_text)
+
+              sigma, coords = parse_dat_meta(dat_path)
+              best_m = metrics_from_solution(best_sol_obj, sigma, coords) if best_sol_obj is not None else {}
+              best_multi_m = metrics_from_solution(best_multi_obj, sigma, coords) if best_multi_obj is not None else {}
+              m = re.match(r"^([A-Za-z]+[0-9]+)_([0-9]+(?:\.[0-9]+)?)", instance_name)
+              group = m.group(1) if m else instance_name.split("_")[0]
+              beta = m.group(2) if m else ""
+
+              result = {
+                  "job_id": "",
+                  "instance": instance_name,
+                  "A": m_d,
+                  "L": l_d,
+                  "run_index": run_id,
+                  "best_fitness": best_fit,
+                  "best_solution": best_solution_text,
+                  "best_multi_fitness": best_multi_fit,
+                  "best_multi_solution": best_multi_text,
+                  "best_drone_avg_trip_time": best_m.get("avg_trip_time"),
+                  "best_multi_visit_trip_count": best_m.get("multi_count"),
+                  "best_drone_trip_count": best_m.get("trip_count"),
+                  "best_avg_customers_per_trip": best_m.get("avg_customers"),
+                  "best_multi_drone_avg_trip_time": best_multi_m.get("avg_trip_time"),
+                  "best_multi_multi_visit_trip_count": best_multi_m.get("multi_count"),
+                  "best_multi_drone_trip_count": best_multi_m.get("trip_count"),
+                  "best_multi_avg_customers_per_trip": best_multi_m.get("avg_customers"),
+                  "best_solution_file": best_solution_path,
+                  "best_multi_solution_file": best_multi_path,
+                  "log": str(log_path),
+                  "Group": group,
+                  "beta": beta,
+                  "instance_name": instance_name,
+                  "instance_run_name": run_name,
+                  "dat_path": dat_path,
+                  "seed_path": seed_path,
+              }
+              out = pathlib.Path(f"run_logs/{run_name}.summary.json")
+              out.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
+              print(out)
+              return run_name, proc.returncode
+
+          failures = []
+          with ThreadPoolExecutor(max_workers=max_workers) as ex:
+              futures = [ex.submit(process_task, t) for t in tasks]
+              for fut in as_completed(futures):
+                  run_name, code = fut.result()
+                  if code != 0:
+                      failures.append((run_name, code))
+
+          if failures:
+              print(f"[SHARD] failures: {len(failures)}")
+              for name, code in failures:
+                  print(f"  - {name}: exit={code}")
+              sys.exit(1)
+          PY
+
+      - name: Upload run log
+        uses: actions/upload-artifact@v4
+        with:
+          name: solve-log-shard-${{ matrix.shard.shard_id }}
+          path: |
+            run_logs/*.log
+            run_logs/*.summary.json
+            run_outputs/**
+
+  summary:
+    needs: [build-matrix, solve]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build read_data_f6 for recompute
+        run: g++ -std=c++17 -O2 C_Version/Function6.cpp -o C_Version/read_data_f6
+
+      - name: Download all solve artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all_artifacts
+          merge-multiple: true
+
+      - name: Merge summaries to CSV
+        run: |
+          python - << 'PY'
+          import csv
+          import json
+          import pathlib
+
+          root = pathlib.Path("all_artifacts")
+          rows = []
+          for p in sorted(root.rglob("*.summary.json")):
+              try:
+                  rows.append(json.loads(p.read_text(encoding="utf-8")))
+              except Exception:
+                  pass
+
+          out_dir = pathlib.Path("summary")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          out_csv = out_dir / "solve_f6_from_augmented_inits_summary.csv"
+          fields = [
+              "job_id",
+              "instance",
+              "A",
+              "L",
+              "run_index",
+              "best_fitness",
+              "best_solution",
+              "best_multi_fitness",
+              "best_multi_solution",
+              "best_drone_avg_trip_time",
+              "best_multi_visit_trip_count",
+              "best_drone_trip_count",
+              "best_avg_customers_per_trip",
+              "best_multi_drone_avg_trip_time",
+              "best_multi_multi_visit_trip_count",
+              "best_multi_drone_trip_count",
+              "best_multi_avg_customers_per_trip",
+              "best_solution_file",
+              "best_multi_solution_file",
+              "log",
+              "dat_path",
+              "seed_path",
+              "Group",
+              "beta",
+          ]
+          rows = sorted(
+              rows,
+              key=lambda r: (
+                  str(r.get("instance", "")),
+                  float(r.get("A", 0) or 0),
+                  float(r.get("L", 0) or 0),
+                  int(r.get("run_index", 0) or 0),
+              ),
+          )
+          with out_csv.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fields)
+              w.writeheader()
+              for idx, r in enumerate(rows, 1):
+                  r["job_id"] = idx
+                  w.writerow({k: r.get(k, "") for k in fields})
+
+          print(f"rows={len(rows)}")
+          print(out_csv)
+          PY
+
+      - name: Recompute metrics from best_solution and best_multi_solution (Function6-style)
+        run: |
+          N_TRUCK=2 N_DRONE=1 SOLVER_BIN=C_Version/read_data_f6 PARALLEL_JOBS=8 \
+            python recompute_metrics_from_solutions_csv.py summary/solve_f6_from_augmented_inits_summary.csv
+
+      - name: Remove rows with zero multi-visit in best_multi_solution
+        run: |
+          python - << 'PY'
+          import csv
+          import pathlib
+
+          csv_path = pathlib.Path("summary/solve_f6_from_augmented_inits_summary.csv")
+          with csv_path.open("r", newline="", encoding="utf-8") as f:
+              r = csv.DictReader(f)
+              rows = list(r)
+              fields = r.fieldnames or []
+
+          def to_float(x):
+              try:
+                  return float(str(x).strip())
+              except Exception:
+                  return None
+
+          kept = []
+          removed = 0
+          for row in rows:
+              bm = (row.get("best_multi_solution") or "").strip()
+              if not bm:
+                  kept.append(row)
+                  continue
+
+              mv = to_float(row.get("best_multi_multi_visit_trip_count", ""))
+              if mv is None:
+                  mv = to_float(row.get("best_multi_visit_trip_count", ""))
+
+              if mv is not None and mv == 0:
+                  removed += 1
+                  continue
+
+              kept.append(row)
+
+          with csv_path.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fields)
+              w.writeheader()
+              w.writerows(kept)
+
+          print(f"rows_before={len(rows)}")
+          print(f"rows_removed={removed}")
+          print(f"rows_after={len(kept)}")
+          print(csv_path)
+          PY
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: solve-f6-augmented-summary
+          path: summary/solve_f6_from_augmented_inits_summary.csv

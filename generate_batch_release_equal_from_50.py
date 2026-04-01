@@ -108,14 +108,24 @@ def build_random_batches(customers: List[List[int]], sizes: List[int], rng: rand
     return batches
 
 
-def assign_equal_interval_release_to_batches(batches: List[List[List[int]]], max_release: int):
+def assign_equal_interval_release_to_batches(
+    batches: List[List[List[int]]],
+    max_release: int,
+    rng: random.Random,
+    release_order: str,
+):
     batch_count = len(batches)
+    if batch_count == 0:
+        return
 
     if batch_count == 1:
         release_values = [max_release]
     else:
         step = max_release / float(batch_count - 1)
         release_values = [int(round(i * step)) for i in range(batch_count)]
+
+    if release_order == "random" and batch_count > 1:
+        rng.shuffle(release_values)
 
     for batch_idx, batch in enumerate(batches):
         rel = release_values[batch_idx]
@@ -131,6 +141,7 @@ def process_all(
     min_batch: int,
     max_batch: int,
     seed: int,
+    release_order: str,
 ):
     rng_cluster = random.Random(seed)
     rng_random = random.Random(seed + 1)
@@ -157,7 +168,7 @@ def process_all(
 
         sizes_cluster = build_batch_sizes(len(customers_base), min_batch, max_batch, rng_cluster)
         cluster_batches = build_clustered_batches(customers_base, sizes_cluster, (depot[0], depot[1]))
-        assign_equal_interval_release_to_batches(cluster_batches, current_max_release)
+        assign_equal_interval_release_to_batches(cluster_batches, current_max_release, rng_cluster, release_order)
         customers_cluster = [c for batch in cluster_batches for c in batch]
         out_rows_cluster = [depot] + customers_cluster
         dst_cluster = os.path.join(output_dir_cluster, os.path.basename(src))
@@ -166,7 +177,7 @@ def process_all(
 
         sizes_random = build_batch_sizes(len(customers_base), min_batch, max_batch, rng_random)
         random_batches = build_random_batches(customers_base, sizes_random, rng_random)
-        assign_equal_interval_release_to_batches(random_batches, current_max_release)
+        assign_equal_interval_release_to_batches(random_batches, current_max_release, rng_random, release_order)
         customers_random = [c for batch in random_batches for c in batch]
         out_rows_random = [depot] + customers_random
         dst_random = os.path.join(output_dir_random, os.path.basename(src))
@@ -203,6 +214,16 @@ def main():
     parser.add_argument("--min-batch-size", type=int, default=4, help="Minimum customers per batch.")
     parser.add_argument("--max-batch-size", type=int, default=8, help="Maximum customers per batch.")
     parser.add_argument("--seed", type=int, default=20260312)
+    parser.add_argument(
+        "--release-order",
+        choices=["random", "sequential"],
+        default="random",
+        help=(
+            "How equal-interval release values are mapped to batches. "
+            "'random' (default) removes near-depot -> early-release bias; "
+            "'sequential' keeps original behavior."
+        ),
+    )
     args = parser.parse_args()
 
     if args.min_batch_size < 1:
@@ -218,6 +239,7 @@ def main():
         min_batch=args.min_batch_size,
         max_batch=args.max_batch_size,
         seed=args.seed,
+        release_order=args.release_order,
     )
 
 

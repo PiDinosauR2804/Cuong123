@@ -1,0 +1,101 @@
+name: Solve F3 Cluster Instances
+on: [push, workflow_dispatch]
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total: ${{ steps.make-matrix.outputs.total }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build matrix
+        id: make-matrix
+        run: |
+          python -c "import glob,json,os; files=sorted(glob.glob('test_data/data_demand_cluster/50/*.dat')); A=[4,8]; L=[60,90,120]; jobs=[]; jid=0; [jobs.append({'job_id':(jid:=jid+1),'instance':f,'base':os.path.basename(f),'A':a,'L':l,'reps':3,'truck_count':2,'drone_count':1}) for f in files for a in A for l in L]; json.dump(jobs, open('matrix.json','w')); print(json.dumps(jobs))"
+          TOTAL=$(python -c "import json; print(len(json.load(open('matrix.json'))))")
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+          echo "Total jobs: $TOTAL"
+
+  solve:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: sudo apt-get update && sudo apt-get install -y parallel
+      - name: Build solver (Function3)
+        run: g++ -std=c++17 C_Version/Function3.cpp -O2 -o C_Version/read_data_f3
+      - name: Run task (2 runs parallel/job, 120-minute solver cap + LS dedup caps)
+        run: |
+          mkdir -p results
+          : > cmds.txt
+          for r in $(seq 1 ${{ matrix.task.reps }}); do
+            echo "N_TRUCK=${{ matrix.task.truck_count }} N_DRONE=${{ matrix.task.drone_count }} SOL_OUT_DIR=results FIX_DEMAND_EQUAL1=1 SOLVER_TIME_LIMIT_SEC=7200 LS_LIGHT_SEEN_CAP=200000 LS_STRONG_SEEN_CAP=200000 ./C_Version/read_data_f3 '${{ matrix.task.instance }}' '${{ matrix.task.A }}' '${{ matrix.task.L }}' > results/${{ matrix.task.base }}_A${{ matrix.task.A }}_L${{ matrix.task.L }}_r${r}.log" >> cmds.txt
+          done
+          cat cmds.txt
+          parallel -j3 < cmds.txt
+
+          python gha_write_run_meta.py \
+            --results-dir results \
+            --base "${{ matrix.task.base }}" \
+            --a "${{ matrix.task.A }}" \
+            --l "${{ matrix.task.L }}" \
+            --reps "${{ matrix.task.reps }}" \
+            --job-id "${{ matrix.task.job_id }}" \
+            --instance "${{ matrix.task.instance }}"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: solvef3-job-${{ matrix.task.job_id }}
+          path: results/
+
+  summarize:
+    needs: [build-matrix, solve]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded
+      - name: Build summary
+        run: |
+          python -c "import json,pathlib,csv; rows=[json.load(open(p)) for p in pathlib.Path('downloaded').rglob('meta_run*.json') if p.is_file()]; out=pathlib.Path('summary_f3_t2_d1.csv'); f=open(out,'w',newline=''); fields=['job_id','instance','A','L','run_index','best_fitness','best_solution','best_multi_fitness','best_multi_solution','best_drone_avg_trip_time','best_total_sortie_time','best_multi_visit_trip_count','best_drone_trip_count','best_avg_customers_per_trip','best_multi_drone_avg_trip_time','best_multi_total_sortie_time','best_multi_multi_visit_trip_count','best_multi_drone_trip_count','best_multi_avg_customers_per_trip','best_solution_file','best_multi_solution_file','log','best_avg_sortie_time','best_avg_truck_wait_for_drone','best_avg_drone_wait_for_truck','best_multi_avg_sortie_time','best_multi_avg_truck_wait_for_drone','best_multi_avg_drone_wait_for_truck']; w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore'); w.writeheader(); w.writerows(sorted(rows,key=lambda x:(x['job_id'], x.get('run_index',0)))); f.close(); print(f'Wrote {len(rows)} rows to {out}')"
+      - name: Build solver (Function3 validate)
+        run: g++ -std=c++17 C_Version/Function3.cpp -O2 -o C_Version/read_data_function3
+      - name: Recompute summary metrics with Function3
+        id: recompute
+        run: |
+          # Recompute all metrics from best_solution / best_multi_solution using
+          # Function3 validation path, so summary metrics match Function3.cpp logic.
+          set +e
+          N_TRUCK=2 N_DRONE=1 SOLVER_BIN=C_Version/read_data_function3 PARALLEL_JOBS=8 \
+            python recompute_metrics_from_solutions_csv.py summary_f3_t2_d1.csv
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ -f batch_init_ats_improved_with_multivisit_recompute_failures.csv ]; then
+            echo "Recompute failures report found."
+            wc -l batch_init_ats_improved_with_multivisit_recompute_failures.csv || true
+          fi
+          exit 0
+      - name: Upload summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: solvef3-summary-t2-d1
+          path: |
+            summary_f3_t2_d1.csv
+            batch_init_ats_improved_with_multivisit_recompute_failures.csv
+      - name: Fail job if recompute has errors
+        if: steps.recompute.outputs.rc != '0'
+        run: |
+          echo "Recompute returned non-zero exit code: ${{ steps.recompute.outputs.rc }}"
+          exit 1

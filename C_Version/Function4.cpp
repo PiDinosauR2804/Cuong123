@@ -4330,6 +4330,18 @@ int main(int argc, char** argv){
         } else {
             read_instance(path, p);
         }
+        const int env_n_truck = env_int("N_TRUCK", p.n_truck);
+        const int env_n_drone = env_int("N_DRONE", p.n_drone);
+        if (env_n_truck > 0 && env_n_truck != p.n_truck) {
+            std::cout << "[CFG] override trucks via N_TRUCK=" << env_n_truck
+                      << " (was " << p.n_truck << ")\n";
+            p.n_truck = env_n_truck;
+        }
+        if (env_n_drone >= 0 && env_n_drone != p.n_drone) {
+            std::cout << "[CFG] override drones via N_DRONE=" << env_n_drone
+                      << " (was " << p.n_drone << ")\n";
+            p.n_drone = env_n_drone;
+        }
         if (argc >= 3) p.M_d = stod(argv[2]);
         if (argc >= 4) p.L_d = stod(argv[3]);
         // Need to refresh reachability if L_d is overridden by CLI.

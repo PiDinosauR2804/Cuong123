@@ -139,13 +139,13 @@ def main():
     )
     parser.add_argument("--pattern", default="*.dat", help="Glob pattern for source files.")
     parser.add_argument("--min-batch-size", type=int, default=4, help="Minimum customers per release batch.")
-    parser.add_argument("--max-batch-size", type=int, default=7, help="Maximum customers per release batch.")
+    parser.add_argument("--max-batch-size", type=int, default=8, help="Maximum customers per release batch.")
     parser.add_argument("--delta-t", type=int, default=20, help="Time gap between consecutive batches.")
     parser.add_argument("--jitter", type=int, default=6, help="Random noise within each batch.")
     parser.add_argument("--seed", type=int, default=20260310)
     parser.add_argument("--number-truck", type=int, default=2)
-    parser.add_argument("--number-drone", type=int, default=1)
-    parser.add_argument("--drone-capacity", type=int, default=8)
+    parser.add_argument("--number-drone", type=int, default=2)
+    parser.add_argument("--drone-capacity", type=int, default=4)
     args = parser.parse_args()
 
     if args.min_batch_size < 1:

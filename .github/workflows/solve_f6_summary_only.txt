@@ -1,0 +1,199 @@
+name: Solve F6 Summary Only
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Run ID that already contains solve-log-shard-* artifacts"
+        required: true
+        default: "23725820891"
+      artifact_pattern:
+        description: "Artifact name pattern to download"
+        required: false
+        default: "solve-log-shard-*"
+      solver_bin:
+        description: "Solver binary for recompute (read_data_f6/read_data_functionX)"
+        required: false
+        default: "read_data_f6"
+      n_truck:
+        description: "Truck count for recompute validate"
+        required: false
+        default: "2"
+      n_drone:
+        description: "Drone count for recompute validate"
+        required: false
+        default: "1"
+      fix_demand_equal1:
+        description: "Set FIX_DEMAND_EQUAL1 for recompute (1/0)"
+        required: false
+        default: "1"
+
+jobs:
+  summary-only:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build solver for recompute
+        run: g++ -std=c++17 -O2 C_Version/Function6.cpp -o C_Version/read_data_f6
+
+      - name: Download solve artifacts from source run
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.inputs.source_run_id }}
+          github-token: ${{ github.token }}
+          pattern: ${{ github.event.inputs.artifact_pattern || 'solve-log-shard-*' }}
+          path: all_artifacts
+          merge-multiple: true
+
+      - name: Merge summaries to CSV
+        run: |
+          python - << 'PY'
+          import csv
+          import json
+          import pathlib
+
+          root = pathlib.Path("all_artifacts")
+          rows = []
+          for p in sorted(root.rglob("*.summary.json")):
+              try:
+                  rows.append(json.loads(p.read_text(encoding="utf-8")))
+              except Exception:
+                  pass
+
+          out_dir = pathlib.Path("summary")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          out_csv = out_dir / "solve_f6_from_augmented_inits_summary.csv"
+          fields = [
+              "job_id",
+              "instance",
+              "A",
+              "L",
+              "run_index",
+              "best_fitness",
+              "best_solution",
+              "best_multi_fitness",
+              "best_multi_solution",
+              "best_drone_avg_trip_time",
+              "best_multi_visit_trip_count",
+              "best_drone_trip_count",
+              "best_avg_customers_per_trip",
+              "best_multi_drone_avg_trip_time",
+              "best_multi_multi_visit_trip_count",
+              "best_multi_drone_trip_count",
+              "best_multi_avg_customers_per_trip",
+              "best_solution_file",
+              "best_multi_solution_file",
+              "log",
+              "dat_path",
+              "seed_path",
+              "Group",
+              "beta",
+          ]
+          rows = sorted(
+              rows,
+              key=lambda r: (
+                  str(r.get("instance", "")),
+                  float(r.get("A", 0) or 0),
+                  float(r.get("L", 0) or 0),
+                  int(r.get("run_index", 0) or 0),
+              ),
+          )
+          with out_csv.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fields)
+              w.writeheader()
+              for idx, r in enumerate(rows, 1):
+                  r["job_id"] = idx
+                  w.writerow({k: r.get(k, "") for k in fields})
+
+          print(f"rows={len(rows)}")
+          print(out_csv)
+          PY
+
+      - name: Recompute metrics from best_solution and best_multi_solution (Function6-style)
+        id: recompute
+        run: |
+          set +e
+          FIX_DEMAND_EQUAL1=${{ github.event.inputs.fix_demand_equal1 || '1' }} \
+          N_TRUCK=${{ github.event.inputs.n_truck || '2' }} \
+          N_DRONE=${{ github.event.inputs.n_drone || '1' }} \
+          SOLVER_BIN=C_Version/${{ github.event.inputs.solver_bin || 'read_data_f6' }} \
+          PARALLEL_JOBS=8 \
+            python recompute_metrics_from_solutions_csv.py summary/solve_f6_from_augmented_inits_summary.csv
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ -f batch_init_ats_improved_with_multivisit_recompute_failures.csv ]; then
+            echo "recompute_failures_lines=$(wc -l < batch_init_ats_improved_with_multivisit_recompute_failures.csv)" >> "$GITHUB_OUTPUT"
+          else
+            echo "recompute_failures_lines=0" >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+
+      - name: Remove rows with zero multi-visit in best_multi_solution
+        run: |
+          python - << 'PY'
+          import csv
+          import pathlib
+
+          csv_path = pathlib.Path("summary/solve_f6_from_augmented_inits_summary.csv")
+          with csv_path.open("r", newline="", encoding="utf-8") as f:
+              r = csv.DictReader(f)
+              rows = list(r)
+              fields = r.fieldnames or []
+
+          def to_float(x):
+              try:
+                  return float(str(x).strip())
+              except Exception:
+                  return None
+
+          kept = []
+          removed = 0
+          for row in rows:
+              bm = (row.get("best_multi_solution") or "").strip()
+              if not bm:
+                  kept.append(row)
+                  continue
+
+              mv = to_float(row.get("best_multi_multi_visit_trip_count", ""))
+              if mv is None:
+                  mv = to_float(row.get("best_multi_visit_trip_count", ""))
+
+              if mv is not None and mv == 0:
+                  removed += 1
+                  continue
+
+              kept.append(row)
+
+          with csv_path.open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fields)
+              w.writeheader()
+              w.writerows(kept)
+
+          print(f"rows_before={len(rows)}")
+          print(f"rows_removed={removed}")
+          print(f"rows_after={len(kept)}")
+          print(csv_path)
+          PY
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: solve-f6-summary-only
+          path: |
+            summary/solve_f6_from_augmented_inits_summary.csv
+            batch_init_ats_improved_with_multivisit_recompute_failures.csv
+          if-no-files-found: ignore
+
+      - name: Recompute warning
+        if: steps.recompute.outputs.rc != '0'
+        run: |
+          echo "Recompute had some row-level failures (exit code=${{ steps.recompute.outputs.rc }})."
+          echo "Failures report lines: ${{ steps.recompute.outputs.recompute_failures_lines }}"

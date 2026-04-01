@@ -1,0 +1,16 @@
+{
+  "owner": "PiDinosauR2804",
+  "repo": "Cuong123",
+  "run_id": 23226499520,
+  "artifacts_total": 182,
+  "artifacts_selected": 1,
+  "final_csv": "/home/runner/work/Cuong123/Cuong123/Result/github_run_summaries/run_23226499520/50_batch_improved_from_run.csv",
+  "final_compare_csv": "/home/runner/work/Cuong123/Cuong123/Result/github_run_summaries/run_23226499520/50_batch_improved_compare_from_run.csv",
+  "compact_summary_csv": "/home/runner/work/Cuong123/Cuong123/Result/github_run_summaries/run_23226499520/improved_solutions_summary.csv",
+  "mode": "use_final_artifact",
+  "source_final_csv": "/home/runner/work/Cuong123/Cuong123/Result/github_run_summaries/run_23226499520/downloaded_artifacts/0001_repair-improve-50-batch-final-23226499520/50_batch_improved.csv",
+  "summary_rows": 360,
+  "ok_rows": 360,
+  "error_rows": 0,
+  "used_final_artifact": true
+}

@@ -1,0 +1,329 @@
+name: Solve F3 From Excel Seeds
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      truck_count:
+        description: "Number of trucks"
+        required: true
+        default: "2"
+      drone_count:
+        description: "Number of drones"
+        required: true
+        default: "1"
+      a:
+        description: "Drone capacity A (single value, comma list, or JSON array: 4 | 4,8 | [4,8])"
+        required: true
+        default: "[4,8]"
+      l:
+        description: "Drone endurance L (single value, comma list, or JSON array: 120 | 60,90,120 | [60,90,120])"
+        required: true
+        default: "[60,90,120]"
+      instance_folder:
+        description: "Folder containing .dat instances"
+        required: true
+        default: "test_data/data_demand_random_50_batch_all1_equal_random"
+      reps:
+        description: "Repetitions per instance"
+        required: true
+        default: "3"
+      seed_xlsx:
+        description: "Excel file containing best_multi_solution / best_solution seeds"
+        required: true
+        default: "result/Question4,14/50_best_fix_demand1.xlsx"
+      seed_sheet:
+        description: "Excel sheet name (leave empty = first sheet)"
+        required: false
+        default: "yellow_rows"
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make-matrix.outputs.matrix }}
+      total_jobs: ${{ steps.make-matrix.outputs.total_jobs }}
+      total_batches: ${{ steps.make-matrix.outputs.total_batches }}
+      batch_size: ${{ steps.make-matrix.outputs.batch_size }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build matrix from folder + input parameters
+        id: make-matrix
+        env:
+          INSTANCE_FOLDER: ${{ github.event.inputs.instance_folder || 'test_data/data_demand_random/50' }}
+          A_VAL: ${{ github.event.inputs.a || '[4,8]' }}
+          L_VAL: ${{ github.event.inputs.l || '[60,90,120]' }}
+          REPS: ${{ github.event.inputs.reps || '3' }}
+          TRUCK_COUNT: ${{ github.event.inputs.truck_count || '2' }}
+          DRONE_COUNT: ${{ github.event.inputs.drone_count || '1' }}
+          MAX_MATRIX_JOBS: '250'
+        run: |
+          python - << 'PY'
+          import glob, json, os, math
+          
+          def parse_int_list(raw: str):
+              raw = (raw or "").strip()
+              if not raw:
+                  raise ValueError("Empty integer list input")
+              if raw.startswith("["):
+                  arr = json.loads(raw)
+                  if not isinstance(arr, list):
+                      raise ValueError(f"Expected JSON array but got: {raw!r}")
+                  vals = [int(x) for x in arr]
+                  if not vals:
+                      raise ValueError(f"Empty integer list from input: {raw!r}")
+                  return vals
+              vals = []
+              for part in raw.split(","):
+                  s = part.strip()
+                  if not s:
+                      continue
+                  vals.append(int(s))
+              if not vals:
+                  raise ValueError(f"Empty integer list from input: {raw!r}")
+              return vals
+          
+          folder = os.environ["INSTANCE_FOLDER"]
+          a_vals = parse_int_list(os.environ["A_VAL"])
+          l_vals = parse_int_list(os.environ["L_VAL"])
+          reps = int(os.environ["REPS"])
+          t = int(os.environ["TRUCK_COUNT"])
+          d = int(os.environ["DRONE_COUNT"])
+          files = sorted(glob.glob(f"{folder}/*.dat"))
+          jobs = []
+          jid = 0
+          for f in files:
+              for a in a_vals:
+                  for l in l_vals:
+                      jid += 1
+                      jobs.append({
+                          "job_id": jid,
+                          "instance": f,
+                          "base": os.path.basename(f),
+                          "A": a,
+                          "L": l,
+                          "reps": reps,
+                          "truck_count": t,
+                          "drone_count": d
+                      })
+          total_jobs = len(jobs)
+          if total_jobs == 0:
+              raise SystemExit(f"No .dat files found in folder: {folder}")
+
+          max_matrix_jobs = int(os.environ.get("MAX_MATRIX_JOBS", "250"))
+          if max_matrix_jobs <= 0:
+              max_matrix_jobs = 250
+          # Keep matrix size <= max_matrix_jobs by chunking tasks into batches.
+          batch_size = max(1, math.ceil(total_jobs / max_matrix_jobs))
+          batches = []
+          for i in range(0, total_jobs, batch_size):
+              chunk = jobs[i:i + batch_size]
+              batches.append({
+                  "batch_id": len(batches) + 1,
+                  "tasks": chunk
+              })
+
+          with open("matrix.json", "w", encoding="utf-8") as fp:
+              json.dump(batches, fp)
+          print(json.dumps(batches))
+          print(
+              f"Total task jobs: {total_jobs}, matrix batches: {len(batches)}, "
+              f"batch_size: {batch_size} (instances={len(files)}, A={a_vals}, L={l_vals})"
+          )
+          PY
+          TOTAL_JOBS=$(python - << 'PY'
+          import json
+          batches = json.load(open('matrix.json'))
+          print(sum(len(b["tasks"]) for b in batches))
+          PY
+          )
+          TOTAL_BATCHES=$(python - << 'PY'
+          import json
+          batches = json.load(open('matrix.json'))
+          print(len(batches))
+          PY
+          )
+          BATCH_SIZE=$(python - << 'PY'
+          import json
+          batches = json.load(open('matrix.json'))
+          print(max((len(b["tasks"]) for b in batches), default=0))
+          PY
+          )
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "total_jobs=$TOTAL_JOBS" >> "$GITHUB_OUTPUT"
+          echo "total_batches=$TOTAL_BATCHES" >> "$GITHUB_OUTPUT"
+          echo "batch_size=$BATCH_SIZE" >> "$GITHUB_OUTPUT"
+
+  solve:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 220
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y parallel python3-pip
+          python3 -m pip install --upgrade pip
+          python3 -m pip install openpyxl
+      - name: Build solver (Function3)
+        run: g++ -std=c++17 C_Version/Function3.cpp -O2 -o C_Version/read_data_f3
+      - name: Build seed from Excel and run task
+        env:
+          SEED_XLSX: ${{ github.event.inputs.seed_xlsx || 'result/Question4,14/50_batch_best_demand1.xlsx' }}
+          SEED_SHEET: ${{ github.event.inputs.seed_sheet || 'yellow_rows' }}
+          BATCH_JSON: ${{ toJson(matrix.batch) }}
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          python3 - << 'PY'
+          import json, os
+          batch = json.loads(os.environ["BATCH_JSON"])
+          with open("batch_tasks.json", "w", encoding="utf-8") as f:
+              json.dump(batch["tasks"], f)
+          print(f"Batch {batch['batch_id']} has {len(batch['tasks'])} tasks")
+          PY
+
+          python3 - << 'PY'
+          import json, os, pathlib, subprocess
+          tasks = json.load(open("batch_tasks.json", encoding="utf-8"))
+          for t in tasks:
+              task_dir = pathlib.Path("results") / f"job_{t['job_id']}"
+              task_dir.mkdir(parents=True, exist_ok=True)
+              seed_file = task_dir / f"seed_{t['base']}_A{t['A']}_L{t['L']}.txt"
+              subprocess.check_call([
+                  "python3", "select_seed_solution_from_xlsx.py",
+                  "--xlsx", os.environ["SEED_XLSX"],
+                  "--instance", str(t["instance"]),
+                  "--a", str(t["A"]),
+                  "--l", str(t["L"]),
+                  "--seed-out", str(seed_file),
+                  "--sheet", os.environ.get("SEED_SHEET", "")
+              ])
+          PY
+
+          for task_json in $(python3 - << 'PY'
+          import json
+          tasks = json.load(open("batch_tasks.json", encoding="utf-8"))
+          for t in tasks:
+              print(json.dumps(t, separators=(",", ":")))
+          PY
+          ); do
+            JOB_ID=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["job_id"])' "$task_json")
+            BASE=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["base"])' "$task_json")
+            INSTANCE=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["instance"])' "$task_json")
+            A=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["A"])' "$task_json")
+            L=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["L"])' "$task_json")
+            REPS=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["reps"])' "$task_json")
+            TCOUNT=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["truck_count"])' "$task_json")
+            DCOUNT=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["drone_count"])' "$task_json")
+
+            TASK_DIR="results/job_${JOB_ID}"
+            SEED_FILE="${TASK_DIR}/seed_${BASE}_A${A}_L${L}.txt"
+            : > "${TASK_DIR}/cmds.txt"
+            for r in $(seq 1 "$REPS"); do
+              echo "N_TRUCK=${TCOUNT} N_DRONE=${DCOUNT} SOL_OUT_DIR=${TASK_DIR} FIX_DEMAND_EQUAL1=1 SOLVER_TIME_LIMIT_SEC=7200 LS_LIGHT_SEEN_CAP=200000 LS_STRONG_SEEN_CAP=200000 ./C_Version/read_data_f3 '${INSTANCE}' '${A}' '${L}' '${SEED_FILE}' > ${TASK_DIR}/${BASE}_A${A}_L${L}_r${r}.log" >> "${TASK_DIR}/cmds.txt"
+            done
+            parallel -j3 < "${TASK_DIR}/cmds.txt"
+
+            python gha_write_run_meta.py \
+              --results-dir "${TASK_DIR}" \
+              --base "${BASE}" \
+              --a "${A}" \
+              --l "${L}" \
+              --reps "${REPS}" \
+              --job-id "${JOB_ID}" \
+              --instance "${INSTANCE}"
+          done
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: solvef3-seeded-batch-${{ matrix.batch.batch_id }}
+          path: results/
+
+  summarize:
+    needs: [build-matrix, solve]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded
+      - name: Build summary
+        env:
+          TRUCK_COUNT: ${{ github.event.inputs.truck_count || '2' }}
+          DRONE_COUNT: ${{ github.event.inputs.drone_count || '1' }}
+          A_VAL: ${{ github.event.inputs.a || '4' }}
+          L_VAL: ${{ github.event.inputs.l || '120' }}
+        run: |
+          python - << 'PY'
+          import csv
+          import json
+          import os
+          import pathlib
+
+          rows = [json.load(open(p)) for p in pathlib.Path("downloaded").rglob("meta_run*.json") if p.is_file()]
+          out = pathlib.Path(
+              f"summary_f3_t{os.environ['TRUCK_COUNT']}_d{os.environ['DRONE_COUNT']}_a{os.environ['A_VAL']}_l{os.environ['L_VAL']}.csv"
+          )
+          fields = [
+              "job_id","instance","A","L","run_index","best_fitness","best_solution",
+              "best_multi_fitness","best_multi_solution","best_drone_avg_trip_time",
+              "best_total_sortie_time","best_multi_visit_trip_count","best_drone_trip_count",
+              "best_avg_customers_per_trip","best_multi_drone_avg_trip_time","best_multi_total_sortie_time",
+              "best_multi_multi_visit_trip_count","best_multi_drone_trip_count","best_multi_avg_customers_per_trip",
+              "best_solution_file","best_multi_solution_file","log","best_avg_sortie_time",
+              "best_avg_truck_wait_for_drone","best_avg_drone_wait_for_truck","best_multi_avg_sortie_time",
+              "best_multi_avg_truck_wait_for_drone","best_multi_avg_drone_wait_for_truck"
+          ]
+          with open(out, "w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+              w.writeheader()
+              w.writerows(sorted(rows, key=lambda x: (x["job_id"], x.get("run_index", 0))))
+          print(f"Wrote {len(rows)} rows to {out}")
+          PY
+      - name: Build solver (Function3 validate)
+        run: g++ -std=c++17 C_Version/Function3.cpp -O2 -o C_Version/read_data_function3
+      - name: Recompute summary metrics with Function3
+        id: recompute
+        env:
+          TRUCK_COUNT: ${{ github.event.inputs.truck_count || '2' }}
+          DRONE_COUNT: ${{ github.event.inputs.drone_count || '1' }}
+          A_VAL: ${{ github.event.inputs.a || '4' }}
+          L_VAL: ${{ github.event.inputs.l || '120' }}
+        run: |
+          set +e
+          SUMMARY_FILE="summary_f3_t${TRUCK_COUNT}_d${DRONE_COUNT}_a${A_VAL}_l${L_VAL}.csv"
+          N_TRUCK="${TRUCK_COUNT}" N_DRONE="${DRONE_COUNT}" SOLVER_BIN=C_Version/read_data_function3 PARALLEL_JOBS=8 \
+            python recompute_metrics_from_solutions_csv.py "${SUMMARY_FILE}"
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ -f batch_init_ats_improved_with_multivisit_recompute_failures.csv ]; then
+            echo "Recompute failures report found."
+            wc -l batch_init_ats_improved_with_multivisit_recompute_failures.csv || true
+          fi
+          exit 0
+      - name: Upload summary
+        if: always()
+        env:
+          TRUCK_COUNT: ${{ github.event.inputs.truck_count || '2' }}
+          DRONE_COUNT: ${{ github.event.inputs.drone_count || '1' }}
+          A_VAL: ${{ github.event.inputs.a || '4' }}
+          L_VAL: ${{ github.event.inputs.l || '120' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: solvef3-seeded-summary-t${{ github.event.inputs.truck_count || '2' }}-d${{ github.event.inputs.drone_count || '1' }}-a${{ github.event.inputs.a || '4' }}-l${{ github.event.inputs.l || '120' }}
+          path: |
+            summary_f3_t${{ github.event.inputs.truck_count || '2' }}_d${{ github.event.inputs.drone_count || '1' }}_a${{ github.event.inputs.a || '4' }}_l${{ github.event.inputs.l || '120' }}.csv
+            batch_init_ats_improved_with_multivisit_recompute_failures.csv
+      - name: Fail job if recompute has errors
+        if: steps.recompute.outputs.rc != '0'
+        run: |
+          echo "Recompute returned non-zero exit code: ${{ steps.recompute.outputs.rc }}"
+          exit 1

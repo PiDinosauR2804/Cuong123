@@ -11,6 +11,7 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Tuple
 
+_INSTANCE_PATH_CACHE: Dict[str, str] = {}
 
 VALIDATE_RE = re.compile(
     r"\[VALIDATE\]\s+OK\s+makespan\s+(?P<makespan>[0-9]+(?:\.[0-9]+)?)\s+"
@@ -96,6 +97,10 @@ def read_instance(path: str) -> Dict[str, Any]:
 
 def parse_solution_text(solution_text: str) -> Optional[Any]:
     txt = (solution_text or "").strip()
+    if txt.lower().startswith("solution"):
+        pos = txt.find("=")
+        if pos >= 0:
+            txt = txt[pos + 1 :].strip()
     if not txt:
         return None
     try:
@@ -109,6 +114,10 @@ def parse_solution_text(solution_text: str) -> Optional[Any]:
 
 def normalize_solution_text(solution_text: str) -> str:
     txt = (solution_text or "").strip()
+    if txt.lower().startswith("solution"):
+        pos = txt.find("=")
+        if pos >= 0:
+            txt = txt[pos + 1 :].strip()
     if not txt:
         return ""
     try:
@@ -255,8 +264,14 @@ def validate_with_stats(
     Optional[float],  # avg_drone_wait
     Optional[int],    # legs
     ]:
+    payload = (solution_text or "").strip()
+    if payload.lower().startswith("solution"):
+        pos = payload.find("=")
+        if pos >= 0:
+            payload = payload[pos + 1 :].strip()
+
     with tempfile.NamedTemporaryFile("w", delete=False, suffix=".txt") as f:
-        f.write("solution = " + solution_text.strip() + "\n")
+        f.write("solution = " + payload + "\n")
         seed_path = f.name
     try:
         env = dict(os.environ)
@@ -324,6 +339,28 @@ def _fmt_float(v: Optional[float]) -> str:
 def recompute_for_row(row: Dict[str, str]) -> Dict[str, Any]:
     job_id = (row.get("job_id") or "").strip()
     inst = (row.get("instance") or "").strip()
+    dat_path = (row.get("dat_path") or "").strip()
+    inst_file = dat_path or inst
+    if inst and inst in _INSTANCE_PATH_CACHE:
+        inst_file = _INSTANCE_PATH_CACHE[inst]
+    else:
+        p = pathlib.Path(inst_file) if inst_file else None
+        if p is None or not p.exists():
+            cand = pathlib.Path(f"{inst}.dat")
+            if cand.exists():
+                inst_file = str(cand)
+            else:
+                base_dir = os.environ.get("CSV_BASE_DIR", "result/generated_instances/c101_cluster5_strategies_augmented").strip()
+                if base_dir:
+                    cand2 = pathlib.Path(base_dir) / f"{inst}.dat"
+                    if cand2.exists():
+                        inst_file = str(cand2)
+                    else:
+                        found = next(pathlib.Path(".").rglob(f"{inst}.dat"), None)
+                        if found is not None:
+                            inst_file = str(found)
+        if inst and inst_file:
+            _INSTANCE_PATH_CACHE[inst] = inst_file
     a = (row.get("A") or "").strip()
     l = (row.get("L") or "").strip()
     best_sol = (row.get("best_solution") or "").strip()
@@ -335,14 +372,14 @@ def recompute_for_row(row: Dict[str, str]) -> Dict[str, Any]:
 
     # Load instance once per row. (Rows share instances, but caching isn't needed at this scale.)
     try:
-        inst_data = read_instance(inst)
+        inst_data = read_instance(inst_file)
     except Exception as e:
         out["ok"] = False
-        out["reason"] = f"cannot read instance: {e}"
+        out["reason"] = f"cannot read instance ({inst_file}): {e}"
         return out
 
     if best_sol:
-        ok, msg, mk, avg_used, _max_used, _trips, avg_sortie, total_sortie, avg_truck_wait, avg_drone_wait, legs = validate_with_stats(inst, a, l, best_sol)
+        ok, msg, mk, avg_used, _max_used, _trips, avg_sortie, total_sortie, avg_truck_wait, avg_drone_wait, legs = validate_with_stats(inst_file, a, l, best_sol)
         if not ok or mk is None:
             out["best_fitness"] = ""
             out["best_drone_avg_trip_time"] = ""
@@ -383,7 +420,7 @@ def recompute_for_row(row: Dict[str, str]) -> Dict[str, Any]:
         out["best_avg_customers_per_trip"] = ""
 
     if best_multi_sol:
-        ok, msg, mk, avg_used, _max_used, _trips, avg_sortie, total_sortie, avg_truck_wait, avg_drone_wait, legs = validate_with_stats(inst, a, l, best_multi_sol)
+        ok, msg, mk, avg_used, _max_used, _trips, avg_sortie, total_sortie, avg_truck_wait, avg_drone_wait, legs = validate_with_stats(inst_file, a, l, best_multi_sol)
         if not ok or mk is None:
             out["best_multi_fitness"] = ""
             out["best_multi_drone_avg_trip_time"] = ""

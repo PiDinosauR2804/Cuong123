@@ -1,0 +1,650 @@
+[
+  {
+    "file": "C101_0.5_strategy1.dat",
+    "solution": "C101_0.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 12,
+    "trip_aug_sum": 14,
+    "max_release": 115,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_0.5_strategy1.dat"
+  },
+  {
+    "file": "C101_0.5_strategy2.dat",
+    "solution": "C101_0.5_strategy2_solution.json",
+    "trips": 4,
+    "augmented_points": 9,
+    "trip_aug_sum": 9,
+    "max_release": 115,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_0.5_strategy2.dat"
+  },
+  {
+    "file": "C101_0.5_strategy3.dat",
+    "solution": "C101_0.5_strategy3_solution.json",
+    "trips": 4,
+    "augmented_points": 12,
+    "trip_aug_sum": 13,
+    "max_release": 115,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_0.5_strategy3.dat"
+  },
+  {
+    "file": "C101_1.5_strategy1.dat",
+    "solution": "C101_1.5_strategy1_solution.json",
+    "trips": 7,
+    "augmented_points": 4,
+    "trip_aug_sum": 5,
+    "max_release": 345,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_1.5_strategy1.dat"
+  },
+  {
+    "file": "C101_1.5_strategy2.dat",
+    "solution": "C101_1.5_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 13,
+    "trip_aug_sum": 16,
+    "max_release": 345,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_1.5_strategy2.dat"
+  },
+  {
+    "file": "C101_1.5_strategy3.dat",
+    "solution": "C101_1.5_strategy3_solution.json",
+    "trips": 6,
+    "augmented_points": 13,
+    "trip_aug_sum": 18,
+    "max_release": 345,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_1.5_strategy3.dat"
+  },
+  {
+    "file": "C101_1_strategy1.dat",
+    "solution": "C101_1_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 11,
+    "trip_aug_sum": 19,
+    "max_release": 230,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_1_strategy1.dat"
+  },
+  {
+    "file": "C101_1_strategy2.dat",
+    "solution": "C101_1_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 6,
+    "trip_aug_sum": 10,
+    "max_release": 230,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_1_strategy2.dat"
+  },
+  {
+    "file": "C101_1_strategy3.dat",
+    "solution": "C101_1_strategy3_solution.json",
+    "trips": 5,
+    "augmented_points": 9,
+    "trip_aug_sum": 15,
+    "max_release": 230,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_1_strategy3.dat"
+  },
+  {
+    "file": "C101_2.5_strategy1.dat",
+    "solution": "C101_2.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 4,
+    "trip_aug_sum": 5,
+    "max_release": 576,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_2.5_strategy1.dat"
+  },
+  {
+    "file": "C101_2.5_strategy2.dat",
+    "solution": "C101_2.5_strategy2_solution.json",
+    "trips": 7,
+    "augmented_points": 5,
+    "trip_aug_sum": 7,
+    "max_release": 576,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_2.5_strategy2.dat"
+  },
+  {
+    "file": "C101_2.5_strategy3.dat",
+    "solution": "C101_2.5_strategy3_solution.json",
+    "trips": 7,
+    "augmented_points": 5,
+    "trip_aug_sum": 8,
+    "max_release": 576,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_2.5_strategy3.dat"
+  },
+  {
+    "file": "C101_2_strategy1.dat",
+    "solution": "C101_2_strategy1_solution.json",
+    "trips": 7,
+    "augmented_points": 11,
+    "trip_aug_sum": 12,
+    "max_release": 461,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_2_strategy1.dat"
+  },
+  {
+    "file": "C101_2_strategy2.dat",
+    "solution": "C101_2_strategy2_solution.json",
+    "trips": 7,
+    "augmented_points": 5,
+    "trip_aug_sum": 8,
+    "max_release": 461,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_2_strategy2.dat"
+  },
+  {
+    "file": "C101_2_strategy3.dat",
+    "solution": "C101_2_strategy3_solution.json",
+    "trips": 7,
+    "augmented_points": 4,
+    "trip_aug_sum": 4,
+    "max_release": 461,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_2_strategy3.dat"
+  },
+  {
+    "file": "C101_3_strategy1.dat",
+    "solution": "C101_3_strategy1_solution.json",
+    "trips": 7,
+    "augmented_points": 9,
+    "trip_aug_sum": 14,
+    "max_release": 691,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_3_strategy1.dat"
+  },
+  {
+    "file": "C101_3_strategy2.dat",
+    "solution": "C101_3_strategy2_solution.json",
+    "trips": 9,
+    "augmented_points": 11,
+    "trip_aug_sum": 15,
+    "max_release": 691,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_3_strategy2.dat"
+  },
+  {
+    "file": "C101_3_strategy3.dat",
+    "solution": "C101_3_strategy3_solution.json",
+    "trips": 12,
+    "augmented_points": 3,
+    "trip_aug_sum": 4,
+    "max_release": 691,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C101_3_strategy3.dat"
+  },
+  {
+    "file": "C201_0.5_strategy1.dat",
+    "solution": "C201_0.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 13,
+    "trip_aug_sum": 14,
+    "max_release": 155,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_0.5_strategy1.dat"
+  },
+  {
+    "file": "C201_0.5_strategy2.dat",
+    "solution": "C201_0.5_strategy2_solution.json",
+    "trips": 4,
+    "augmented_points": 4,
+    "trip_aug_sum": 4,
+    "max_release": 155,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_0.5_strategy2.dat"
+  },
+  {
+    "file": "C201_0.5_strategy3.dat",
+    "solution": "C201_0.5_strategy3_solution.json",
+    "trips": 5,
+    "augmented_points": 13,
+    "trip_aug_sum": 14,
+    "max_release": 155,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_0.5_strategy3.dat"
+  },
+  {
+    "file": "C201_1.5_strategy1.dat",
+    "solution": "C201_1.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 5,
+    "trip_aug_sum": 6,
+    "max_release": 466,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_1.5_strategy1.dat"
+  },
+  {
+    "file": "C201_1.5_strategy2.dat",
+    "solution": "C201_1.5_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 3,
+    "trip_aug_sum": 3,
+    "max_release": 466,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_1.5_strategy2.dat"
+  },
+  {
+    "file": "C201_1.5_strategy3.dat",
+    "solution": "C201_1.5_strategy3_solution.json",
+    "trips": 7,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 466,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_1.5_strategy3.dat"
+  },
+  {
+    "file": "C201_1_strategy1.dat",
+    "solution": "C201_1_strategy1_solution.json",
+    "trips": 6,
+    "augmented_points": 7,
+    "trip_aug_sum": 7,
+    "max_release": 310,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_1_strategy1.dat"
+  },
+  {
+    "file": "C201_1_strategy2.dat",
+    "solution": "C201_1_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 9,
+    "trip_aug_sum": 14,
+    "max_release": 310,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_1_strategy2.dat"
+  },
+  {
+    "file": "C201_1_strategy3.dat",
+    "solution": "C201_1_strategy3_solution.json",
+    "trips": 4,
+    "augmented_points": 3,
+    "trip_aug_sum": 3,
+    "max_release": 310,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_1_strategy3.dat"
+  },
+  {
+    "file": "C201_2.5_strategy1.dat",
+    "solution": "C201_2.5_strategy1_solution.json",
+    "trips": 8,
+    "augmented_points": 10,
+    "trip_aug_sum": 12,
+    "max_release": 776,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_2.5_strategy1.dat"
+  },
+  {
+    "file": "C201_2.5_strategy2.dat",
+    "solution": "C201_2.5_strategy2_solution.json",
+    "trips": 9,
+    "augmented_points": 2,
+    "trip_aug_sum": 3,
+    "max_release": 776,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_2.5_strategy2.dat"
+  },
+  {
+    "file": "C201_2.5_strategy3.dat",
+    "solution": "C201_2.5_strategy3_solution.json",
+    "trips": 12,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 776,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_2.5_strategy3.dat"
+  },
+  {
+    "file": "C201_2_strategy1.dat",
+    "solution": "C201_2_strategy1_solution.json",
+    "trips": 9,
+    "augmented_points": 4,
+    "trip_aug_sum": 8,
+    "max_release": 621,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_2_strategy1.dat"
+  },
+  {
+    "file": "C201_2_strategy2.dat",
+    "solution": "C201_2_strategy2_solution.json",
+    "trips": 9,
+    "augmented_points": 3,
+    "trip_aug_sum": 6,
+    "max_release": 621,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_2_strategy2.dat"
+  },
+  {
+    "file": "C201_2_strategy3.dat",
+    "solution": "C201_2_strategy3_solution.json",
+    "trips": 7,
+    "augmented_points": 2,
+    "trip_aug_sum": 4,
+    "max_release": 621,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_2_strategy3.dat"
+  },
+  {
+    "file": "C201_3_strategy1.dat",
+    "solution": "C201_3_strategy1_solution.json",
+    "trips": 9,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 932,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_3_strategy1.dat"
+  },
+  {
+    "file": "C201_3_strategy2.dat",
+    "solution": "C201_3_strategy2_solution.json",
+    "trips": 14,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 932,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_3_strategy2.dat"
+  },
+  {
+    "file": "C201_3_strategy3.dat",
+    "solution": "C201_3_strategy3_solution.json",
+    "trips": 12,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 932,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/C201_3_strategy3.dat"
+  },
+  {
+    "file": "R101_0.5_strategy1.dat",
+    "solution": "R101_0.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 9,
+    "trip_aug_sum": 9,
+    "max_release": 216,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_0.5_strategy1.dat"
+  },
+  {
+    "file": "R101_0.5_strategy2.dat",
+    "solution": "R101_0.5_strategy2_solution.json",
+    "trips": 4,
+    "augmented_points": 9,
+    "trip_aug_sum": 9,
+    "max_release": 216,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_0.5_strategy2.dat"
+  },
+  {
+    "file": "R101_0.5_strategy3.dat",
+    "solution": "R101_0.5_strategy3_solution.json",
+    "trips": 5,
+    "augmented_points": 12,
+    "trip_aug_sum": 14,
+    "max_release": 216,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_0.5_strategy3.dat"
+  },
+  {
+    "file": "R101_1.5_strategy1.dat",
+    "solution": "R101_1.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 7,
+    "trip_aug_sum": 11,
+    "max_release": 650,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_1.5_strategy1.dat"
+  },
+  {
+    "file": "R101_1.5_strategy2.dat",
+    "solution": "R101_1.5_strategy2_solution.json",
+    "trips": 7,
+    "augmented_points": 9,
+    "trip_aug_sum": 15,
+    "max_release": 650,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_1.5_strategy2.dat"
+  },
+  {
+    "file": "R101_1.5_strategy3.dat",
+    "solution": "R101_1.5_strategy3_solution.json",
+    "trips": 5,
+    "augmented_points": 16,
+    "trip_aug_sum": 16,
+    "max_release": 650,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_1.5_strategy3.dat"
+  },
+  {
+    "file": "R101_1_strategy1.dat",
+    "solution": "R101_1_strategy1_solution.json",
+    "trips": 6,
+    "augmented_points": 4,
+    "trip_aug_sum": 4,
+    "max_release": 433,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_1_strategy1.dat"
+  },
+  {
+    "file": "R101_1_strategy2.dat",
+    "solution": "R101_1_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 5,
+    "trip_aug_sum": 5,
+    "max_release": 433,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_1_strategy2.dat"
+  },
+  {
+    "file": "R101_1_strategy3.dat",
+    "solution": "R101_1_strategy3_solution.json",
+    "trips": 5,
+    "augmented_points": 12,
+    "trip_aug_sum": 14,
+    "max_release": 433,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_1_strategy3.dat"
+  },
+  {
+    "file": "R101_2.5_strategy1.dat",
+    "solution": "R101_2.5_strategy1_solution.json",
+    "trips": 8,
+    "augmented_points": 2,
+    "trip_aug_sum": 2,
+    "max_release": 1084,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_2.5_strategy1.dat"
+  },
+  {
+    "file": "R101_2.5_strategy2.dat",
+    "solution": "R101_2.5_strategy2_solution.json",
+    "trips": 9,
+    "augmented_points": 7,
+    "trip_aug_sum": 10,
+    "max_release": 1084,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_2.5_strategy2.dat"
+  },
+  {
+    "file": "R101_2.5_strategy3.dat",
+    "solution": "R101_2.5_strategy3_solution.json",
+    "trips": 7,
+    "augmented_points": 15,
+    "trip_aug_sum": 18,
+    "max_release": 1084,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_2.5_strategy3.dat"
+  },
+  {
+    "file": "R101_2_strategy1.dat",
+    "solution": "R101_2_strategy1_solution.json",
+    "trips": 9,
+    "augmented_points": 4,
+    "trip_aug_sum": 8,
+    "max_release": 867,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_2_strategy1.dat"
+  },
+  {
+    "file": "R101_2_strategy2.dat",
+    "solution": "R101_2_strategy2_solution.json",
+    "trips": 7,
+    "augmented_points": 9,
+    "trip_aug_sum": 13,
+    "max_release": 867,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_2_strategy2.dat"
+  },
+  {
+    "file": "R101_2_strategy3.dat",
+    "solution": "R101_2_strategy3_solution.json",
+    "trips": 6,
+    "augmented_points": 6,
+    "trip_aug_sum": 10,
+    "max_release": 867,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_2_strategy3.dat"
+  },
+  {
+    "file": "R101_3_strategy1.dat",
+    "solution": "R101_3_strategy1_solution.json",
+    "trips": 11,
+    "augmented_points": 7,
+    "trip_aug_sum": 14,
+    "max_release": 1301,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_3_strategy1.dat"
+  },
+  {
+    "file": "R101_3_strategy2.dat",
+    "solution": "R101_3_strategy2_solution.json",
+    "trips": 14,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 1301,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_3_strategy2.dat"
+  },
+  {
+    "file": "R101_3_strategy3.dat",
+    "solution": "R101_3_strategy3_solution.json",
+    "trips": 12,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 1301,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/R101_3_strategy3.dat"
+  },
+  {
+    "file": "RC101_0.5_strategy1.dat",
+    "solution": "RC101_0.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 4,
+    "trip_aug_sum": 4,
+    "max_release": 176,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_0.5_strategy1.dat"
+  },
+  {
+    "file": "RC101_0.5_strategy2.dat",
+    "solution": "RC101_0.5_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 11,
+    "trip_aug_sum": 11,
+    "max_release": 176,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_0.5_strategy2.dat"
+  },
+  {
+    "file": "RC101_0.5_strategy3.dat",
+    "solution": "RC101_0.5_strategy3_solution.json",
+    "trips": 4,
+    "augmented_points": 11,
+    "trip_aug_sum": 11,
+    "max_release": 176,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_0.5_strategy3.dat"
+  },
+  {
+    "file": "RC101_1.5_strategy1.dat",
+    "solution": "RC101_1.5_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 8,
+    "trip_aug_sum": 13,
+    "max_release": 528,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_1.5_strategy1.dat"
+  },
+  {
+    "file": "RC101_1.5_strategy2.dat",
+    "solution": "RC101_1.5_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 10,
+    "trip_aug_sum": 10,
+    "max_release": 528,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_1.5_strategy2.dat"
+  },
+  {
+    "file": "RC101_1.5_strategy3.dat",
+    "solution": "RC101_1.5_strategy3_solution.json",
+    "trips": 6,
+    "augmented_points": 13,
+    "trip_aug_sum": 17,
+    "max_release": 528,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_1.5_strategy3.dat"
+  },
+  {
+    "file": "RC101_1_strategy1.dat",
+    "solution": "RC101_1_strategy1_solution.json",
+    "trips": 5,
+    "augmented_points": 1,
+    "trip_aug_sum": 1,
+    "max_release": 352,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_1_strategy1.dat"
+  },
+  {
+    "file": "RC101_1_strategy2.dat",
+    "solution": "RC101_1_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 14,
+    "trip_aug_sum": 14,
+    "max_release": 352,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_1_strategy2.dat"
+  },
+  {
+    "file": "RC101_1_strategy3.dat",
+    "solution": "RC101_1_strategy3_solution.json",
+    "trips": 6,
+    "augmented_points": 8,
+    "trip_aug_sum": 8,
+    "max_release": 352,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_1_strategy3.dat"
+  },
+  {
+    "file": "RC101_2.5_strategy1.dat",
+    "solution": "RC101_2.5_strategy1_solution.json",
+    "trips": 6,
+    "augmented_points": 6,
+    "trip_aug_sum": 8,
+    "max_release": 881,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_2.5_strategy1.dat"
+  },
+  {
+    "file": "RC101_2.5_strategy2.dat",
+    "solution": "RC101_2.5_strategy2_solution.json",
+    "trips": 8,
+    "augmented_points": 3,
+    "trip_aug_sum": 6,
+    "max_release": 881,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_2.5_strategy2.dat"
+  },
+  {
+    "file": "RC101_2.5_strategy3.dat",
+    "solution": "RC101_2.5_strategy3_solution.json",
+    "trips": 7,
+    "augmented_points": 9,
+    "trip_aug_sum": 15,
+    "max_release": 881,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_2.5_strategy3.dat"
+  },
+  {
+    "file": "RC101_2_strategy1.dat",
+    "solution": "RC101_2_strategy1_solution.json",
+    "trips": 7,
+    "augmented_points": 10,
+    "trip_aug_sum": 11,
+    "max_release": 705,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_2_strategy1.dat"
+  },
+  {
+    "file": "RC101_2_strategy2.dat",
+    "solution": "RC101_2_strategy2_solution.json",
+    "trips": 5,
+    "augmented_points": 5,
+    "trip_aug_sum": 5,
+    "max_release": 705,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_2_strategy2.dat"
+  },
+  {
+    "file": "RC101_2_strategy3.dat",
+    "solution": "RC101_2_strategy3_solution.json",
+    "trips": 6,
+    "augmented_points": 18,
+    "trip_aug_sum": 22,
+    "max_release": 705,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_2_strategy3.dat"
+  },
+  {
+    "file": "RC101_3_strategy1.dat",
+    "solution": "RC101_3_strategy1_solution.json",
+    "trips": 7,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 1057,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_3_strategy1.dat"
+  },
+  {
+    "file": "RC101_3_strategy2.dat",
+    "solution": "RC101_3_strategy2_solution.json",
+    "trips": 13,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 1057,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_3_strategy2.dat"
+  },
+  {
+    "file": "RC101_3_strategy3.dat",
+    "solution": "RC101_3_strategy3_solution.json",
+    "trips": 11,
+    "augmented_points": 0,
+    "trip_aug_sum": 0,
+    "max_release": 1057,
+    "out_dat": "result/generated_instances/c101_cluster5_strategies_augmented/RC101_3_strategy3.dat"
+  }
+]
