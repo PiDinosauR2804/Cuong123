@@ -43,7 +43,7 @@ on:
       target_jobs:
         description: "Target number of shard jobs to split tasks across"
         required: false
-        default: "216"
+        default: "256"
 
 jobs:
   build-matrix:
@@ -164,7 +164,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 120
+      max-parallel: 256
       matrix:
         shard: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
 
