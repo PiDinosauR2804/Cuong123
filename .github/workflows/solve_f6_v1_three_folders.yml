@@ -1,4 +1,4 @@
-name: Solve F6 On C101 (V7 V8 - Cluster Random Uniform)
+name: Solve F6 On C101 (V8 - Cluster Random Uniform)
 
 on:
   push:
@@ -47,7 +47,7 @@ on:
       target_jobs:
         description: "Target number of shard jobs to split tasks across"
         required: false
-        default: "216"
+        default: "256"
 
 jobs:
   build-matrix:
@@ -62,13 +62,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build instance matrix for C101 in v7-v8 of 3 folders
+      - name: Build instance matrix for C101 in v8 of 3 folders
         id: mk
         env:
           A_VALUES: ${{ github.event.inputs.a_values || '4,8' }}
           L_VALUES: ${{ github.event.inputs.l_values || '60,90,120' }}
           RUNS_PER_INSTANCE: ${{ github.event.inputs.runs_per_instance || '3' }}
-          TARGET_JOBS: ${{ github.event.inputs.target_jobs || '216' }}
+          TARGET_JOBS: ${{ github.event.inputs.target_jobs || '256' }}
         run: |
           python - << 'PY'
           import json
@@ -99,11 +99,8 @@ jobs:
               raise SystemExit("No L values provided (L_VALUES is empty)")
 
           roots = [
-              ("cluster", "v7", pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_cluster/v7")),
               ("cluster", "v8", pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_cluster/v8")),
-              ("random", "v7", pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_random/v7")),
               ("random", "v8", pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_random/v8")),
-              ("uniform", "v7", pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_uniform/v7")),
               ("uniform", "v8", pathlib.Path("test_data/data_demand_random_50_batch_all1_equal_uniform/v8")),
           ]
 
@@ -123,7 +120,7 @@ jobs:
                   )
 
           if not base_tasks:
-              raise SystemExit("No C101*.dat instances found in v7-v8 folders")
+              raise SystemExit("No C101*.dat instances found in v8 folders")
 
           tasks = []
           for t in base_tasks:
@@ -168,7 +165,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 120
+      max-parallel: 256
       matrix:
         shard: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
 
@@ -598,7 +595,7 @@ jobs:
       - name: Upload summary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: solve-f6-c101-v7-v8-three-folders-summary
+          name: solve-f6-c101-v8-three-folders-summary
           path: |
             summary/solve_f6_from_augmented_inits_summary.csv
             batch_init_ats_improved_with_multivisit_recompute_failures.csv
