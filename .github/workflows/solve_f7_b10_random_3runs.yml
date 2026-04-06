@@ -1,13 +1,9 @@
-name: Solve F7 B10 Cluster+Random (3 Runs)
+name: Solve F7 B10 Random (3 Runs)
 
 on:
-  #push:
+  push:
   workflow_dispatch:
     inputs:
-      cluster_dir:
-        description: "Cluster dataset dir (B10)"
-        required: false
-        default: "test_data/data_demand_random_50_batch_custom_cluster_all_flat"
       random_dir:
         description: "Random dataset dir (B10)"
         required: false
@@ -34,7 +30,6 @@ jobs:
       - uses: actions/checkout@v4
       - id: mk
         env:
-          CLUSTER_DIR: ${{ github.event.inputs.cluster_dir || 'test_data/data_demand_random_50_batch_custom_cluster_all_flat' }}
           RANDOM_DIR: ${{ github.event.inputs.random_dir || 'test_data/data_demand_random_50_batch_custom_random_all_flat' }}
         run: |
           python - << 'PY'
@@ -62,7 +57,6 @@ jobs:
               return out
 
           tasks = []
-          tasks += collect(pathlib.Path(os.environ["CLUSTER_DIR"]), "cluster")
           tasks += collect(pathlib.Path(os.environ["RANDOM_DIR"]), "random")
 
           with open("matrix.json", "w", encoding="utf-8") as f:
@@ -451,7 +445,7 @@ jobs:
                   sol_dir / "best_no_resupply" / f"{rn}__{inst}.txt",
               )
 
-          out_csv = out_dir / "summary_f7_b10_cluster_random_3runs.csv"
+          out_csv = out_dir / "summary_f7_b10_random_3runs.csv"
           fields = [
               "run_name","instance","instance_name","group","beta","B","version","run_index",
               "A","L","n_truck","n_drone","solver_time_limit_sec","return_code",
@@ -504,7 +498,7 @@ jobs:
                   "avg_best_trip_count": avg_num(vals("best_trip_count")),
               })
 
-          out_avg = out_dir / "summary_f7_b10_cluster_random_3runs_avg_by_instance.csv"
+          out_avg = out_dir / "summary_f7_b10_random_3runs_avg_by_instance.csv"
           fields_avg = ["group","instance_name","beta","B","version","runs","avg_best_fitness","avg_best_mult_fitness","avg_best_single_fitness","avg_best_no_resupply_fitness","avg_best_multi_visit_trip_count","avg_best_trip_count"]
           with out_avg.open("w", newline="", encoding="utf-8") as f:
               w = csv.DictWriter(f, fieldnames=fields_avg, extrasaction="ignore")
@@ -528,10 +522,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: summary_f7_b10_cluster_random_3runs
+          name: summary_f7_b10_random_3runs
           path: |
-            results/summary_f7_b10_cluster_random_3runs.csv
-            results/summary_f7_b10_cluster_random_3runs_avg_by_instance.csv
+            results/summary_f7_b10_random_3runs.csv
+            results/summary_f7_b10_random_3runs_avg_by_instance.csv
             results/solutions/**
             downloaded/**
           if-no-files-found: warn
