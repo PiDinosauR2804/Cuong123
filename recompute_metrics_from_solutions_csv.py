@@ -387,6 +387,8 @@ def recompute_for_row(row: Dict[str, str]) -> Dict[str, Any]:
             out["best_total_sortie_time"] = ""
             out["best_avg_truck_wait_for_drone"] = ""
             out["best_avg_drone_wait_for_truck"] = ""
+            out["best_sum_truck_wait_for_drone"] = ""
+            out["best_sum_drone_wait_for_truck"] = ""
             out["best_multi_visit_trip_count"] = ""
             out["best_drone_trip_count"] = ""
             out["best_avg_customers_per_trip"] = ""
@@ -401,6 +403,14 @@ def recompute_for_row(row: Dict[str, str]) -> Dict[str, Any]:
         out["best_total_sortie_time"] = _fmt_float(total_sortie)
         out["best_avg_truck_wait_for_drone"] = _fmt_float(avg_truck_wait)
         out["best_avg_drone_wait_for_truck"] = _fmt_float(avg_drone_wait)
+        if avg_truck_wait is not None and legs is not None:
+            out["best_sum_truck_wait_for_drone"] = _fmt_float(avg_truck_wait * float(legs))
+        else:
+            out["best_sum_truck_wait_for_drone"] = ""
+        if avg_drone_wait is not None and legs is not None:
+            out["best_sum_drone_wait_for_truck"] = _fmt_float(avg_drone_wait * float(legs))
+        else:
+            out["best_sum_drone_wait_for_truck"] = ""
         out["best_multi_visit_trip_count"] = (
             str(int(stats["multi_visit_trip_count"])) if stats["multi_visit_trip_count"] is not None else ""
         )
@@ -415,6 +425,8 @@ def recompute_for_row(row: Dict[str, str]) -> Dict[str, Any]:
         out["best_total_sortie_time"] = ""
         out["best_avg_truck_wait_for_drone"] = ""
         out["best_avg_drone_wait_for_truck"] = ""
+        out["best_sum_truck_wait_for_drone"] = ""
+        out["best_sum_drone_wait_for_truck"] = ""
         out["best_multi_visit_trip_count"] = ""
         out["best_drone_trip_count"] = ""
         out["best_avg_customers_per_trip"] = ""
@@ -511,6 +523,8 @@ def main() -> int:
         "best_total_sortie_time",
         "best_avg_truck_wait_for_drone",
         "best_avg_drone_wait_for_truck",
+        "best_sum_truck_wait_for_drone",
+        "best_sum_drone_wait_for_truck",
         "best_multi_avg_sortie_time",
         "best_multi_total_sortie_time",
         "best_multi_avg_truck_wait_for_drone",
